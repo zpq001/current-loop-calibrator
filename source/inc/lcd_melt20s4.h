@@ -11,3 +11,15 @@
 #define LCD_RW      5
 #define LCD_E       6
 
+#define KEYBOARD_SCAN_LINES     4
+#define KEYBOARD_FEEDBACK_LINES 5
+#define KEYBOARD_DELAY_US       10
+
+
+
+void LCD_Init(void);
+void LCD_SetCursorPosition(uint8_t x, uint8_t y);
+void LCD_PutString(const char *data);
+void LCD_CaptureKeyboard(void);
+
+

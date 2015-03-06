@@ -463,6 +463,31 @@
               <FileType>5</FileType>
               <FilePath>..\source\inc\lcd_melt20s4.h</FilePath>
             </File>
+            <File>
+              <FileName>lcd_melt.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\lcd_melt.h</FilePath>
+            </File>
+            <File>
+              <FileName>buttons.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\buttons.h</FilePath>
+            </File>
+            <File>
+              <FileName>led.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\led.h</FilePath>
+            </File>
+            <File>
+              <FileName>encoder.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\encoder.h</FilePath>
+            </File>
+            <File>
+              <FileName>dac.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\dac.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -487,6 +512,26 @@
               <FileName>lcd_melt20s4.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\source\src\lcd_melt20s4.c</FilePath>
+            </File>
+            <File>
+              <FileName>buttons.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\buttons.c</FilePath>
+            </File>
+            <File>
+              <FileName>led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\led.c</FilePath>
+            </File>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\encoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>dac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\dac.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -949,6 +994,31 @@
               <FileType>5</FileType>
               <FilePath>..\source\inc\lcd_melt20s4.h</FilePath>
             </File>
+            <File>
+              <FileName>lcd_melt.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\lcd_melt.h</FilePath>
+            </File>
+            <File>
+              <FileName>buttons.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\buttons.h</FilePath>
+            </File>
+            <File>
+              <FileName>led.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\led.h</FilePath>
+            </File>
+            <File>
+              <FileName>encoder.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\encoder.h</FilePath>
+            </File>
+            <File>
+              <FileName>dac.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\dac.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -973,6 +1043,26 @@
               <FileName>lcd_melt20s4.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\source\src\lcd_melt20s4.c</FilePath>
+            </File>
+            <File>
+              <FileName>buttons.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\buttons.c</FilePath>
+            </File>
+            <File>
+              <FileName>led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\led.c</FilePath>
+            </File>
+            <File>
+              <FileName>encoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\encoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>dac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\dac.c</FilePath>
             </File>
           </Files>
         </Group>

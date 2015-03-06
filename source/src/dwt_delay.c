@@ -7,8 +7,6 @@
 		When enabled, this counter increments every core cycle
 	
 	http://electronix.ru/forum/index.php?showtopic=99506
-		
-	TODO: check out sharing between different OS tasks - possibly use defines instead of functions
 	
 ********************************************************************/
 
