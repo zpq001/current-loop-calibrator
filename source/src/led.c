@@ -14,10 +14,10 @@
 void LED_Init(void) {
     PORT_InitTypeDef PORT_InitStructure;
     // Setup GPIO
-    PORT_ResetBits(LED_PORT, (1<<LED_STATE) | (1<<LED_OVERLOAD));
+    PORT_ResetBits(LED_PORT, (1<<LED_STATE) | (1<<LED_BREAK));
     
     PORT_StructInit(&PORT_InitStructure);
-    PORT_InitStructure.PORT_Pin = (1 << LED_STATE) | (1 << LED_OVERLOAD);
+    PORT_InitStructure.PORT_Pin = (1 << LED_STATE) | (1 << LED_BREAK);
 	PORT_InitStructure.PORT_MODE = PORT_MODE_DIGITAL;
     PORT_InitStructure.PORT_OE = PORT_OE_OUT;
     PORT_InitStructure.PORT_SPEED = PORT_SPEED_SLOW;
@@ -25,7 +25,7 @@ void LED_Init(void) {
 }
 
 void LED_Set(uint8_t led, uint8_t state) {
-    if ((led == LED_STATE) || (led == LED_OVERLOAD)) {
+    if ((led == LED_STATE) || (led == LED_BREAK)) {
         if (state)
             PORT_SetBits(LED_PORT, (1<<led));
         else
