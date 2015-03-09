@@ -3,7 +3,7 @@
 
 #define LED_PORT        MDR_PORTC
 #define LED_STATE       0
-#define LED_OVERLOAD    1
+#define LED_BREAK    	1
 
 
 void LED_Init(void);
