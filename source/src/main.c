@@ -11,7 +11,8 @@
 #include "systick.h"
 #include "adc.h"
 #include "external_adc.h"
-
+#include "power_monitor.h"
+#include "gui_top.h"
 
 void processCurrentLoopMonitor(void) {
 	if (ADC_GetLoopCurrent() < 3900)
@@ -47,13 +48,16 @@ int main(void) {
     ExtADC_Initialize();
 	// DAC driver
     DAC_Initialize();
-    
-	// Comparator
-	// TODO
-	
+    // EEPROM memory
+    // TODO
+    // Restore settings
+    // TODO
+    // GUI
+    GUI_Init();
+	// Power supply monitor
+	PowerMonitor_Init();
 	// Start ISR-based syncronizer
 	Systick_Init();
-	
 	
 	while (1) {
 		// Syncronize
@@ -65,7 +69,12 @@ int main(void) {
 			ADC_UpdateLoopVoltage();
 			ADC_UpdateLoopCurrent();
 			processCurrentLoopMonitor();
+            ExtADC_UpdateCurrent();
+            
+            LCD_CaptureKeyboard();
+            ProcessButtons();
 		
+            GUI_Process();
 		}
 	}
 }

@@ -3,13 +3,17 @@
 #include "MDR32F9Qx_config.h"
 #include "MDR32F9Qx_adc.h"
 #include "MDR32F9Qx_port.h"
+#include "linear_calibration.h"
 #include "adc.h"
 
 
-uint32_t adc_loop_voltage;
-uint32_t adc_loop_current;
-uint32_t adc_temperature;
+uint32_t loop_voltage;
+uint32_t loop_current;
+uint32_t temperature;
 
+
+static calibration_t adc_voltage_calibration;
+static calibration_t adc_current_calibration;
 
 void ADC_Initialize(void) {
 	
@@ -45,30 +49,49 @@ void ADC_Initialize(void) {
     PORT_StructInit(&PORT_InitStructure);
     PORT_InitStructure.PORT_Pin = ((1 << ADC_PIN_CURRENT) | (1 << ADC_PIN_VOLTAGE) | (1 << ADC_PIN_CONTRAST));
 	PORT_Init(ADC_PORT, &PORT_InitStructure);
+    
+   	// Default calibration
+	adc_voltage_calibration.point1.value = 0;
+	adc_voltage_calibration.point1.code = 0;
+	adc_voltage_calibration.point2.value = 20000;
+	adc_voltage_calibration.point2.code = 3276;
+    adc_voltage_calibration.scale = 10000L;
+	CalculateCoefficients(&adc_voltage_calibration);
+    
+    adc_current_calibration.point1.value = 0;
+	adc_current_calibration.point1.code = 0;
+	adc_current_calibration.point2.value = 2000;
+	adc_current_calibration.point2.code = 3276;
+    adc_current_calibration.scale = 10000L;
+	CalculateCoefficients(&adc_current_calibration);
 }
 
 // Using ADC1
 void ADC_UpdateLoopCurrent(void) {
+    uint32_t temp32u;
 	ADC1_SetChannel(ADC_PIN_CURRENT);
 	ADC1_Start();
 	while (ADC1_GetFlagStatus(ADCx_FLAG_END_OF_CONVERSION) == RESET);
-	adc_loop_current = ADC1_GetResult();
+	temp32u = ADC1_GetResult();
+    loop_current = GetValueForCode(&adc_current_calibration, temp32u);        
 }
 
 uint32_t ADC_GetLoopCurrent(void) {
-	return adc_loop_current;	// FIXME
+	return loop_current;
 }
 
 // Using ADC1
 void ADC_UpdateLoopVoltage(void) {
-	ADC1_SetChannel(ADC_PIN_VOLTAGE);
+	uint32_t temp32u;
+    ADC1_SetChannel(ADC_PIN_VOLTAGE);
 	ADC1_Start();
 	while (ADC1_GetFlagStatus(ADCx_FLAG_END_OF_CONVERSION) == RESET);
-	adc_loop_voltage = ADC1_GetResult();
+	temp32u = ADC1_GetResult();
+    loop_voltage = GetValueForCode(&adc_voltage_calibration, temp32u); 
 }
 
 uint32_t ADC_GetLoopVoltage(void) {
-	return adc_loop_voltage;	// FIXME
+	return loop_voltage;
 }
 
 // Using ADC1
@@ -76,9 +99,8 @@ void ADC_UpdateMCUTemperature(void) {
 	ADC1_SetChannel(ADC_CH_TEMP_SENSOR);
 	ADC1_Start();
 	while (ADC1_GetFlagStatus(ADCx_FLAG_END_OF_CONVERSION) == RESET);
-	adc_temperature = ADC1_GetResult();
+	temperature = ADC1_GetResult();     // FIXME
 }
-
 
 
 // Using ADC2
