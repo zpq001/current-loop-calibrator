@@ -10,5 +10,6 @@
 
 
 void ExtADC_Initialize(void);
-
+void ExtADC_UpdateCurrent(void);
+int32_t ExtADC_GetCurrent(void);
 

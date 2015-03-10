@@ -9,13 +9,16 @@
 #include "MDR32F9Qx_port.h"
 #include "MDR32F9Qx_ssp.h"
 #include "external_adc.h"
-
+#include "linear_calibration.h"
 
 #define CH_VGND			0
 #define CH_LOW_GAIN		1
 #define CH_HIGH_GAIN	2
 
+static calibration_t adc_calibration_low_gain;
+static calibration_t adc_calibration_high_gain;
 
+static int32_t ext_current;
 
 void ExtADC_Initialize(void) {
 	
@@ -49,6 +52,23 @@ void ExtADC_Initialize(void) {
 	PORT_InitStructure.PORT_Pin = (1 << EXTADC_RXD_PIN);
 	PORT_InitStructure.PORT_OE    = PORT_OE_IN;
 	PORT_Init(EXTADC_PORT, &PORT_InitStructure);
+    
+    
+    // Default calibration
+	adc_calibration_low_gain.point1.value = 0;
+	adc_calibration_low_gain.point1.code = 2048;
+	adc_calibration_low_gain.point2.value = 400000;
+	adc_calibration_low_gain.point2.code = 2048+1886;
+    adc_calibration_low_gain.scale = 10000L;
+	CalculateCoefficients(&adc_calibration_low_gain);
+    
+    adc_calibration_high_gain.point1.value = 0;
+	adc_calibration_high_gain.point1.code = 2048;
+	adc_calibration_high_gain.point2.value = 40000;
+	adc_calibration_high_gain.point2.code = 2048+1886;
+    adc_calibration_high_gain.scale = 10000L;
+	CalculateCoefficients(&adc_calibration_high_gain);
+    
 }
 
 
@@ -63,6 +83,28 @@ uint16_t getData(uint8_t channel) {
 	return temp16u;
 }
 
+
+
+void ExtADC_UpdateCurrent(void) {
+    uint16_t conversion_result[3];
+    conversion_result[0] = getData(CH_VGND);
+    conversion_result[1] = getData(CH_LOW_GAIN);
+    conversion_result[2] = getData(CH_HIGH_GAIN);
+    // Pseudo-differential
+    conversion_result[1] += 2048;
+    conversion_result[2] += 2048;
+    conversion_result[1] -= conversion_result[0];
+    conversion_result[2] -= conversion_result[0];
+    
+    if ((conversion_result[2] > 100) && (conversion_result[2] < 4000))
+        ext_current = GetValueForCode(&adc_calibration_high_gain, conversion_result[2]);
+    else
+        ext_current = GetValueForCode(&adc_calibration_low_gain, conversion_result[1]);
+}
+
+int32_t ExtADC_GetCurrent(void) {
+    return ext_current;
+}
 
 
 

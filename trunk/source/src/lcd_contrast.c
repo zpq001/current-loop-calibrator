@@ -84,12 +84,11 @@ void LCD_InitContrastBooster(void) {
     PORT_InitStructure.PORT_SPEED = PORT_SPEED_FAST;
 	PORT_Init(CPWM_PORT, &PORT_InitStructure);
 	
-	// Contrast
-	enableCPWM();
 }
 
 void LCD_ProcessContrastBooster(void) {
-	
+	// Contrast
+	enableCPWM();
 	
 }
 

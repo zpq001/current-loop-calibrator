@@ -27,16 +27,12 @@ Calibration sequence:
 #include "MDR32F9Qx_config.h"
 #include "MDR32F9Qx_dac.h"
 #include "MDR32F9Qx_port.h"
+#include "linear_calibration.h"
 #include "dac.h"
 #include "led.h"
 
-#define COEFF_SCALE				10000L
 #define DEFAULT_OFF_VALUE		4000
 
-static struct {
-	uint32_t k;
-	uint32_t offset;
-} line_coeffs;
 
 static struct {
 	uint32_t setting;
@@ -44,22 +40,13 @@ static struct {
 	uint8_t isEnabled;
 } dac_state;
 
-static dac_calibration_t dac_calibration;
+static calibration_t dac_calibration;
 
-static void DAC_CalculateCoeffs(void) {
-	int32_t temp = dac_calibration.point2.dac_code - dac_calibration.point1.dac_code;
-	line_coeffs.k = ((int32_t)(dac_calibration.point2.value - dac_calibration.point1.value) * COEFF_SCALE + (int32_t)(temp>>1)) / ((int32_t)temp);	// Round	
-	line_coeffs.offset = (int32_t)dac_calibration.point1.value * COEFF_SCALE - (int32_t)dac_calibration.point1.dac_code * line_coeffs.k;
-}
-
-static uint32_t DAC_GetCodeForValue(uint32_t value) {
-	return (uint32_t)(((int32_t)value * COEFF_SCALE - line_coeffs.offset + (line_coeffs.k>>1)) / line_coeffs.k);	// Round
-}
 
 static void DAC_UpdateState(void) {
 	uint32_t temp32u;
 	if (dac_state.isEnabled) {
-		temp32u = DAC_GetCodeForValue(dac_state.setting);
+		temp32u = GetCodeForValue(&dac_calibration, dac_state.setting);
 		if (temp32u > 4095)
 			temp32u = 4095;
 		DAC2_SetData(temp32u);
@@ -86,12 +73,13 @@ void DAC_Initialize(void) {
     DAC2_Cmd(ENABLE);
     DAC2_SetData(0);  
 	
-	// Ideal calibration
+	// Default calibration
 	dac_calibration.point1.value = 4000;
-	dac_calibration.point1.dac_code = 655;
+	dac_calibration.point1.code = 655;
 	dac_calibration.point2.value = 20000;
-	dac_calibration.point2.dac_code = 3276;
-	DAC_CalculateCoeffs();
+	dac_calibration.point2.code = 3276;
+    dac_calibration.scale = 10000L;
+	CalculateCoefficients(&dac_calibration);
 	
 	// Default state after power-on
 	dac_state.isEnabled = 0;
@@ -126,33 +114,33 @@ uint32_t DAC_GetCalibrationPoint(uint8_t pointNumber) {
 
 
 void DAC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {
-	dac_calibration_point_t *p = (pointNum == 1) ? &dac_calibration.point1 : &dac_calibration.point2;
+	calibration_point_t *p = (pointNum == 1) ? &dac_calibration.point1 : &dac_calibration.point2;
 	p->value = measuredValue;
-	p->dac_code = dac_state.dac_code;
+	p->code = dac_state.dac_code;
 }
 
 
 void DAC_Calibrate(void) {
-	DAC_CalculateCoeffs();
+	CalculateCoefficients(&dac_calibration);
 	DAC_UpdateState();
 }
 
 
-void DAC_ApplyCalibration(dac_calibration_t *points) {
-	dac_calibration.point1.value = points->point1.value;
-	dac_calibration.point1.dac_code = points->point1.dac_code;
-	dac_calibration.point2.value = points->point2.value;
-	dac_calibration.point2.dac_code = points->point2.dac_code;
-	DAC_CalculateCoeffs();
+void DAC_ApplyCalibration(calibration_t *c) {           // FIXME
+	dac_calibration.point1.value = c->point1.value;
+	dac_calibration.point1.code = c->point1.code;
+	dac_calibration.point2.value = c->point2.value;
+	dac_calibration.point2.code = c->point2.code;
+	CalculateCoefficients(&dac_calibration);
 	DAC_UpdateState();
 }
 
 
-void DAC_SaveCalibration(dac_calibration_t *points) {
+void DAC_SaveCalibration(calibration_t *points) {           // FIXME
 	points->point1.value = dac_calibration.point1.value;
-	points->point1.dac_code = dac_calibration.point1.dac_code;
+	points->point1.code = dac_calibration.point1.code;
 	points->point2.value = dac_calibration.point2.value;
-	points->point2.dac_code = dac_calibration.point2.dac_code;
+	points->point2.code = dac_calibration.point2.code;
 }
 
 

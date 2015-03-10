@@ -14,6 +14,8 @@
         <TargetCommonOption>
           <Device>MDR1986BE92</Device>
           <Vendor>Milandr</Vendor>
+          <PackID>Keil.MDR1986BExx.1.3.0</PackID>
+          <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IROM(0x08000000,0x20000) IRAM(0x20000000,0x8000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -72,6 +74,8 @@
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
+            <nStopB1X>0</nStopB1X>
+            <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
@@ -128,6 +132,7 @@
             <RestoreFunctions>1</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
+            <RestoreSysVw>1</RestoreSysVw>
           </Simulator>
           <Target>
             <UseTarget>1</UseTarget>
@@ -139,6 +144,7 @@
             <RestoreFunctions>0</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <RestoreTracepoints>1</RestoreTracepoints>
+            <RestoreSysVw>1</RestoreSysVw>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
           <TargetSelection>1</TargetSelection>
@@ -353,6 +359,8 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
+            <uC99>0</uC99>
+            <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define>USE_MDR1986VE9x</Define>
@@ -369,6 +377,7 @@
             <SwStkChk>0</SwStkChk>
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
+            <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -385,6 +394,7 @@
             <useFile>0</useFile>
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
+            <pXoBase></pXoBase>
             <ScatterFile></ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
@@ -447,6 +457,16 @@
               <FileName>MDR32F9Qx_adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>MDR32F9Qx_ssp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_ssp.c</FilePath>
+            </File>
+            <File>
+              <FileName>MDR32F9Qx_comp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_comp.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -518,6 +538,21 @@
               <FileType>5</FileType>
               <FilePath>..\source\inc\softTimer.h</FilePath>
             </File>
+            <File>
+              <FileName>linear_calibration.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\linear_calibration.h</FilePath>
+            </File>
+            <File>
+              <FileName>power_monitor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\power_monitor.h</FilePath>
+            </File>
+            <File>
+              <FileName>gui_top.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\gui_top.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -587,6 +622,21 @@
               <FileName>softTimer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\source\src\softTimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>linear_calibration.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\linear_calibration.c</FilePath>
+            </File>
+            <File>
+              <FileName>power_monitor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\power_monitor.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_top.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\gui_top.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -658,6 +708,8 @@
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
+            <nStopB1X>0</nStopB1X>
+            <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
@@ -714,6 +766,7 @@
             <RestoreFunctions>1</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
+            <RestoreSysVw>1</RestoreSysVw>
           </Simulator>
           <Target>
             <UseTarget>1</UseTarget>
@@ -725,6 +778,7 @@
             <RestoreFunctions>0</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <RestoreTracepoints>1</RestoreTracepoints>
+            <RestoreSysVw>1</RestoreSysVw>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
           <TargetSelection>1</TargetSelection>
@@ -939,6 +993,8 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
+            <uC99>0</uC99>
+            <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -955,6 +1011,7 @@
             <SwStkChk>0</SwStkChk>
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
+            <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -971,6 +1028,7 @@
             <useFile>0</useFile>
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
+            <pXoBase></pXoBase>
             <ScatterFile></ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
@@ -1033,6 +1091,16 @@
               <FileName>MDR32F9Qx_adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>MDR32F9Qx_ssp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_ssp.c</FilePath>
+            </File>
+            <File>
+              <FileName>MDR32F9Qx_comp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_comp.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1104,6 +1172,21 @@
               <FileType>5</FileType>
               <FilePath>..\source\inc\softTimer.h</FilePath>
             </File>
+            <File>
+              <FileName>linear_calibration.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\linear_calibration.h</FilePath>
+            </File>
+            <File>
+              <FileName>power_monitor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\power_monitor.h</FilePath>
+            </File>
+            <File>
+              <FileName>gui_top.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\source\inc\gui_top.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1173,6 +1256,21 @@
               <FileName>softTimer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\source\src\softTimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>linear_calibration.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\linear_calibration.c</FilePath>
+            </File>
+            <File>
+              <FileName>power_monitor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\power_monitor.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_top.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\source\src\gui_top.c</FilePath>
             </File>
           </Files>
         </Group>
