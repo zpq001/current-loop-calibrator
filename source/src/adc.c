@@ -4,12 +4,14 @@
 #include "MDR32F9Qx_adc.h"
 #include "MDR32F9Qx_port.h"
 #include "linear_calibration.h"
+#include "led.h"
 #include "adc.h"
 
 
-uint32_t loop_voltage;
-uint32_t loop_current;
-uint32_t temperature;
+static uint32_t loop_voltage;
+static uint32_t loop_current;
+static uint8_t loop_status;
+static uint32_t temperature;
 
 
 static calibration_t adc_voltage_calibration;
@@ -74,6 +76,20 @@ void ADC_UpdateLoopCurrent(void) {
 	while (ADC1_GetFlagStatus(ADCx_FLAG_END_OF_CONVERSION) == RESET);
 	temp32u = ADC1_GetResult();
     loop_current = GetValueForCode(&adc_current_calibration, temp32u);        
+}
+
+void ADC_UpdateLoopMonitor(void) {
+    if (loop_current <= LOOP_BREAK_TRESHOLD) {
+        loop_status = LOOP_BREAK;
+		LED_Set(LED_BREAK, 1);
+    } else {
+        loop_status = LOOP_OK;
+		LED_Set(LED_BREAK, 0);
+    }
+}
+
+uint8_t ADC_GetLoopStatus(void) {
+    return loop_status;
 }
 
 uint32_t ADC_GetLoopCurrent(void) {

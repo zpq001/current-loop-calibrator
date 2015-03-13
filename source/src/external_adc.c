@@ -19,6 +19,7 @@ static calibration_t adc_calibration_low_gain;
 static calibration_t adc_calibration_high_gain;
 
 static int32_t ext_current;
+static uint8_t ext_current_range;
 
 void ExtADC_Initialize(void) {
 	
@@ -96,16 +97,27 @@ void ExtADC_UpdateCurrent(void) {
     conversion_result[1] -= conversion_result[0];
     conversion_result[2] -= conversion_result[0];
     
-    if ((conversion_result[2] > 100) && (conversion_result[2] < 4000))
-        ext_current = GetValueForCode(&adc_calibration_high_gain, conversion_result[2]);
-    else
+    if ((conversion_result[2] > 100) && (conversion_result[2] < 4000)) {
+        ext_current = GetValueForCode(&adc_calibration_high_gain, conversion_result[2]); 
+        ext_current_range = EXTADC_LOW_RANGE;
+    } else {
         ext_current = GetValueForCode(&adc_calibration_low_gain, conversion_result[1]);
+        if ((conversion_result[1] > 100) && (conversion_result[1] < 4000))
+            ext_current_range = EXTADC_HIGH_RANGE;
+        else
+            ext_current_range = EXTADC_HIGH_OVERLOAD;
+    }
+        
+    
 }
 
 int32_t ExtADC_GetCurrent(void) {
     return ext_current;
 }
 
+uint8_t ExtADC_GetRange(void) {
+    return ext_current_range;
+}
 
 
 

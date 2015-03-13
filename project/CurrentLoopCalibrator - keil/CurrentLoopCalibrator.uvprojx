@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>USE_MDR1986VE9x</Define>
               <Undefine></Undefine>
-              <IncludePath>..\library\CMSIS\CM3\CoreSupport;..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\inc;..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm;..\library\MDR32F9Qx_StdPeriph_Driver\inc;..\source\inc</IncludePath>
+              <IncludePath>..\..\library\CMSIS\CM3\CoreSupport;..\..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\inc;..\..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm;..\..\library\MDR32F9Qx_StdPeriph_Driver\inc;..\..\source\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -411,7 +411,7 @@
             <File>
               <FileName>core_cm3.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\CMSIS\CM3\CoreSupport\core_cm3.c</FilePath>
+              <FilePath>..\..\library\CMSIS\CM3\CoreSupport\core_cm3.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -421,12 +421,12 @@
             <File>
               <FileName>system_MDR32F9Qx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm\system_MDR32F9Qx.c</FilePath>
+              <FilePath>..\..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm\system_MDR32F9Qx.c</FilePath>
             </File>
             <File>
               <FileName>startup_MDR32F9Qx.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm\startup_MDR32F9Qx.s</FilePath>
+              <FilePath>..\..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm\startup_MDR32F9Qx.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -436,37 +436,37 @@
             <File>
               <FileName>MDR32F9Qx_port.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_port.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_port.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_rst_clk.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_rst_clk.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_rst_clk.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_dac.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_dac.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_dac.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_timer.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_timer.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_adc.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_adc.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_ssp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_ssp.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_ssp.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_comp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_comp.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_comp.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -476,82 +476,92 @@
             <File>
               <FileName>MDR32F9Qx_config.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\MDR32F9Qx_config.h</FilePath>
+              <FilePath>..\..\source\inc\MDR32F9Qx_config.h</FilePath>
             </File>
             <File>
               <FileName>dwt_delay.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\dwt_delay.h</FilePath>
+              <FilePath>..\..\source\inc\dwt_delay.h</FilePath>
             </File>
             <File>
               <FileName>lcd_melt20s4.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\lcd_melt20s4.h</FilePath>
+              <FilePath>..\..\source\inc\lcd_melt20s4.h</FilePath>
             </File>
             <File>
               <FileName>lcd_melt.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\lcd_melt.h</FilePath>
+              <FilePath>..\..\source\inc\lcd_melt.h</FilePath>
             </File>
             <File>
               <FileName>lcd_contrast.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\lcd_contrast.h</FilePath>
+              <FilePath>..\..\source\inc\lcd_contrast.h</FilePath>
             </File>
             <File>
               <FileName>buttons.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\buttons.h</FilePath>
+              <FilePath>..\..\source\inc\buttons.h</FilePath>
             </File>
             <File>
               <FileName>led.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\led.h</FilePath>
+              <FilePath>..\..\source\inc\led.h</FilePath>
             </File>
             <File>
               <FileName>encoder.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\encoder.h</FilePath>
+              <FilePath>..\..\source\inc\encoder.h</FilePath>
             </File>
             <File>
               <FileName>systick.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\systick.h</FilePath>
+              <FilePath>..\..\source\inc\systick.h</FilePath>
             </File>
             <File>
               <FileName>adc.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\adc.h</FilePath>
+              <FilePath>..\..\source\inc\adc.h</FilePath>
             </File>
             <File>
               <FileName>external_adc.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\external_adc.h</FilePath>
+              <FilePath>..\..\source\inc\external_adc.h</FilePath>
             </File>
             <File>
               <FileName>dac.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\dac.h</FilePath>
+              <FilePath>..\..\source\inc\dac.h</FilePath>
             </File>
             <File>
               <FileName>softTimer.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\softTimer.h</FilePath>
+              <FilePath>..\..\source\inc\softTimer.h</FilePath>
             </File>
             <File>
               <FileName>linear_calibration.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\linear_calibration.h</FilePath>
+              <FilePath>..\..\source\inc\linear_calibration.h</FilePath>
             </File>
             <File>
               <FileName>power_monitor.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\power_monitor.h</FilePath>
+              <FilePath>..\..\source\inc\power_monitor.h</FilePath>
             </File>
             <File>
               <FileName>gui_top.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\gui_top.h</FilePath>
+              <FilePath>..\..\source\inc\gui_top.h</FilePath>
+            </File>
+            <File>
+              <FileName>gui_core.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\gui_core.h</FilePath>
+            </File>
+            <File>
+              <FileName>utils.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\utils.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -561,82 +571,92 @@
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\main.c</FilePath>
+              <FilePath>..\..\source\src\main.c</FilePath>
             </File>
             <File>
               <FileName>hw_utils.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\hw_utils.c</FilePath>
+              <FilePath>..\..\source\src\hw_utils.c</FilePath>
             </File>
             <File>
               <FileName>dwt_delay.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\dwt_delay.c</FilePath>
+              <FilePath>..\..\source\src\dwt_delay.c</FilePath>
             </File>
             <File>
               <FileName>lcd_melt20s4.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\lcd_melt20s4.c</FilePath>
+              <FilePath>..\..\source\src\lcd_melt20s4.c</FilePath>
             </File>
             <File>
               <FileName>lcd_contrast.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\lcd_contrast.c</FilePath>
+              <FilePath>..\..\source\src\lcd_contrast.c</FilePath>
             </File>
             <File>
               <FileName>buttons.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\buttons.c</FilePath>
+              <FilePath>..\..\source\src\buttons.c</FilePath>
             </File>
             <File>
               <FileName>led.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\led.c</FilePath>
+              <FilePath>..\..\source\src\led.c</FilePath>
             </File>
             <File>
               <FileName>encoder.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\encoder.c</FilePath>
+              <FilePath>..\..\source\src\encoder.c</FilePath>
             </File>
             <File>
               <FileName>systick.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\systick.c</FilePath>
+              <FilePath>..\..\source\src\systick.c</FilePath>
             </File>
             <File>
               <FileName>adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\adc.c</FilePath>
+              <FilePath>..\..\source\src\adc.c</FilePath>
             </File>
             <File>
               <FileName>external_adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\external_adc.c</FilePath>
+              <FilePath>..\..\source\src\external_adc.c</FilePath>
             </File>
             <File>
               <FileName>dac.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\dac.c</FilePath>
+              <FilePath>..\..\source\src\dac.c</FilePath>
             </File>
             <File>
               <FileName>softTimer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\softTimer.c</FilePath>
+              <FilePath>..\..\source\src\softTimer.c</FilePath>
             </File>
             <File>
               <FileName>linear_calibration.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\linear_calibration.c</FilePath>
+              <FilePath>..\..\source\src\linear_calibration.c</FilePath>
             </File>
             <File>
               <FileName>power_monitor.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\power_monitor.c</FilePath>
+              <FilePath>..\..\source\src\power_monitor.c</FilePath>
             </File>
             <File>
               <FileName>gui_top.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\gui_top.c</FilePath>
+              <FilePath>..\..\source\src\gui_top.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\source\src\gui_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\source\src\utils.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -999,7 +1019,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\library\CMSIS\CM3\CoreSupport;..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\inc;..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm;..\library\MDR32F9Qx_StdPeriph_Driver\inc;..\source\inc</IncludePath>
+              <IncludePath>..\library\CMSIS\CM3\CoreSupport;..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\inc;..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm;..\library\MDR32F9Qx_StdPeriph_Driver\inc;..\..\source\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1045,7 +1065,7 @@
             <File>
               <FileName>core_cm3.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\CMSIS\CM3\CoreSupport\core_cm3.c</FilePath>
+              <FilePath>..\..\library\CMSIS\CM3\CoreSupport\core_cm3.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1055,12 +1075,12 @@
             <File>
               <FileName>system_MDR32F9Qx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm\system_MDR32F9Qx.c</FilePath>
+              <FilePath>..\..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm\system_MDR32F9Qx.c</FilePath>
             </File>
             <File>
               <FileName>startup_MDR32F9Qx.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm\startup_MDR32F9Qx.s</FilePath>
+              <FilePath>..\..\library\CMSIS\CM3\DeviceSupport\MDR32F9Qx\startup\arm\startup_MDR32F9Qx.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -1070,37 +1090,37 @@
             <File>
               <FileName>MDR32F9Qx_port.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_port.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_port.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_rst_clk.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_rst_clk.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_rst_clk.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_dac.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_dac.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_dac.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_timer.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_timer.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_adc.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_adc.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_ssp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_ssp.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_ssp.c</FilePath>
             </File>
             <File>
               <FileName>MDR32F9Qx_comp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_comp.c</FilePath>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_comp.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1110,82 +1130,92 @@
             <File>
               <FileName>MDR32F9Qx_config.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\MDR32F9Qx_config.h</FilePath>
+              <FilePath>..\..\source\inc\MDR32F9Qx_config.h</FilePath>
             </File>
             <File>
               <FileName>dwt_delay.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\dwt_delay.h</FilePath>
+              <FilePath>..\..\source\inc\dwt_delay.h</FilePath>
             </File>
             <File>
               <FileName>lcd_melt20s4.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\lcd_melt20s4.h</FilePath>
+              <FilePath>..\..\source\inc\lcd_melt20s4.h</FilePath>
             </File>
             <File>
               <FileName>lcd_melt.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\lcd_melt.h</FilePath>
+              <FilePath>..\..\source\inc\lcd_melt.h</FilePath>
             </File>
             <File>
               <FileName>lcd_contrast.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\lcd_contrast.h</FilePath>
+              <FilePath>..\..\source\inc\lcd_contrast.h</FilePath>
             </File>
             <File>
               <FileName>buttons.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\buttons.h</FilePath>
+              <FilePath>..\..\source\inc\buttons.h</FilePath>
             </File>
             <File>
               <FileName>led.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\led.h</FilePath>
+              <FilePath>..\..\source\inc\led.h</FilePath>
             </File>
             <File>
               <FileName>encoder.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\encoder.h</FilePath>
+              <FilePath>..\..\source\inc\encoder.h</FilePath>
             </File>
             <File>
               <FileName>systick.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\systick.h</FilePath>
+              <FilePath>..\..\source\inc\systick.h</FilePath>
             </File>
             <File>
               <FileName>adc.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\adc.h</FilePath>
+              <FilePath>..\..\source\inc\adc.h</FilePath>
             </File>
             <File>
               <FileName>external_adc.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\external_adc.h</FilePath>
+              <FilePath>..\..\source\inc\external_adc.h</FilePath>
             </File>
             <File>
               <FileName>dac.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\dac.h</FilePath>
+              <FilePath>..\..\source\inc\dac.h</FilePath>
             </File>
             <File>
               <FileName>softTimer.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\softTimer.h</FilePath>
+              <FilePath>..\..\source\inc\softTimer.h</FilePath>
             </File>
             <File>
               <FileName>linear_calibration.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\linear_calibration.h</FilePath>
+              <FilePath>..\..\source\inc\linear_calibration.h</FilePath>
             </File>
             <File>
               <FileName>power_monitor.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\power_monitor.h</FilePath>
+              <FilePath>..\..\source\inc\power_monitor.h</FilePath>
             </File>
             <File>
               <FileName>gui_top.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\source\inc\gui_top.h</FilePath>
+              <FilePath>..\..\source\inc\gui_top.h</FilePath>
+            </File>
+            <File>
+              <FileName>gui_core.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\gui_core.h</FilePath>
+            </File>
+            <File>
+              <FileName>utils.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\utils.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1195,82 +1225,92 @@
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\main.c</FilePath>
+              <FilePath>..\..\source\src\main.c</FilePath>
             </File>
             <File>
               <FileName>hw_utils.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\hw_utils.c</FilePath>
+              <FilePath>..\..\source\src\hw_utils.c</FilePath>
             </File>
             <File>
               <FileName>dwt_delay.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\dwt_delay.c</FilePath>
+              <FilePath>..\..\source\src\dwt_delay.c</FilePath>
             </File>
             <File>
               <FileName>lcd_melt20s4.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\lcd_melt20s4.c</FilePath>
+              <FilePath>..\..\source\src\lcd_melt20s4.c</FilePath>
             </File>
             <File>
               <FileName>lcd_contrast.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\lcd_contrast.c</FilePath>
+              <FilePath>..\..\source\src\lcd_contrast.c</FilePath>
             </File>
             <File>
               <FileName>buttons.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\buttons.c</FilePath>
+              <FilePath>..\..\source\src\buttons.c</FilePath>
             </File>
             <File>
               <FileName>led.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\led.c</FilePath>
+              <FilePath>..\..\source\src\led.c</FilePath>
             </File>
             <File>
               <FileName>encoder.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\encoder.c</FilePath>
+              <FilePath>..\..\source\src\encoder.c</FilePath>
             </File>
             <File>
               <FileName>systick.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\systick.c</FilePath>
+              <FilePath>..\..\source\src\systick.c</FilePath>
             </File>
             <File>
               <FileName>adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\adc.c</FilePath>
+              <FilePath>..\..\source\src\adc.c</FilePath>
             </File>
             <File>
               <FileName>external_adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\external_adc.c</FilePath>
+              <FilePath>..\..\source\src\external_adc.c</FilePath>
             </File>
             <File>
               <FileName>dac.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\dac.c</FilePath>
+              <FilePath>..\..\source\src\dac.c</FilePath>
             </File>
             <File>
               <FileName>softTimer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\softTimer.c</FilePath>
+              <FilePath>..\..\source\src\softTimer.c</FilePath>
             </File>
             <File>
               <FileName>linear_calibration.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\linear_calibration.c</FilePath>
+              <FilePath>..\..\source\src\linear_calibration.c</FilePath>
             </File>
             <File>
               <FileName>power_monitor.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\power_monitor.c</FilePath>
+              <FilePath>..\..\source\src\power_monitor.c</FilePath>
             </File>
             <File>
               <FileName>gui_top.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\source\src\gui_top.c</FilePath>
+              <FilePath>..\..\source\src\gui_top.c</FilePath>
+            </File>
+            <File>
+              <FileName>gui_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\source\src\gui_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\source\src\utils.c</FilePath>
             </File>
           </Files>
         </Group>

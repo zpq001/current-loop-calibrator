@@ -14,13 +14,6 @@
 #include "power_monitor.h"
 #include "gui_top.h"
 
-void processCurrentLoopMonitor(void) {
-	if (ADC_GetLoopCurrent() < 3900)
-		LED_Set(LED_BREAK, 1);
-	else
-		LED_Set(LED_BREAK, 0);
-}
-
 
 
 int main(void) {
@@ -50,6 +43,8 @@ int main(void) {
     DAC_Initialize();
     // EEPROM memory
     // TODO
+	// Buzzer
+	// TODO
     // Restore settings
     // TODO
     // GUI
@@ -68,7 +63,7 @@ int main(void) {
 			
 			ADC_UpdateLoopVoltage();
 			ADC_UpdateLoopCurrent();
-			processCurrentLoopMonitor();
+			ADC_UpdateLoopMonitor();
             ExtADC_UpdateCurrent();
             
             LCD_CaptureKeyboard();
