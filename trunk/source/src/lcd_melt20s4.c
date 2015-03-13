@@ -174,9 +174,13 @@ void LCD_Init(void) {
     LCD_SetCursorPosition(0,1); 
     LCD_PutString("calibrator 0-20мА");
     LCD_SetCursorPosition(0,2); 
-    LCD_PutString("!Привет!");
+    LCD_PutString("_!Привет!_");
     LCD_SetCursorPosition(0,3); 
     LCD_PutString("Version 0.1");
+}
+
+void LCD_Clear(void) {
+    write_byte(BYTE_CMD, CMD_CLEAR);    // CHECKME
 }
 
 void LCD_SetCursorPosition(uint8_t x, uint8_t y) {
@@ -196,6 +200,22 @@ void LCD_PutString(const char *data) {
     while (*data) {
         write_byte(BYTE_DATA, *data++);
     }
+}
+
+void LCD_InsertChars(const char *data, uint8_t count) {
+    while (count--) {
+        write_byte(BYTE_DATA, *data++);
+    }
+}
+
+void LCD_PutStringXY(uint8_t x, uint8_t y, const char *data) {
+    LCD_SetCursorPosition(x, y);
+    LCD_PutString(data);
+}
+
+void LCD_InsertCharsXY(uint8_t x, uint8_t y, const char *data, uint8_t count) {
+    LCD_SetCursorPosition(x, y);
+    LCD_InsertChars(data, count);
 }
 
 void LCD_CaptureKeyboard(void) {

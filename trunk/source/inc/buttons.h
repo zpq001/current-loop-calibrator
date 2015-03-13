@@ -31,6 +31,8 @@
 #define KEY_DOT             (1<<1)
 #define KEY_NUM0            (1<<0)
 
+#define ANY_KEY             ~(0x00);
+
 
 //=============================================//
 // Button processing setup
