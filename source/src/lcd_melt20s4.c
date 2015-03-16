@@ -42,7 +42,10 @@ static uint32_t raw_keyboard_state;
 // Private functions
 
 static void set_db4(uint8_t byte) {
-    LCD_PORT->RXTX = byte & 0x0F;
+	uint32_t temp = LCD_PORT->RXTX;
+	temp &= ~0x0F;
+	temp |= (byte & 0x0F);
+    LCD_PORT->RXTX = temp;
 }
 
 static uint8_t get_db4(void) {
@@ -53,7 +56,7 @@ static void set_db_dir(uint8_t db_direction) {
     if (db_direction == DB_OUTPUT)
         LCD_PORT->OE |= (1 << LCD_DB4) | (1 << LCD_DB5) | (1 << LCD_DB6) | (1 << LCD_DB7);
     else
-        LCD_PORT->OE &= ~(1 << LCD_DB4) | (1 << LCD_DB5) | (1 << LCD_DB6) | (1 << LCD_DB7);
+        LCD_PORT->OE &= ~((1 << LCD_DB4) | (1 << LCD_DB5) | (1 << LCD_DB6) | (1 << LCD_DB7));
 }
 
 static void set_ctrl(uint8_t line, uint8_t new_state) {
@@ -65,21 +68,21 @@ static void set_ctrl(uint8_t line, uint8_t new_state) {
 
 static void write_db4(uint8_t byte) {
     set_db4(byte);
-    DWT_DelayUs(1);
+    DWT_DelayUs(20);
     set_ctrl(LCD_E, 1);
-    DWT_DelayUs(2);
+    DWT_DelayUs(20);
     set_ctrl(LCD_E, 0);
-    DWT_DelayUs(1);
+    DWT_DelayUs(20);
 }
 
 static uint8_t read_db4(void) {
     uint8_t temp8u;
-    DWT_DelayUs(1);
+    DWT_DelayUs(20);
     set_ctrl(LCD_E, 1);
-    DWT_DelayUs(2);
+    DWT_DelayUs(20);
     temp8u = get_db4();
     set_ctrl(LCD_E, 0);
-    DWT_DelayUs(1);
+    DWT_DelayUs(20);
     return temp8u;
 }
 
@@ -96,8 +99,8 @@ static void write_byte(uint8_t type, uint8_t data) {
     set_db_dir(DB_OUTPUT);
     set_ctrl(LCD_RW, 0);
     set_ctrl(LCD_A0, type);
-    write_db4(temp8u >> 4);
-    write_db4(temp8u);
+    write_db4(data >> 4);
+    write_db4(data);
 }
 
 
@@ -151,30 +154,38 @@ void LCD_Init(void) {
     set_ctrl(LCD_RW, 0);
     set_ctrl(LCD_A0, 0);
     DWT_DelayUs(20000);
+	set_db_dir(DB_OUTPUT);
     write_db4(0x03);
+	DWT_DelayUs(50);
     write_db4(0x03);
+	DWT_DelayUs(50);
     write_db4(0x03);
+	DWT_DelayUs(50);
     write_db4(0x02);    // <- 4-bit mode
+	DWT_DelayUs(50);
     
     // Setup LCD
     write_byte(BYTE_CMD, CMD_SET_FUNC | OPT_4BIT_INTERFACE | OPT_TWO_ROW_LCD | OPT_FONT_5x8 | OPT_CGROM_PAGE1 | OPT_NO_INVERSION);
     write_byte(BYTE_CMD, CMD_SET_LCD_STATE | OPT_LCD_ON | OPT_CURSOR_OFF | OPT_CURSOR_STEADY);
+    //write_byte(BYTE_CMD, CMD_SET_LCD_STATE | OPT_LCD_OFF | OPT_CURSOR_OFF | OPT_CURSOR_STEADY);
     write_byte(BYTE_CMD, CMD_CLEAR);
     write_byte(BYTE_CMD, CMD_SET_DATA_INPUT_MODE | OPT_INC_DDRAM_ADDR | OPT_NOT_SHIFT_LCD);
     
+	//write_byte(BYTE_CMD, CMD_SET_LCD_STATE | OPT_LCD_ON | OPT_CURSOR_OFF | OPT_CURSOR_STEADY);
+	
     LCD_SetCursorPosition(0,0); // for sure
    
-    //LCD_PutString("ÐšÐ°Ð»Ð¸Ð±Ñ€Ð°Ñ‚Ð¾Ñ€ Ñ‚Ð¾ÐºÐ¾Ð²Ð¾Ð¹");
+    //LCD_PutString("Êàëèáðàòîð òîêîâîé");
     //LCD_SetCursorPosition(0,1); 
-    //LCD_PutString("  Ð¿ÐµÑ‚Ð»Ð¸ 0-20Ð¼Ð");
+    //LCD_PutString("  ïåòëè 0-20ìÀ");
     //LCD_SetCursorPosition(0,3); 
-    //LCD_PutString("Ð’ÐµÑ€ÑÐ¸Ñ 0.1");
+    //LCD_PutString("Âåðñèÿ 0.1");
     
     LCD_PutString("Current loop");
     LCD_SetCursorPosition(0,1); 
-    LCD_PutString("calibrator 0-20Ð¼Ð");
+    LCD_PutString("calibrator 0-20ìÀ");
     LCD_SetCursorPosition(0,2); 
-    LCD_PutString("_!ÐŸÑ€Ð¸Ð²ÐµÑ‚!_");
+    LCD_PutString("Ïðèâåò!");
     LCD_SetCursorPosition(0,3); 
     LCD_PutString("Version 0.1");
 }
