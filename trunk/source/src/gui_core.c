@@ -88,3 +88,69 @@ void processItemFunction(const MenuFunctionRecord_t* funcRecord, uint8_t funcTyp
     }
 }
 
+
+void resetEditor(edit_t *edit, uint8_t numFractDigits) {
+    edit->value = 0;
+    edit->dot_position = -1;
+    edit->entered_digits = 0;
+    edit->fract_digits = numFractDigits;
+}
+
+void startEditor(edit_t *edit, uint8_t code, uint8_t numFractDigits) {
+    resetEditor(edit, numFractDigits);
+    processEditor(edit, code);
+}
+
+void processEditor(edit_t *edit, uint8_t code) {
+    if (code <= EDIT_NUM9) {
+        if ((code != EDIT_NUM0) || (edit->value != 0) || (edit->dot_position >= 0)) {
+            if (edit->dot_position < edit->fract_digits) {
+            edit->value *= 10;
+            edit->value += code;
+            edit->entered_digits++;
+            if(edit->dot_position >= 0)
+                edit->dot_position++;
+            }
+        }
+    } else if (code == EDIT_DOT) {
+        if (edit->dot_position < 0) {
+            edit->dot_position = 0;
+            if (edit->value == 0) {
+                edit->entered_digits++;
+            }
+        }
+    } else if (code == EDIT_BKSPACE) {
+        if (edit->dot_position == 0) {
+            edit->dot_position--;
+            if (edit->value == 0)
+                edit->entered_digits = 0;
+        } else {
+            edit->value /= 10;
+            if (edit->entered_digits) {
+                edit->entered_digits--;
+                if (edit->dot_position > 0)
+                    edit->dot_position--;
+            }
+        }
+    }
+}
+
+uint32_t getScaledEditValue(edit_t *edit, uint8_t scale) {
+    uint32_t temp32u;
+
+    temp32u = edit->value;
+    if (edit->dot_position > 0)
+        scale -= edit->dot_position;
+
+    while(scale > 0) {
+        temp32u *= 10;
+        scale--;
+    }
+
+    return temp32u;
+}
+
+
+
+
+

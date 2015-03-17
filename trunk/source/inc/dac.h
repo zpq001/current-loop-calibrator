@@ -18,7 +18,9 @@ void DAC_Calibrate(void);
 void DAC_ApplyCalibration(calibration_t *points);
 void DAC_SaveCalibration(calibration_t *points);
 
-
-
+uint32_t DAC_GetSettingConst(void);
+uint32_t DAC_GetSettingAlternHigh(void);
+uint32_t DAC_GetSettingAlternLow(void);
+void DAC_SetSettingConst(uint32_t newValue);
 
 

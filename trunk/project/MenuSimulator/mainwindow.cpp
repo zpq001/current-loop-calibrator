@@ -213,10 +213,10 @@ void MainWindow::onKeyDriverEvent(int id, int keyEventType)
     switch(keyEventType)
     {
         case keyDriver::KEY_DOWN:   buttons.action_down = guiKeyCode;       break;
-        case keyDriver::KEY_UP:   buttons.action_down = guiKeyCode;         break;
-        case keyDriver::KEY_UP_SHORT:   buttons.action_down = guiKeyCode;   break;
-        case keyDriver::KEY_UP_LONG:   buttons.action_down = guiKeyCode;    break;
-        case keyDriver::KEY_HOLD:   buttons.action_down = guiKeyCode;       break;
+        case keyDriver::KEY_UP:   buttons.action_up = guiKeyCode;         break;
+        case keyDriver::KEY_UP_SHORT:   buttons.action_up_short = guiKeyCode;   break;
+        case keyDriver::KEY_UP_LONG:   buttons.action_up_long = guiKeyCode;    break;
+        case keyDriver::KEY_HOLD:   buttons.action_hold = guiKeyCode;       break;
     }
     guiButtonEvent();
 }

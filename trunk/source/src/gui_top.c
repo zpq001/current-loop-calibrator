@@ -6,6 +6,7 @@
 #include "gui_top.h"
 #include "adc.h"
 #include "external_adc.h"
+#include "dac.h"
 
 #ifndef _MENU_SIMULATOR_
 #include "lcd_melt20s4.h"
@@ -52,11 +53,36 @@ const MenuFunctionRecord_t menuFunctionSet[] =
 static uint8_t selectedMenuItemId;
 static const MenuFunctionRecord_t *selectedMenuFunctionRecord;
 
+static uint8_t editMode;
+edit_t edit;
+uint8_t editorCode;
+uint8_t editorCodeValid;
+
+
+
+static void encodeEditorKeys(void) {
+    editorCodeValid = 1;
+    if (buttons.action_down & KEY_NUM0) editorCode = EDIT_NUM0;
+    else if (buttons.action_down & KEY_NUM1) editorCode = EDIT_NUM1;
+    else if (buttons.action_down & KEY_NUM2) editorCode = EDIT_NUM2;
+    else if (buttons.action_down & KEY_NUM3) editorCode = EDIT_NUM3;
+    else if (buttons.action_down & KEY_NUM4) editorCode = EDIT_NUM4;
+    else if (buttons.action_down & KEY_NUM5) editorCode = EDIT_NUM5;
+    else if (buttons.action_down & KEY_NUM6) editorCode = EDIT_NUM6;
+    else if (buttons.action_down & KEY_NUM7) editorCode = EDIT_NUM7;
+    else if (buttons.action_down & KEY_NUM8) editorCode = EDIT_NUM8;
+    else if (buttons.action_down & KEY_NUM9) editorCode = EDIT_NUM9;
+    else if (buttons.action_down & KEY_DOT) editorCode = EDIT_DOT;
+    else if (buttons.action_down & KEY_BACKSPACE) editorCode = EDIT_BKSPACE;
+    else editorCodeValid = 0;
+}
+
 
 
 void GUI_Init(void) {
     selectedMenuItemId = mi_START;
     selectedMenuFunctionRecord = getMenuFunctionRecord(selectedMenuItemId);
+    editMode = 0;
 }
 
 
@@ -83,7 +109,7 @@ void GUI_Process(void) {
 static void mfConstSource_Select(void) {
     // Draw static text
     LCD_Clear();
-    LCD_PutStringXY(0,0,"Уст. ток:");
+    LCD_PutStringXY(0,0,"Уст. ток:         мА");
     LCD_PutStringXY(10,1,"Uвых=    В");
     LCD_PutStringXY(0,2,"Постоянный ток");
     LCD_PutStringXY(0,3,"Амперметр:        мА");
@@ -92,10 +118,72 @@ static void mfConstSource_Select(void) {
 static void mfConstSource_Run(void) {
     int32_t temp32;
     uint32_t temp32u;
+    uint8_t temp8u;
     char str[10];
     
     // Loop current setting
-    
+
+    // Check the keys
+    encodeEditorKeys();
+#if 0
+    if (!editMode) {
+        if (editorCodeValid) {
+            startEditor(&edit, editorCode);
+            editMode = 1;
+        } else {
+            temp32u = DAC_GetSettingConst();
+            i32toa_align_right(temp32u, str, 10, 4, 3);
+            LCD_InsertCharsXY(13, 0, &str[2], 5);
+        }
+    } else {
+        // Check enter or cancel keys
+        if (buttons.action_down & KEY_OK) {
+            temp32u = getScaledEditValue(&edit, 3);
+            DAC_SetSettingConst(temp32u);
+            editMode = 0;
+        } else if (buttons.action_down & KEY_ESC) {
+            editMode = 0;
+        }
+
+        if (editorCodeValid)
+            processEditor(&edit, editorCode);
+        temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
+        i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
+        LCD_InsertCharsXY(14, 0, &str[5], 4);
+    }
+#endif
+
+    // Control
+    if (!editMode) {
+        // Capture numeric keys
+        if (editorCodeValid) {
+            startEditor(&edit, editorCode, 1);
+            editMode = 1;
+        }
+    } else {
+        // Check enter or cancel keys
+        if (buttons.action_down & KEY_OK) {
+            temp32u = getScaledEditValue(&edit, 3);
+            DAC_SetSettingConst(temp32u);
+            editMode = 0;
+        } else if (buttons.action_down & KEY_ESC) {
+            editMode = 0;
+        } else if (editorCodeValid)
+            processEditor(&edit, editorCode);
+    }
+
+    // Display
+    if (!editMode) {
+        temp32u = DAC_GetSettingConst();
+        i32toa_align_right(temp32u, str, 10, 4, 3);
+        LCD_InsertCharsXY(13, 0, &str[2], 5);
+    } else {
+        temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
+        i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
+        LCD_InsertCharsXY(14, 0, &str[5], 4);
+    }
+
+
     // Loop health
     if (ADC_GetLoopStatus() == LOOP_OK) 
         LCD_PutStringXY(0,1,"Подключ.");
