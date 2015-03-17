@@ -10,8 +10,8 @@ typedef struct {
 } calibration_point_t;
 
 typedef struct {
-	uint32_t k;
-	uint32_t offset;
+	int32_t k;
+	int32_t offset;
 } line_coeff_t;
 
 typedef struct {

@@ -66,10 +66,10 @@ int main(void) {
 			ADC_UpdateLoopMonitor();
             ExtADC_UpdateCurrent();
             
-            //LCD_CaptureKeyboard();
-            //ProcessButtons();
+            LCD_CaptureKeyboard();
+            ProcessButtons();
 		
-            //GUI_Process();
+            GUI_Process();
 		}
 	}
 }
