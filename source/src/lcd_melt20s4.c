@@ -54,7 +54,7 @@ static uint8_t get_db4(void) {
 
 static void set_db_dir(uint8_t db_direction) {
     if (db_direction == DB_OUTPUT)
-        LCD_PORT->OE |= (1 << LCD_DB4) | (1 << LCD_DB5) | (1 << LCD_DB6) | (1 << LCD_DB7);
+        LCD_PORT->OE |= ((1 << LCD_DB4) | (1 << LCD_DB5) | (1 << LCD_DB6) | (1 << LCD_DB7));
     else
         LCD_PORT->OE &= ~((1 << LCD_DB4) | (1 << LCD_DB5) | (1 << LCD_DB6) | (1 << LCD_DB7));
 }
@@ -110,7 +110,6 @@ static void write_byte(uint8_t type, uint8_t data) {
 
 void LCD_Init(void) {
     uint8_t i;
-    
     PORT_InitTypeDef PORT_InitStructure;
     
     // Setup GPIO for LCD
@@ -121,6 +120,7 @@ void LCD_Init(void) {
     PORT_InitStructure.PORT_SPEED = PORT_SPEED_FAST;
 	PORT_Init(LCD_PORT, &PORT_InitStructure);
     PORT_InitStructure.PORT_Pin = (1 << LCD_DB4) | (1 << LCD_DB5) | (1 << LCD_DB6) | (1 << LCD_DB7);
+    PORT_InitStructure.PORT_PULL_UP = PORT_PULL_UP_OFF;
     PORT_InitStructure.PORT_PULL_DOWN = PORT_PULL_DOWN_ON;
     PORT_InitStructure.PORT_OE = PORT_OE_IN;
     PORT_Init(LCD_PORT, &PORT_InitStructure);
@@ -134,20 +134,6 @@ void LCD_Init(void) {
         PORT_InitStructure.PORT_Pin = (PORT_MODE_DIGITAL << keyboard_fb_lines[i].pin);
         PORT_Init(keyboard_fb_lines[i].port, &PORT_InitStructure);
     }
-    
-    /*
-    LCD_PORT->ANALOG = (PORT_MODE_DIGITAL << LCD_DB4) | (PORT_MODE_DIGITAL << LCD_DB5) | (PORT_MODE_DIGITAL << LCD_DB6) | (PORT_MODE_DIGITAL << LCD_DB7) |\
-                       (PORT_MODE_DIGITAL << LCD_A0) | (PORT_MODE_DIGITAL << LCD_RW) | (PORT_MODE_DIGITAL << LCD_E);
-    LCD_PORT->PULL = 0;     // no pull-up/down
-    LCD_PORT->RXTX = 0;     // data io
-    LCD_PORT->FUNC = 0;     // 00 - port, 01 - main, 10 - altern, 11 - redef
-    LCD_PORT->PD = 0;       // [15:0]: 0-driver, 1-open drain. [31:16]: 0-normal input, 1 - Shimdt trigger 400mV
-    LCD_PORT->PWR = (PORT_SPEED_FAST << LCD_DB4*2) | (PORT_SPEED_FAST << LCD_DB5*2) | (PORT_SPEED_FAST << LCD_DB6*2) | (PORT_SPEED_FAST << LCD_DB7*2) |\
-                    (PORT_SPEED_FAST << LCD_A0*2) | (PORT_SPEED_FAST << LCD_RW*2) | (PORT_SPEED_FAST << LCD_E*2);
-    LCD_PORT->GFEN = 0;     // input filter disable
-    LCD_PORT->OE = (PORT_OE_OUT << LCD_DB4) | (PORT_OE_OUT << LCD_DB5) | (PORT_OE_OUT << LCD_DB6) | (PORT_OE_OUT << LCD_DB7) |\
-                   (PORT_OE_OUT << LCD_A0) | (PORT_OE_OUT << LCD_RW) | (PORT_OE_OUT << LCD_E);
-    */
     
     // Initialize sequence
     set_ctrl(LCD_E, 0);
@@ -166,28 +152,19 @@ void LCD_Init(void) {
     
     // Setup LCD
     write_byte(BYTE_CMD, CMD_SET_FUNC | OPT_4BIT_INTERFACE | OPT_TWO_ROW_LCD | OPT_FONT_5x8 | OPT_CGROM_PAGE1 | OPT_NO_INVERSION);
-    write_byte(BYTE_CMD, CMD_SET_LCD_STATE | OPT_LCD_ON | OPT_CURSOR_OFF | OPT_CURSOR_STEADY);
-    //write_byte(BYTE_CMD, CMD_SET_LCD_STATE | OPT_LCD_OFF | OPT_CURSOR_OFF | OPT_CURSOR_STEADY);
+    //write_byte(BYTE_CMD, CMD_SET_LCD_STATE | OPT_LCD_ON | OPT_CURSOR_OFF | OPT_CURSOR_STEADY);
+    write_byte(BYTE_CMD, CMD_SET_LCD_STATE | OPT_LCD_OFF | OPT_CURSOR_OFF | OPT_CURSOR_STEADY);
     write_byte(BYTE_CMD, CMD_CLEAR);
     write_byte(BYTE_CMD, CMD_SET_DATA_INPUT_MODE | OPT_INC_DDRAM_ADDR | OPT_NOT_SHIFT_LCD);
-    
-	//write_byte(BYTE_CMD, CMD_SET_LCD_STATE | OPT_LCD_ON | OPT_CURSOR_OFF | OPT_CURSOR_STEADY);
+	write_byte(BYTE_CMD, CMD_SET_LCD_STATE | OPT_LCD_ON | OPT_CURSOR_OFF | OPT_CURSOR_STEADY);
 	
-    LCD_SetCursorPosition(0,0); // for sure
-   
-    //LCD_PutString("Калибратор токовой");
-    //LCD_SetCursorPosition(0,1); 
-    //LCD_PutString("  петли 0-20мА");
-    //LCD_SetCursorPosition(0,3); 
-    //LCD_PutString("Версия 0.1");
-    
-    LCD_PutString("Current loop");
+    // Greeting message
+    LCD_SetCursorPosition(0,0);
+    LCD_PutString("Калибратор токовой");
     LCD_SetCursorPosition(0,1); 
-    LCD_PutString("calibrator 0-20мА");
-    LCD_SetCursorPosition(0,2); 
-    LCD_PutString("Привет!");
+    LCD_PutString("  петли 0-20мА");
     LCD_SetCursorPosition(0,3); 
-    LCD_PutString("Version 0.1");
+    LCD_PutString("Версия 0.1");
 }
 
 void LCD_Clear(void) {
@@ -196,13 +173,14 @@ void LCD_Clear(void) {
 
 void LCD_SetCursorPosition(uint8_t x, uint8_t y) {
     if (x > 19) x = 0;
+    // Offset according to datasheet
     switch (y) {
         case 1:
-            x += 20;    break;
+            x += 0x40;  break;
         case 2:
-            x += 64;    break;
+            x += 0x14;  break;
         case 3:
-            x += 64+20; break;
+            x += 0x54;  break;
     }
     write_byte(BYTE_CMD, CMD_SET_DDRAM_ADDRESS | x);
 }

@@ -19,6 +19,10 @@ struct {
 // Callback functions
 cbLcdUpdatePtr updateLcdCallback;
 
+static uint32_t DAC_SettingConst;
+
+
+
 //-----------------------------------//
 // Callbacks top->GUI
 void registerLcdUpdateCallback(cbLcdUpdatePtr fptr)
@@ -29,6 +33,8 @@ void registerLcdUpdateCallback(cbLcdUpdatePtr fptr)
 
 void guiInitialize(void)
 {
+    DAC_SettingConst = 16800;
+
     uint8_t i;
     for (i=0; i<4; i++)
     {
@@ -115,7 +121,21 @@ uint8_t ExtADC_GetRange(void) {
     return 0;
 }
 
+uint32_t DAC_GetSettingConst(void) {
+    return DAC_SettingConst;
+}
 
+uint32_t DAC_GetSettingAlternHigh(void) {
+    return 20000;
+}
+
+uint32_t DAC_GetSettingAlternLow(void) {
+    return 4000;
+}
+
+void DAC_SetSettingConst(uint32_t newValue) {
+    DAC_SettingConst = newValue;
+}
 
 
 
