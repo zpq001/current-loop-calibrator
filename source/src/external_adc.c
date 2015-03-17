@@ -10,6 +10,7 @@
 #include "MDR32F9Qx_ssp.h"
 #include "external_adc.h"
 #include "linear_calibration.h"
+#include "dwt_delay.h"
 
 #define CH_VGND			0
 #define CH_LOW_GAIN		1
@@ -27,7 +28,7 @@ void ExtADC_Initialize(void) {
 	PORT_InitTypeDef PORT_InitStructure;
 	
 	// SPI frequency = F_SSPCLK / ( CPSDVR * (1 + SCR) ) 
-	SSP_BRGInit(MDR_SSP2,SSP_HCLKdiv1);		// F_SSPCLK = HCLK / 1
+	SSP_BRGInit(MDR_SSP1,SSP_HCLKdiv1);		// F_SSPCLK = HCLK / 1
 	
 	SSP_StructInit (&sSSP);
 	sSSP.SSP_SCR  = 31;			// 0 to 255
@@ -40,7 +41,7 @@ void ExtADC_Initialize(void) {
 	SSP_Init (MDR_SSP1,&sSSP);
 	SSP_Cmd(MDR_SSP1, ENABLE);
 	
-
+	
     // Setup GPIO
     PORT_StructInit(&PORT_InitStructure);
     PORT_InitStructure.PORT_Pin = (1 << EXTADC_CLK_PIN) | (1 << EXTADC_TXD_PIN) | (1 << EXTADC_FSS_PIN);
@@ -76,10 +77,11 @@ void ExtADC_Initialize(void) {
 
 uint16_t getData(uint8_t channel) {
 	uint16_t temp16u;
-	channel &= ~0x07;
+	channel &= 0x07;
 	channel |= (1<<3);	// single-ended
 	channel |= (1<<4);	// start
 	SSP_SendData(MDR_SSP1, channel);
+	while( SSP_GetFlagStatus(MDR_SSP1, SSP_FLAG_RNE)!= SET );
 	temp16u = SSP_ReceiveData(MDR_SSP1);
 	return temp16u;
 }
@@ -87,9 +89,11 @@ uint16_t getData(uint8_t channel) {
 
 
 void ExtADC_UpdateCurrent(void) {
-    uint16_t conversion_result[3];
+    volatile uint16_t conversion_result[3];
     conversion_result[0] = getData(CH_VGND);
+	DWT_DelayUs(100);
     conversion_result[1] = getData(CH_LOW_GAIN);
+	DWT_DelayUs(100);
     conversion_result[2] = getData(CH_HIGH_GAIN);
     // Pseudo-differential
     conversion_result[1] += 2048;

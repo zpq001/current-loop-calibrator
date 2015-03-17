@@ -62,7 +62,7 @@ void ADC_Initialize(void) {
     
     adc_current_calibration.point1.value = 0;
 	adc_current_calibration.point1.code = 0;
-	adc_current_calibration.point2.value = 2000;
+	adc_current_calibration.point2.value = 20000;
 	adc_current_calibration.point2.code = 3276;
     adc_current_calibration.scale = 10000L;
 	CalculateCoefficients(&adc_current_calibration);
@@ -75,6 +75,7 @@ void ADC_UpdateLoopCurrent(void) {
 	ADC1_Start();
 	while (ADC1_GetFlagStatus(ADCx_FLAG_END_OF_CONVERSION) == RESET);
 	temp32u = ADC1_GetResult();
+	temp32u &= 0xFFF;
     loop_current = GetValueForCode(&adc_current_calibration, temp32u);        
 }
 
@@ -103,6 +104,7 @@ void ADC_UpdateLoopVoltage(void) {
 	ADC1_Start();
 	while (ADC1_GetFlagStatus(ADCx_FLAG_END_OF_CONVERSION) == RESET);
 	temp32u = ADC1_GetResult();
+	temp32u &= 0xFFF;
     loop_voltage = GetValueForCode(&adc_voltage_calibration, temp32u); 
 }
 
@@ -116,6 +118,7 @@ void ADC_UpdateMCUTemperature(void) {
 	ADC1_Start();
 	while (ADC1_GetFlagStatus(ADCx_FLAG_END_OF_CONVERSION) == RESET);
 	temperature = ADC1_GetResult();     // FIXME
+	temperature &= 0xFFF;
 }
 
 

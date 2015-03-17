@@ -53,7 +53,8 @@ static void DAC_UpdateState(void) {
 		dac_state.dac_code = temp32u;
 		LED_Set(LED_STATE, 1);
 	} else {
-		DAC2_SetData(DEFAULT_OFF_VALUE);
+		temp32u = GetCodeForValue(&dac_calibration, DEFAULT_OFF_VALUE);
+		DAC2_SetData(temp32u);
 		dac_state.dac_code = DEFAULT_OFF_VALUE;
 		LED_Set(LED_STATE, 0);
 	}
@@ -82,10 +83,9 @@ void DAC_Initialize(void) {
 	CalculateCoefficients(&dac_calibration);
 	
 	// Default state after power-on
-	dac_state.isEnabled = 0;
-	dac_state.setting = 0;
-	DAC2_SetData(0);
-	LED_Set(LED_STATE, 0);
+	dac_state.isEnabled = 1;
+	dac_state.setting = 4000;
+	DAC_UpdateState();
 }
 
 
@@ -143,5 +143,22 @@ void DAC_SaveCalibration(calibration_t *points) {           // FIXME
 	points->point2.code = dac_calibration.point2.code;
 }
 
+
+
+uint32_t DAC_GetSettingConst(void) {
+    return dac_state.setting;
+}
+
+uint32_t DAC_GetSettingAlternHigh(void) {
+    return 20000;
+}
+
+uint32_t DAC_GetSettingAlternLow(void) {
+    return 4000;
+}
+
+void DAC_SetSettingConst(uint32_t newValue) {
+    DAC_SetCurrent(newValue);
+}
 
 

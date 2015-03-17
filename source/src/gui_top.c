@@ -192,8 +192,8 @@ static void mfConstSource_Run(void) {
     
     // Output voltage
     temp32 = ADC_GetLoopVoltage();
-    i32toa_align_right(temp32, str, 5, 2, 1);
-    LCD_InsertCharsXY(15, 1, &str[0], 4);
+    i32toa_align_right(temp32, str, 10, 4, 3);
+    LCD_InsertCharsXY(15, 1, &str[3], 4);
     
     // Ampermeter result
     temp32 = ExtADC_GetCurrent();

@@ -109,7 +109,7 @@ uint32_t ADC_GetLoopCurrent(void) {
 }
 
 uint32_t ADC_GetLoopVoltage(void) {
-    return 0;
+    return 18562;
 }
 
 
