@@ -6,7 +6,7 @@
 #include "gui_top.h"
 #include "adc.h"
 #include "external_adc.h"
-
+#include "dac.h"
 buttons_t buttons;
 struct {
     char *strings[4];    // + \0
@@ -20,8 +20,8 @@ struct {
 cbLcdUpdatePtr updateLcdCallback;
 
 static uint32_t DAC_SettingConst;
-
-
+static uint8_t DAC_WaveForm;
+static uint16_t DAC_Period;
 
 //-----------------------------------//
 // Callbacks top->GUI
@@ -34,6 +34,8 @@ void registerLcdUpdateCallback(cbLcdUpdatePtr fptr)
 void guiInitialize(void)
 {
     DAC_SettingConst = 16800;
+    DAC_WaveForm = WAVE_MEANDR;
+    DAC_Period = 345;
 
     uint8_t i;
     for (i=0; i<4; i++)
@@ -137,7 +139,30 @@ void DAC_SetSettingConst(uint32_t newValue) {
     DAC_SettingConst = newValue;
 }
 
+uint8_t DAC_GetWaveform(void) {
+    return DAC_WaveForm;
+}
 
+void DAC_SetWaveform(uint8_t newWaveForm) {
+    DAC_WaveForm = newWaveForm;
+    // Restart DMA!
+}
+
+uint16_t DAC_GetPeriod(void) {
+    return DAC_Period;
+}
+
+void DAC_SetPeriod(uint16_t newPeriod) {
+    DAC_Period = newPeriod;
+}
+
+void DAC_SetWaveformMode(void) {
+
+}
+
+void DAC_SetConstantMode(void) {
+
+}
 
 
 

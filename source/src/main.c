@@ -15,16 +15,24 @@
 #include "gui_top.h"
 
 
+/*
+	timer3 -> buzzer
+	timer2 -> contrast
+	timer1 -> DMA for waveform
+*/
+
+
 
 int main(void) {
 	
     // Initialize system 
 	hw_Setup_CPU_Clock();
+	hw_Init_DMA();
     DWT_Init();
     
     // Initialize software modules. 
     // All required HW setup is performed inside modules.
-    
+	
     // LCD and keyboard controller
     LCD_Init();
 	// LCD contrast DC-DC controller

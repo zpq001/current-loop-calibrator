@@ -458,6 +458,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_comp.c</FilePath>
             </File>
+            <File>
+              <FileName>MDR32F9Qx_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_dma.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -552,6 +557,11 @@
               <FileName>utils.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\source\inc\utils.h</FilePath>
+            </File>
+            <File>
+              <FileName>hw_utils.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\hw_utils.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1104,6 +1114,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_comp.c</FilePath>
             </File>
+            <File>
+              <FileName>MDR32F9Qx_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_dma.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1198,6 +1213,11 @@
               <FileName>utils.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\source\inc\utils.h</FilePath>
+            </File>
+            <File>
+              <FileName>hw_utils.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\hw_utils.h</FilePath>
             </File>
           </Files>
         </Group>

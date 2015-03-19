@@ -31,7 +31,7 @@ void LCD_InitContrastBooster(void) {
 	// Initialize timer 2 counter
 	TIMER_CntStructInit(&sTIM_CntInit);
 	sTIM_CntInit.TIMER_Prescaler                = 31;		// CLK = F_CPU / (prescaler + 1)
-	sTIM_CntInit.TIMER_Period                   = 999;		// 1MHz / 1000 = 1kHz
+	sTIM_CntInit.TIMER_Period                   = 1000;		// 1MHz / 100 = 10kHz
 	TIMER_CntInit (MDR_TIMER2,&sTIM_CntInit);
 
 	// Initialize timer 2 channel 3 - used for LCD contrast
