@@ -125,33 +125,6 @@ static void mfConstSource_Run(void) {
 
     // Check the keys
     encodeEditorKeys();
-#if 0
-    if (!editMode) {
-        if (editorCodeValid) {
-            startEditor(&edit, editorCode);
-            editMode = 1;
-        } else {
-            temp32u = DAC_GetSettingConst();
-            i32toa_align_right(temp32u, str, 10, 4, 3);
-            LCD_InsertCharsXY(13, 0, &str[2], 5);
-        }
-    } else {
-        // Check enter or cancel keys
-        if (buttons.action_down & KEY_OK) {
-            temp32u = getScaledEditValue(&edit, 3);
-            DAC_SetSettingConst(temp32u);
-            editMode = 0;
-        } else if (buttons.action_down & KEY_ESC) {
-            editMode = 0;
-        }
-
-        if (editorCodeValid)
-            processEditor(&edit, editorCode);
-        temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
-        i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
-        LCD_InsertCharsXY(14, 0, &str[5], 4);
-    }
-#endif
 
     // Control
     if (!editMode) {
@@ -212,7 +185,7 @@ static void mfConstSource_Run(void) {
 }
 
 static void mfConstSource_Leave(void) {
-    
+
 }
 
 
@@ -222,15 +195,51 @@ static void mfConstSource_Leave(void) {
 static void mfAlternSource_Select(void) {
     // Draw static text
     LCD_Clear();
+    LCD_PutStringXY(0,0,"Сигнал:");
+    LCD_PutStringXY(0,1,"Период:            с");
+    LCD_PutStringXY(0,2,"Циклов:");
+    LCD_PutStringXY(0,3,"Амперметр:        мА");
 
+    DAC_SetWaveformMode();
 }
 
 static void mfAlternSource_Run(void) {
-    
+    int32_t temp32;
+    uint32_t temp32u;
+    uint8_t temp8u;
+    char str[10];
+
+    // Display waveform
+    switch (DAC_GetWaveform()) {
+        case WAVE_MEANDR:       LCD_PutStringXY(10,0,"    меандр"); break;
+        case WAVE_SAW_DIRECT:   LCD_PutStringXY(10,0,"      пила"); break;
+        case WAVE_SAW_REVERSED: LCD_PutStringXY(10,0," обр. пила"); break;
+    }
+
+    // Display waveform period
+    temp32u = DAC_GetPeriod();
+    i32toa_align_right(temp32u, str, 10, 2, 1);
+    LCD_InsertCharsXY(15, 1, &str[5], 4);
+
+
+    // Ampermeter result
+    temp32 = ExtADC_GetCurrent();
+    i32toa_align_right(temp32, str, 10, 4, 3);
+    switch (ExtADC_GetRange()) {
+        case EXTADC_LOW_RANGE:
+            LCD_InsertCharsXY(13, 3, &str[2], 5);
+            break;
+        case EXTADC_HIGH_RANGE:
+            LCD_InsertCharsXY(13, 3, &str[0], 5);
+            break;
+        default:
+            str[3] = str[4] = '-';  // Overload
+            LCD_InsertCharsXY(13, 3, &str[0], 5);
+    }
 }
     
 static void mfAlternSource_Leave(void) {
-    
+    DAC_SetConstantMode();
 }
 
 

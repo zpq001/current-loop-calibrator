@@ -68,21 +68,21 @@ static void set_ctrl(uint8_t line, uint8_t new_state) {
 
 static void write_db4(uint8_t byte) {
     set_db4(byte);
-    DWT_DelayUs(20);
+    DWT_DelayUs(5);
     set_ctrl(LCD_E, 1);
-    DWT_DelayUs(20);
+    DWT_DelayUs(10);
     set_ctrl(LCD_E, 0);
-    DWT_DelayUs(20);
+    DWT_DelayUs(5);
 }
 
 static uint8_t read_db4(void) {
     uint8_t temp8u;
-    DWT_DelayUs(20);
+    DWT_DelayUs(5);
     set_ctrl(LCD_E, 1);
-    DWT_DelayUs(20);
+    DWT_DelayUs(10);
     temp8u = get_db4();
     set_ctrl(LCD_E, 0);
-    DWT_DelayUs(20);
+    DWT_DelayUs(5);
     return temp8u;
 }
 
