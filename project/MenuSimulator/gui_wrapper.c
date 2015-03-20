@@ -7,7 +7,11 @@
 #include "adc.h"
 #include "external_adc.h"
 #include "dac.h"
+
+
+
 buttons_t buttons;
+
 struct {
     char *strings[4];    // + \0
     char str_data[4][21];

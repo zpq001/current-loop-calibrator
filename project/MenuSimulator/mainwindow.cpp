@@ -6,6 +6,7 @@
 #include "keydriver.h"
 #include "gui_wrapper.h"
 #include "buttons.h"
+#include "tdd_verification.h"
 
 // Internal button codes
 enum buttons {
@@ -152,6 +153,9 @@ MainWindow::MainWindow(QWidget *parent) :
     pt2Myself = this;
     registerLcdUpdateCallback((cbLcdUpdatePtr)&MainWindow::updateDisplayWrapper);
     guiInitialize();
+
+    //TDD_VerifyCalibration();
+    //TDD_VerifyWaveformGenerator();
 }
 
 MainWindow::~MainWindow()
