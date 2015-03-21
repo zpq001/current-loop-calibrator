@@ -10,6 +10,8 @@
 #include "MDR32F9Qx_timer.h"
 #include "lcd_contrast.h"
 
+static uint8_t contrastSetting = 10;	// 0 to 20
+
 /*
 static void enableCPWM(void) {
 	MDR_TIMER2->CCR3 = MDR_TIMER2->ARR >> 1;
@@ -49,7 +51,7 @@ void LCD_InitContrastBooster(void) {
 	sTIM_ChnInit.TIMER_CH_Number              = TIMER_CHANNEL2;
 	sTIM_ChnInit.TIMER_CH_CCR_UpdateMode      = TIMER_CH_CCR_Update_Immediately;
 	TIMER_ChnInit(MDR_TIMER2, &sTIM_ChnInit);
-	
+	*/
 	// Initialize timer 2 channel 3 output
 	TIMER_ChnOutStructInit(&sTIM_ChnOutInit);
 	sTIM_ChnOutInit.TIMER_CH_NegOut_Polarity          = TIMER_CHOPolarity_NonInverted;
@@ -57,7 +59,7 @@ void LCD_InitContrastBooster(void) {
 	sTIM_ChnOutInit.TIMER_CH_NegOut_Mode              = TIMER_CH_OutMode_Output;
 	sTIM_ChnOutInit.TIMER_CH_Number                   = TIMER_CHANNEL3;
 	TIMER_ChnOutInit(MDR_TIMER2, &sTIM_ChnOutInit);
-	*/
+	
 	// Set contrast PWM duty cycle 50%
 	MDR_TIMER2->CCR3 = MDR_TIMER2->ARR >> 1;
 	// Set default CCR for interrupt generation
@@ -70,7 +72,7 @@ void LCD_InitContrastBooster(void) {
 	TIMER_BRGInit(MDR_TIMER2,TIMER_HCLKdiv1);
 
 	// Enable TIMER2
-//	TIMER_Cmd(MDR_TIMER2,ENABLE);
+	TIMER_Cmd(MDR_TIMER2,ENABLE);
 	
 	
     // Setup GPIO
@@ -86,9 +88,16 @@ void LCD_InitContrastBooster(void) {
 }
 
 void LCD_ProcessContrastBooster(void) {
+	uint16_t temp16u;
 	
-	//TIMER_SetCntAutoreload(MDR_TIMER2, 2000);
+	TIMER_SetCntAutoreload(MDR_TIMER2, 900);
+	// Set contrast PWM duty cycle 50%
+	MDR_TIMER2->CCR3 = MDR_TIMER2->ARR >> 1; 
 	
+	
+	
+	temp16u = 36 - contrastSetting;
+	temp16u *= 100;
 	
 }
 
