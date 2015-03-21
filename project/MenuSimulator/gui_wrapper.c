@@ -11,6 +11,7 @@
 
 
 buttons_t buttons;
+int16_t encoder_delta;
 
 struct {
     char *strings[4];    // + \0
@@ -23,9 +24,17 @@ struct {
 // Callback functions
 cbLcdUpdatePtr updateLcdCallback;
 
-static uint32_t DAC_SettingConst;
-static uint8_t DAC_WaveForm;
-static uint16_t DAC_Period;
+static struct {
+    uint32_t setting;		// [uA]
+    uint32_t dac_code;
+    uint8_t mode;
+    uint8_t waveform;
+    uint32_t period;		// [ms]
+    uint32_t wave_min;		// [uA]
+    uint32_t wave_max;		// [uA]
+    uint32_t total_cycles;
+    uint32_t current_cycle;
+} dac_state;
 
 //-----------------------------------//
 // Callbacks top->GUI
@@ -37,9 +46,15 @@ void registerLcdUpdateCallback(cbLcdUpdatePtr fptr)
 
 void guiInitialize(void)
 {
-    DAC_SettingConst = 16800;
-    DAC_WaveForm = WAVE_MEANDR;
-    DAC_Period = 345;
+    // Default state after power-on
+    dac_state.setting = 4000;
+    dac_state.mode = DAC_MODE_CONST;
+    dac_state.waveform = WAVE_MEANDR;
+    dac_state.period = 1500;
+    dac_state.wave_min = 4000;
+    dac_state.wave_max = 20000;
+    dac_state.total_cycles = 95684;
+    dac_state.current_cycle = 87521;
 
     uint8_t i;
     for (i=0; i<4; i++)
@@ -53,7 +68,6 @@ void guiInitialize(void)
 void guiButtonEvent(void)
 {
     GUI_Process();
-    memset(&buttons, 0, sizeof(buttons));
 }
 
 void guiUpdate(void)
@@ -127,45 +141,93 @@ uint8_t ExtADC_GetRange(void) {
     return 0;
 }
 
-uint32_t DAC_GetSettingConst(void) {
-    return DAC_SettingConst;
+
+
+
+void DAC_RestoreSettings(void) {
 }
 
-uint32_t DAC_GetSettingAlternHigh(void) {
-    return 20000;
+void DAC_SaveSettings(void) {
 }
 
-uint32_t DAC_GetSettingAlternLow(void) {
-    return 4000;
+
+
+void DAC_SetSettingConst(uint32_t value) {
+    dac_state.setting = value;
 }
 
-void DAC_SetSettingConst(uint32_t newValue) {
-    DAC_SettingConst = newValue;
+void DAC_SetSettingWaveMax(uint32_t value) {
+    dac_state.wave_max = value;
 }
 
-uint8_t DAC_GetWaveform(void) {
-    return DAC_WaveForm;
+void DAC_SetSettingWaveMin(uint32_t value) {
+    dac_state.wave_min = value;
 }
 
 void DAC_SetWaveform(uint8_t newWaveForm) {
-    DAC_WaveForm = newWaveForm;
-    // Restart DMA!
+    dac_state.waveform = newWaveForm;
+}
+
+void DAC_SetPeriod(uint32_t new_period) {
+    dac_state.period = new_period;
+}
+
+void DAC_SetMode(uint8_t new_mode) {
+    if (new_mode != dac_state.mode) {
+        if (new_mode == DAC_MODE_WAVEFORM) {
+            dac_state.mode = DAC_MODE_WAVEFORM;
+
+        } else {
+            dac_state.mode = DAC_MODE_CONST;
+        }
+    }
+}
+
+void DAC_SetTotalCycles(uint32_t number) {
+    dac_state.total_cycles = number;
+    dac_state.current_cycle = number - 1;
+}
+
+void DAC_RestartCycles(void) {
+    dac_state.current_cycle = 1;
+}
+
+
+
+
+
+
+
+uint32_t DAC_GetSettingConst(void) {
+    return dac_state.setting;
+}
+
+uint32_t DAC_GetSettingWaveMax(void) {
+    return dac_state.wave_max;
+}
+
+uint32_t DAC_GetSettingWaveMin(void) {
+    return dac_state.wave_min;
+}
+
+uint8_t DAC_GetWaveform(void) {
+    return dac_state.waveform;
 }
 
 uint16_t DAC_GetPeriod(void) {
-    return DAC_Period;
+    return dac_state.period;
 }
 
-void DAC_SetPeriod(uint16_t newPeriod) {
-    DAC_Period = newPeriod;
+uint8_t DAC_GetMode(void) {
+    return dac_state.mode;
 }
 
-void DAC_SetWaveformMode(void) {
-
+uint32_t DAC_GetTotalCycles(void) {
+    return dac_state.total_cycles;
 }
 
-void DAC_SetConstantMode(void) {
-
+uint32_t DAC_GetCurrentCycle(void) {
+    return dac_state.current_cycle;
 }
 
 

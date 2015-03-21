@@ -377,7 +377,7 @@
             </VariousControls>
           </Aads>
           <LDads>
-            <umfTarg>0</umfTarg>
+            <umfTarg>1</umfTarg>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
             <noStLib>0</noStLib>
@@ -462,6 +462,52 @@
               <FileName>MDR32F9Qx_dma.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_dma.c</FilePath>
+            </File>
+            <File>
+              <FileName>MDR32F9Qx_eeprom.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_eeprom.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>9</RVCTCodeConst>
+                  <RVCTZI>4</RVCTZI>
+                  <RVCTOtherData>4</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>2</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
             </File>
           </Files>
         </Group>
@@ -563,6 +609,11 @@
               <FileType>5</FileType>
               <FilePath>..\..\source\inc\hw_utils.h</FilePath>
             </File>
+            <File>
+              <FileName>eeprom.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\eeprom.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -657,6 +708,11 @@
               <FileName>utils.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\source\src\utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>eeprom.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\source\src\eeprom.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1119,6 +1175,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_dma.c</FilePath>
             </File>
+            <File>
+              <FileName>MDR32F9Qx_eeprom.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_eeprom.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1219,6 +1280,11 @@
               <FileType>5</FileType>
               <FilePath>..\..\source\inc\hw_utils.h</FilePath>
             </File>
+            <File>
+              <FileName>eeprom.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\eeprom.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1313,6 +1379,11 @@
               <FileName>utils.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\source\src\utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>eeprom.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\source\src\eeprom.c</FilePath>
             </File>
           </Files>
         </Group>

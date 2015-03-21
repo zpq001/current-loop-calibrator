@@ -47,7 +47,7 @@
 #define PLLCPUonTimeOut ((uint16_t)0x0600)
 #define PLLUSBonTimeOut ((uint16_t)0x0600)
 
-#define FLASH_PROG_FREQ_MHZ                     (8.0)
+#define FLASH_PROG_FREQ_MHZ                     (32.0)
 
 /* DMA configuration parameters */
 /* Number of DMA channels to use */

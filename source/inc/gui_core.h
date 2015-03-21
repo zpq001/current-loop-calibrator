@@ -23,10 +23,19 @@ typedef struct {
 
 enum ItemFunctionTypes { SELECT_FUNCTION, RUN_FUNCTION, LEAVE_FUNCTION };
 
+#define JCONDITIONS_MASK    0x0F
+#define JKEYACTIONS_MASK    0xF0
+
 enum JumpContitionCheckTypes {
-    JUMP_IF_EXACT,
+    JUMP_IF_EXACT = 0x00,
     JUMP_IF_ANY,
     JUMP_ALWAYS
+};
+
+enum JumpKeyActions {
+    KEY_ACT_DOWN = 0x10,
+    KEY_ACT_UP_SHORT = 0x20,
+    KEY_ACT_HOLD = 0x30
 };
 
 typedef struct {
@@ -43,7 +52,7 @@ enum EditorCodes {
 };
 
 
-uint8_t getNextMenuItem(uint8_t selectedItemId, uint32_t jmpCond);
+uint8_t getNextMenuItem(uint8_t selectedItemId);
 const MenuFunctionRecord_t* getMenuFunctionRecord(uint8_t menuItemId);
 void processItemFunction(const MenuFunctionRecord_t* funcRecord, uint8_t funcType);
 

@@ -13,7 +13,7 @@
 #include "external_adc.h"
 #include "power_monitor.h"
 #include "gui_top.h"
-
+#include "eeprom.h"
 
 /*
 	timer3 -> buzzer
@@ -49,14 +49,18 @@ int main(void) {
     ExtADC_Initialize();
 	// DAC driver
     DAC_Initialize();
-    // EEPROM memory
-    // TODO
 	// Buzzer
 	// TODO
-    // Restore settings
-    // TODO
+	// Watchdog
+	// TODO
     // GUI
     GUI_Init();
+	// EEPROM memory - restore settings
+    if (EE_RestoreSettings()) {
+		DAC_RestoreSettings();
+	} else {
+		// Showm error message!
+	}
 	// Power supply monitor
 	PowerMonitor_Init();
 	// Start ISR-based syncronizer
@@ -76,6 +80,7 @@ int main(void) {
             
             LCD_CaptureKeyboard();
             ProcessButtons();
+			Encoder_UpdateDelta();
 		
             GUI_Process();
 		}

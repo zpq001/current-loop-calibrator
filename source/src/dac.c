@@ -33,9 +33,10 @@ Calibration sequence:
 #include "linear_calibration.h"
 #include "dac.h"
 #include "led.h"
+#include "eeprom.h"
 
 #define DEFAULT_OFF_VALUE		4000
-#define WAVEFORM_BUFFER_SIZE	2000
+#define WAVEFORM_BUFFER_SIZE	1000
 
 
 
@@ -44,16 +45,18 @@ static struct {
 	uint32_t dac_code;
 	uint8_t mode;
 	uint8_t waveform;
-	uint8_t period;			// [us]
+	uint32_t period;		// [ms]
 	uint32_t wave_min;		// [uA]
 	uint32_t wave_max;		// [uA]
+	uint32_t total_cycles;
+	uint32_t current_cycle;
 } dac_state;
 
 static calibration_t dac_calibration;
 static uint16_t waveform_buffer[WAVEFORM_BUFFER_SIZE];
 
 static uint32_t saved_TCB[3]; 	// Saved DMA configuration for fast reload in ISR
-	
+
 
 // Located in hw_utils
 void my_DMA_ChannelInit(uint8_t DMA_Channel, DMA_ChannelInitTypeDef* DMA_InitStruct);
@@ -71,7 +74,7 @@ static void DAC_init_DMA(void)
 	DMA_PriCtrlStr.DMA_SourceBaseAddr = (uint32_t)&waveform_buffer;
 	DMA_PriCtrlStr.DMA_DestBaseAddr = (uint32_t)(uint32_t)(&(MDR_DAC->DAC2_DATA));		// dest 
 	DMA_PriCtrlStr.DMA_SourceIncSize = DMA_SourceIncHalfword;
-	DMA_PriCtrlStr.DMA_DestIncSize = DMA_DestIncNo ;
+	DMA_PriCtrlStr.DMA_DestIncSize = DMA_DestIncNo;
 	DMA_PriCtrlStr.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
 	DMA_PriCtrlStr.DMA_Mode = DMA_Mode_Basic;								// 
 	DMA_PriCtrlStr.DMA_CycleSize = WAVEFORM_BUFFER_SIZE;							// count of 16-bit shorts
@@ -99,28 +102,42 @@ static void DAC_init_DMA(void)
 
 void DAC_InitDMATimer(void) {
 	TIMER_CntInitTypeDef sTIM_CntInit;
+	TIMER_DeInit(MDR_TIMER1);
 	
 	// Initialize timer 2 counters
 	TIMER_CntStructInit(&sTIM_CntInit);
 	sTIM_CntInit.TIMER_Prescaler                = 31;			// CLK = F_CPU / (prescaler + 1)
-	sTIM_CntInit.TIMER_Period                   = period_us;	// 1MHz / 100 = 10kHz
+	sTIM_CntInit.TIMER_Period                   = 10;			// anything different from CNT, which is 0
 	TIMER_CntInit(MDR_TIMER1,&sTIM_CntInit);
 	
 	// Enable TIMER2 counter clock
 	TIMER_BRGInit(MDR_TIMER1,TIMER_HCLKdiv1);
 	// Set requests to the DMA
-	TIMER_DMACmd(MDR_TIMER1, TIMER_STATUS_CNT_ARR, ENABLE);
+	TIMER_DMACmd(MDR_TIMER1, TIMER_STATUS_CNT_ARR, ENABLE); 
 }
 
+static void DAC_RestartDMA(void) {
+	uint32_t *tcb_ptr;
+	// Reload TCB
+	tcb_ptr = (uint32_t*)&DMA_ControlTable[DMA_Channel_TIM1];
+	*tcb_ptr++ = saved_TCB[0];
+	*tcb_ptr++ = saved_TCB[1];
+	*tcb_ptr = saved_TCB[2];
+	// Restart channel
+	//MDR_DMA->CHNL_ENABLE_SET = (1 << DMA_Channel_TIM1);
+}
+
+//[ms]
 void DAC_SetDMATimerPeriod(uint32_t new_period) {
-	MDR_TIMER1.ARR = new_period;
-	if (MDR_TIMER1.CNT > new_period)
-		MDR_TIMER1.CNT = 0;
+	new_period *= 1000;
+	new_period /= WAVEFORM_BUFFER_SIZE;
+	MDR_TIMER1->ARR = new_period;
+	if (MDR_TIMER1->CNT > new_period)
+		MDR_TIMER1->CNT = 0;
 }
 
-void DAC_StartDMATimer(uint32_t period_us) {
-	MDR_TIMER1.ARR = new_period;
-	MDR_TIMER1.CNT = 0;
+void DAC_StartDMATimer(void) {
+	MDR_TIMER1->CNT = 0;
 	TIMER_Cmd(MDR_TIMER1, ENABLE);
 }
 
@@ -138,13 +155,37 @@ static void DAC_UpdateOutput(uint32_t value) {
 		temp32u = 4095;
 	DAC2_SetData(temp32u);
 }
-	//LED_Set(LED_STATE, 1);
 
+
+static void DAC_GenerateWaveform(void) {
+	uint16_t index;
+	uint16_t min_code = GetCodeForValue(&dac_calibration, dac_state.wave_min);
+	uint16_t max_code = GetCodeForValue(&dac_calibration, dac_state.wave_max);
+	//if (dac_state.mode == DAC_MODE_WAVEFORM) {
+	//	DAC_StopDMATimer();
+	//}
+	// Regenerate waveform
+	switch (dac_state.waveform) {
+		case WAVE_MEANDR:
+			for (index = 0; index < WAVEFORM_BUFFER_SIZE; index++)
+				waveform_buffer[index] = (index < WAVEFORM_BUFFER_SIZE/2) ? min_code : max_code;
+		break;
+		case WAVE_SAW_DIRECT:
+			CreateSawWaveform(waveform_buffer, min_code, max_code, WAVEFORM_BUFFER_SIZE);
+		break;
+		case WAVE_SAW_REVERSED:
+			CreateSawWaveform(waveform_buffer, max_code, min_code, WAVEFORM_BUFFER_SIZE);
+		break;
+	}
+	//if (dac_state.mode == DAC_MODE_WAVEFORM) {
+	//	DAC_StartDMATimer();
+	//}
+}
 	
 	
 	
 void DAC_Initialize(void) {
-	uint16_t temp16u;
+	//uint16_t temp16u;
     PORT_InitTypeDef PORT_InitStructure;
 	
     // Setup GPIO
@@ -158,11 +199,23 @@ void DAC_Initialize(void) {
     DAC2_SetData(0);  
 	
 	// Setup timer
+	DAC_InitDMATimer();
 	
 	// Setup DMA
 	DAC_init_DMA();
 	// Enable RX DMA channel
-	DMA_Cmd(DMA_Channel_TIM1, ENABLE);	
+	DMA_Cmd(DMA_Channel_TIM1, ENABLE);
+	
+
+	// Default state after power-on
+	dac_state.setting = 4000;
+	dac_state.mode = DAC_MODE_CONST;
+	dac_state.waveform = WAVE_MEANDR;
+	dac_state.period = 1000;
+	dac_state.wave_min = 0000;
+	dac_state.wave_max = 20000;
+	dac_state.total_cycles = 10;
+	dac_state.current_cycle = 1;
 	
 	// Default calibration
 	dac_calibration.point1.value = 4000;
@@ -170,18 +223,10 @@ void DAC_Initialize(void) {
 	dac_calibration.point2.value = 20000;
 	dac_calibration.point2.code = 3276;
     dac_calibration.scale = 10000L;
+	
 	CalculateCoefficients(&dac_calibration);
-	
-	// Default state after power-on
-	dac_state.setting = 4000;
-	dac_state.mode = DAC_MODE_CONST;
-	dac_state.waveform = WAVE_MEANDR;
-	dac_state.period = 5;
-	dac_state.wave_min = 4000;
-	dac_state.wave_max = 20000;
-	// Generate waveform
-	CreateSawWaveform(waveform_buffer, dac_state.wave_min, dac_state.wave_max, WAVEFORM_BUFFER_SIZE);
-	
+	DAC_GenerateWaveform();
+	DAC_SetDMATimerPeriod(dac_state.period);
 	DAC_UpdateOutput(dac_state.setting);
 }
 
@@ -206,7 +251,7 @@ void DAC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {
 
 void DAC_Calibrate(void) {
 	CalculateCoefficients(&dac_calibration);
-	DAC_UpdateState();
+	DAC_UpdateOutput(dac_state.setting);
 }
 
 
@@ -216,7 +261,7 @@ void DAC_ApplyCalibration(calibration_t *c) {           // FIXME
 	dac_calibration.point2.value = c->point2.value;
 	dac_calibration.point2.code = c->point2.code;
 	CalculateCoefficients(&dac_calibration);
-	DAC_UpdateState();
+	DAC_UpdateOutput(dac_state.setting);
 }
 
 
@@ -228,30 +273,74 @@ void DAC_SaveCalibration(calibration_t *points) {           // FIXME
 }
 
 
-
-void DAC_SetSettingConst(uint32_t newValue) {
-    dac_state.setting = new_value;
+void DAC_RestoreSettings(void) {
+	// State
+	dac_state.setting 		= settings.dac.setting;
+	dac_state.waveform 		= settings.dac.waveform;
+	dac_state.period 		= settings.dac.period;
+	dac_state.wave_min 		= settings.dac.wave_min;
+	dac_state.wave_max 		= settings.dac.wave_max;
+	dac_state.total_cycles 	= settings.dac.total_cycles;
+	// Calibration
+	dac_calibration.point1.value 	= settings.dac.calibration_point1.value;
+	dac_calibration.point1.code 	= settings.dac.calibration_point1.code;
+	dac_calibration.point2.value 	= settings.dac.calibration_point2.value;
+	dac_calibration.point2.code 	= settings.dac.calibration_point2.code;
+	CalculateCoefficients(&dac_calibration);
+	DAC_GenerateWaveform();
+	DAC_SetDMATimerPeriod(dac_state.period);
 	DAC_UpdateOutput(dac_state.setting);
+}
+
+void DAC_SaveSettings(void) {
+	// State
+	settings.dac.setting 		= dac_state.setting; 	
+	settings.dac.waveform 		= dac_state.waveform; 	
+	settings.dac.period 		= dac_state.period; 		
+	settings.dac.wave_min 		= dac_state.wave_min; 	
+	settings.dac.wave_max 		= dac_state.wave_max; 	
+	settings.dac.total_cycles 	= dac_state.total_cycles; 
+	// Calibration
+	settings.dac.calibration_point1.value =  dac_calibration.point1.value;
+	settings.dac.calibration_point1.code  =  dac_calibration.point1.code;
+	settings.dac.calibration_point2.value =  dac_calibration.point2.value;
+	settings.dac.calibration_point2.code  =  dac_calibration.point2.code;
+}
+
+
+
+void DAC_SetSettingConst(uint32_t value) {
+    dac_state.setting = value;
+	if (dac_state.mode == DAC_MODE_CONST) {
+		DAC_UpdateOutput(dac_state.setting);
+	}
 }
 
 void DAC_SetSettingWaveMax(uint32_t value) {
 	dac_state.wave_max = value;
-	// Regenerate waveform
-	CreateSawWaveform(waveform_buffer, dac_state.wave_min, dac_state.wave_max, WAVEFORM_BUFFER_SIZE);
+	//DAC_StopDMATimer();
+	DAC_GenerateWaveform();
+	DAC_RestartDMA();
+	//DAC_StartDMATimer();	// CHECKME
 }
 
 void DAC_SetSettingWaveMin(uint32_t value) {
 	dac_state.wave_min = value;
-	// Regenerate waveform
-	CreateSawWaveform(waveform_buffer, dac_state.wave_min, dac_state.wave_max, WAVEFORM_BUFFER_SIZE);
+	//DAC_StopDMATimer();
+	DAC_GenerateWaveform();
+	DAC_RestartDMA();
+	//DAC_StartDMATimer();
 }
 
 void DAC_SetWaveform(uint8_t newWaveForm) {
     dac_state.waveform = newWaveForm;
-    // Restart DMA!
+	//DAC_StopDMATimer();
+    DAC_GenerateWaveform();
+	DAC_RestartDMA();
+	//DAC_StartDMATimer();
 }
 
-void DAC_SetPeriod(uint16_t new_period) {
+void DAC_SetPeriod(uint32_t new_period) {
     dac_state.period = new_period;
 	if (dac_state.mode == DAC_MODE_WAVEFORM) {
 		DAC_SetDMATimerPeriod(dac_state.period);
@@ -263,8 +352,9 @@ void DAC_SetMode(uint8_t new_mode) {
 		if (new_mode == DAC_MODE_WAVEFORM) {
 			dac_state.mode = DAC_MODE_WAVEFORM;
 			// Waveform is already generated
-			DAC_StartDMATimer(dac_state.period);
-			// TODO  Restart DMA
+			DAC_RestartDMA();
+			dac_state.current_cycle = 1;
+			DAC_StartDMATimer();
 		} else {
 			dac_state.mode = DAC_MODE_CONST;
 			DAC_StopDMATimer();
@@ -273,8 +363,20 @@ void DAC_SetMode(uint8_t new_mode) {
 	}
 }
 
+void DAC_SetTotalCycles(uint32_t number) {
+	DAC_StopDMATimer();
+	DAC_RestartDMA();
+	dac_state.total_cycles = (number == 0) ? 1 : number;
+	dac_state.current_cycle = 1;
+	DAC_StartDMATimer();
+}
 
-
+void DAC_RestartCycles(void) {
+	DAC_StopDMATimer();
+	DAC_RestartDMA();
+	dac_state.current_cycle = 1;
+	DAC_StartDMATimer();
+}
 
 
 
@@ -295,11 +397,19 @@ uint8_t DAC_GetWaveform(void) {
 }
 
 uint16_t DAC_GetPeriod(void) {
-    return DAC_Period;
+    return dac_state.period;
 }
 
 uint8_t DAC_GetMode(void) {
 	return dac_state.mode;
+}
+
+uint32_t DAC_GetTotalCycles(void) {
+	return dac_state.total_cycles;
+}
+
+uint32_t DAC_GetCurrentCycle(void) {
+	return dac_state.current_cycle;
 }
 
 
@@ -324,6 +434,12 @@ void DMA_IRQHandler(void)
 		*tcb_ptr = saved_TCB[2];
 		// Restart channel
 		MDR_DMA->CHNL_ENABLE_SET = (1 << DMA_Channel_TIM1);
+		
+		if (dac_state.current_cycle < dac_state.total_cycles) {
+			dac_state.current_cycle++;
+		} else {
+			TIMER_Cmd(MDR_TIMER1, DISABLE);
+		}
 	}
 
 	

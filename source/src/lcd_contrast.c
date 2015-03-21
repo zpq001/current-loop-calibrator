@@ -10,7 +10,7 @@
 #include "MDR32F9Qx_timer.h"
 #include "lcd_contrast.h"
 
-
+/*
 static void enableCPWM(void) {
 	MDR_TIMER2->CCR3 = MDR_TIMER2->ARR >> 1;
 }
@@ -19,7 +19,7 @@ static void enableCPWM(void) {
 static void disableCPWM(void) {
 	MDR_TIMER2->CCR3 = 0;	
 }
-
+*/
 
 void LCD_InitContrastBooster(void) {
 
@@ -41,7 +41,7 @@ void LCD_InitContrastBooster(void) {
 	sTIM_ChnInit.TIMER_CH_CCR_UpdateMode      = TIMER_CH_CCR_Update_On_CNT_eq_0;
 	sTIM_ChnInit.TIMER_CH_Number              = TIMER_CHANNEL3;			
 	TIMER_ChnInit(MDR_TIMER2, &sTIM_ChnInit);
-	
+	/*
 	// Initialize timer 2 channel 2 - used for interrupt generation
 	TIMER_ChnStructInit(&sTIM_ChnInit);
 	sTIM_ChnInit.TIMER_CH_Mode                = TIMER_CH_MODE_PWM;
@@ -57,20 +57,20 @@ void LCD_InitContrastBooster(void) {
 	sTIM_ChnOutInit.TIMER_CH_NegOut_Mode              = TIMER_CH_OutMode_Output;
 	sTIM_ChnOutInit.TIMER_CH_Number                   = TIMER_CHANNEL3;
 	TIMER_ChnOutInit(MDR_TIMER2, &sTIM_ChnOutInit);
-	
-	// Set contrast PWM duty cycle
-	MDR_TIMER2->CCR3 = 0;	
+	*/
+	// Set contrast PWM duty cycle 50%
+	MDR_TIMER2->CCR3 = MDR_TIMER2->ARR >> 1;
 	// Set default CCR for interrupt generation
-	MDR_TIMER2->CCR2 = 0;
+	//MDR_TIMER2->CCR2 = 0;
 	
 	// Enable interrupts
-	TIMER_ITConfig(MDR_TIMER2, TIMER_STATUS_CCR_REF_CH2, ENABLE);
+	//TIMER_ITConfig(MDR_TIMER2, TIMER_STATUS_CCR_REF_CH2, ENABLE);
 	
 	// Enable TIMER2 counter clock
 	TIMER_BRGInit(MDR_TIMER2,TIMER_HCLKdiv1);
 
 	// Enable TIMER2
-	TIMER_Cmd(MDR_TIMER2,ENABLE);
+//	TIMER_Cmd(MDR_TIMER2,ENABLE);
 	
 	
     // Setup GPIO
@@ -83,12 +83,12 @@ void LCD_InitContrastBooster(void) {
     PORT_InitStructure.PORT_OE = PORT_OE_OUT;
     PORT_InitStructure.PORT_SPEED = PORT_SPEED_FAST;
 	PORT_Init(CPWM_PORT, &PORT_InitStructure);
-	
 }
 
 void LCD_ProcessContrastBooster(void) {
-	// Contrast
-	enableCPWM();
+	
+	//TIMER_SetCntAutoreload(MDR_TIMER2, 2000);
+	
 	
 }
 

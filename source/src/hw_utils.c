@@ -28,7 +28,8 @@ void DMA_CtrlDataInit(DMA_CtrlDataInitTypeDef *DMA_ctrl_data_ptr, DMA_CtrlDataTy
 						 RST_CLK_PCLK_ADC |     \
                          RST_CLK_PCLK_DAC |     \
 						 RST_CLK_PCLK_DMA |     \
-                         RST_CLK_PCLK_COMP)
+                         RST_CLK_PCLK_COMP) | 	\
+						 RST_CLK_PCLK_EEPROM
 
 
 
