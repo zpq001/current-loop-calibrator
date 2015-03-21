@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.4.0
+** Created by: Qt User Interface Compiler version 5.2.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -46,6 +46,7 @@ public:
     QPushButton *pb_Const;
     QPushButton *pb_Altern;
     QPushButton *pb_Update;
+    QPushButton *pb_OutCtrl;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -54,7 +55,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(774, 329);
+        MainWindow->resize(775, 329);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         TextDisplay1 = new TextDisplay(centralWidget);
@@ -111,10 +112,13 @@ public:
         pb_Update = new QPushButton(centralWidget);
         pb_Update->setObjectName(QStringLiteral("pb_Update"));
         pb_Update->setGeometry(QRect(30, 220, 91, 31));
+        pb_OutCtrl = new QPushButton(centralWidget);
+        pb_OutCtrl->setObjectName(QStringLiteral("pb_OutCtrl"));
+        pb_OutCtrl->setGeometry(QRect(610, 220, 131, 31));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 774, 21));
+        menuBar->setGeometry(QRect(0, 0, 775, 21));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -148,6 +152,7 @@ public:
         pb_Const->setText(QApplication::translate("MainWindow", "\320\237\320\276\321\201\321\202", 0));
         pb_Altern->setText(QApplication::translate("MainWindow", "\320\230\320\274\320\277", 0));
         pb_Update->setText(QApplication::translate("MainWindow", "Update", 0));
+        pb_OutCtrl->setText(QApplication::translate("MainWindow", "\320\240\320\265\321\201\321\202\320\260\321\200\321\202/\320\277\321\200\320\276\321\204\320\270\320\273\321\214", 0));
     } // retranslateUi
 
 };

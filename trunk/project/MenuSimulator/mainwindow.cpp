@@ -6,7 +6,7 @@
 #include "keydriver.h"
 #include "gui_wrapper.h"
 #include "buttons.h"
-#include "tdd_verification.h"
+//#include "tdd_verification.h"
 
 // Internal button codes
 enum buttons {
@@ -17,7 +17,8 @@ enum buttons {
     APP_KEY_NUM0,   APP_KEY_NUM1,       APP_KEY_NUM2,
     APP_KEY_NUM3,   APP_KEY_NUM4,       APP_KEY_NUM5,
     APP_KEY_NUM6,   APP_KEY_NUM7,       APP_KEY_NUM8,
-    APP_KEY_NUM9,   APP_KEY_BKSPACE,    APP_KEY_DOT
+    APP_KEY_NUM9,   APP_KEY_BKSPACE,    APP_KEY_DOT,
+    APP_KEY_OUTCTRL
 };
 
 
@@ -44,7 +45,8 @@ keyCodeRecord_t keyCodeTable[] = {
     { APP_KEY_NUM9,     KEY_NUM9},
     { APP_KEY_NUM0,     KEY_NUM0},
     { APP_KEY_BKSPACE,  KEY_BACKSPACE},
-    { APP_KEY_DOT,      KEY_DOT}
+    { APP_KEY_DOT,      KEY_DOT},
+    { APP_KEY_OUTCTRL,  KEY_OUTPUT_CTRL}
 };
 
 
@@ -82,6 +84,8 @@ MainWindow::MainWindow(QWidget *parent) :
     btnPressSignalMapper->setMapping(ui->pb_Esc     , APP_KEY_ESC);
     btnPressSignalMapper->setMapping(ui->pb_Const   , APP_KEY_CONST);
     btnPressSignalMapper->setMapping(ui->pb_Altern  , APP_KEY_ALTERN);
+    btnPressSignalMapper->setMapping(ui->pb_OutCtrl , APP_KEY_OUTCTRL);
+
     connect(ui->pb_num0    , SIGNAL(pressed()), btnPressSignalMapper, SLOT(map()));
     connect(ui->pb_num1    , SIGNAL(pressed()), btnPressSignalMapper, SLOT(map()));
     connect(ui->pb_num2    , SIGNAL(pressed()), btnPressSignalMapper, SLOT(map()));
@@ -98,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->pb_Esc     , SIGNAL(pressed()), btnPressSignalMapper, SLOT(map()));
     connect(ui->pb_Const   , SIGNAL(pressed()), btnPressSignalMapper, SLOT(map()));
     connect(ui->pb_Altern  , SIGNAL(pressed()), btnPressSignalMapper, SLOT(map()));
+    connect(ui->pb_OutCtrl , SIGNAL(pressed()), btnPressSignalMapper, SLOT(map()));
     connect(btnPressSignalMapper, SIGNAL(mapped(const int &)), keyDriver1, SLOT(keyPress(const int &)));
 
     // Control buttons release
@@ -118,22 +123,24 @@ MainWindow::MainWindow(QWidget *parent) :
     btnReleaseSignalMapper->setMapping(ui->pb_Esc     , APP_KEY_ESC);
     btnReleaseSignalMapper->setMapping(ui->pb_Const   , APP_KEY_CONST);
     btnReleaseSignalMapper->setMapping(ui->pb_Altern  , APP_KEY_ALTERN);
-    connect(ui->pb_num0    , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_num1    , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_num2    , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_num3    , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_num4    , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_num5    , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_num6    , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_num7    , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_num8    , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_num9    , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_dot     , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_bkspace , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_Ok      , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_Esc     , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_Const   , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
-    connect(ui->pb_Altern  , SIGNAL(pressed()), btnReleaseSignalMapper, SLOT(map()));
+    btnReleaseSignalMapper->setMapping(ui->pb_OutCtrl , APP_KEY_OUTCTRL);
+    connect(ui->pb_num0    , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_num1    , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_num2    , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_num3    , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_num4    , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_num5    , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_num6    , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_num7    , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_num8    , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_num9    , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_dot     , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_bkspace , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_Ok      , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_Esc     , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_Const   , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_Altern  , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
+    connect(ui->pb_OutCtrl , SIGNAL(released()), btnReleaseSignalMapper, SLOT(map()));
     connect(btnReleaseSignalMapper, SIGNAL(mapped(const int &)), keyDriver1, SLOT(keyRelease(const int &)));
 
     connect(keyDriver1, SIGNAL(onKeyEvent(int,int)), this, SLOT(onKeyDriverEvent(int, int)));
@@ -223,6 +230,7 @@ void MainWindow::onKeyDriverEvent(int id, int keyEventType)
         case keyDriver::KEY_HOLD:   buttons.action_hold = guiKeyCode;       break;
     }
     guiButtonEvent();
+    memset(&buttons, 0, sizeof(buttons));
 }
 
 

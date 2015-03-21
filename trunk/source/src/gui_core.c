@@ -1,10 +1,10 @@
 
 #include <string.h>
 #include "gui_core.h"
+#include "buttons.h"
 
 extern const MenuJumpRecord_t menuJumpSet[];
 extern const MenuFunctionRecord_t menuFunctionSet[];
-
 
 //-----------------------------------------------------------------//
 //	Returns ID of next menu item. 
@@ -17,13 +17,22 @@ extern const MenuFunctionRecord_t menuFunctionSet[];
 //	Output:
 //		NextItemID		- ID of item to jump to.
 //-----------------------------------------------------------------//
-uint8_t getNextMenuItem(uint8_t selectedItemId, uint32_t jmpCond) {
+uint8_t getNextMenuItem(uint8_t selectedItemId) {
 	uint8_t nextItemId = selectedItemId;
     uint8_t jumpConditionMatch = 0;
 	uint8_t i = 0;
+    uint32_t jmpCond;
+    volatile uint8_t keyAction;
     while ((menuJumpSet[i].ItemId) && (!jumpConditionMatch)) {
         if (menuJumpSet[i].ItemId == selectedItemId) {
-            switch (menuJumpSet[i].ConditionCheckType) {
+            keyAction = menuJumpSet[i].ConditionCheckType & JKEYACTIONS_MASK;
+            switch (keyAction) {
+                case KEY_ACT_DOWN:      jmpCond = buttons.action_down;      break;
+                case KEY_ACT_UP_SHORT:  jmpCond = buttons.action_up_short;  break;
+                case KEY_ACT_HOLD:      jmpCond = buttons.action_hold;      break;
+                default: jmpCond = 0;
+            }
+            switch (menuJumpSet[i].ConditionCheckType & JCONDITIONS_MASK) {
                 case JUMP_IF_EXACT:
                     jumpConditionMatch = (menuJumpSet[i].JumpCondition == jmpCond) ? 1 : 0;
                     break;
