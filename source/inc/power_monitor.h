@@ -4,6 +4,9 @@
 
 
 
+enum DeviceModes {MODE_NORMAL, MODE_CALIBRATION};
+
+extern uint8_t device_mode;
 
 
 void PowerMonitor_Init(void);

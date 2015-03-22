@@ -14,6 +14,8 @@
 #include "power_monitor.h"
 
 
+uint8_t device_mode;
+
 void PowerMonitor_Init(void) {
     
     COMP_InitTypeDef COMP_InitStructure;
@@ -28,7 +30,7 @@ void PowerMonitor_Init(void) {
     COMP_CVRefStructInit(&COMP_CVRefInitStructure);
     COMP_CVRefInitStructure.COMP_CVRefSource = COMP_CVREF_SOURCE_AVdd;
     COMP_CVRefInitStructure.COMP_CVRefRange = COMP_CVREF_RANGE_Up;
-    COMP_CVRefInitStructure.COMP_CVRefScale = COMP_CVREF_SCALE_9_div_32;
+    COMP_CVRefInitStructure.COMP_CVRefScale = COMP_CVREF_SCALE_14_div_32;
     COMP_CVRefInit(&COMP_CVRefInitStructure);
     
     COMP_Cmd(ENABLE); 
@@ -43,11 +45,12 @@ void PowerMonitor_Init(void) {
     // Read and clear comparator result latch
     COMP_GetResultLatch();
     COMP_ITConfig(ENABLE);
+	
+	NVIC_EnableIRQ(COMPARATOR_IRQn);
 }
 
 
 void COMPARATOR_IRQHandler(void) {
-	settings_t settings_copy;
     // Save all settings to EEPROM here
 	// When we get here,  main power supply is off and MCU operates from on-board capacitors
 	// Disable all power-consuming devices and reduce F_CPU
@@ -64,14 +67,18 @@ void COMPARATOR_IRQHandler(void) {
 	
 	hw_Switch_CPU_Clock_to_HSI();
 	
-	// Make a copy of settings structure
-	memcpy(&settings_copy, &settings, sizeof(settings));
-	// Gather settings and states from all modules (using global variable settings)
-	DAC_SaveSettings();
-	// Add more - TODO
-	// Check if EEPROM update is required
-	if (memcmp(&settings, &settings, sizeof(settings)) != 0) {
+	if (device_mode == MODE_NORMAL) {
+		// Gather settings and states from all modules (using global variable settings)
+		DAC_SaveSettings();
+		// Add more modules if required
+		
 		EE_SaveSettings();
+	} else {
+		// System settings are already updated
+		EE_SaveSystemSettings();
 	}
+	
+	// Safely wait until power suply goes down.
+	while(1);
 }
 
