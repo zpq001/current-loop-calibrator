@@ -24,6 +24,8 @@
 
 
 int main(void) {
+	uint8_t system_settings_ok;
+	uint8_t settings_ok;
 	
     // Initialize system 
 	hw_Setup_CPU_Clock();
@@ -53,21 +55,42 @@ int main(void) {
 	// TODO
 	// Watchdog
 	// TODO
-    // GUI
-    GUI_Init();
-    // Wait a bit for greeting message
-    DWT_DelayUs(500000);
-    // EEPROM memory - restore settings
-    if (EE_RestoreSettings()) {
-        DAC_RestoreSettings();
-	} else {
-        // Show error message!
-        LCD_Clear();
-        LCD_PutStringXY(0,0,"Необходима");
-        LCD_PutStringXY(0,1,"     калибровка!");
-        // Wait a bit more
-        DWT_DelayUs(500000);
+	
+	// Get mode of operation
+	LCD_CaptureKeyboard();	
+//	device_mode = (GetRawButtonState() & KEY_OK) ? MODE_CALIBRATION : MODE_NORMAL;
+	device_mode = MODE_NORMAL;
+	// Restore system settings
+//	system_settings_ok = EE_RestoreSystemSettings((device_mode == MODE_CALIBRATION));
+	// Apply system settings:
+	// DAC
+	// Contrast
+	// ADC
+	// extADC
+	
+	if (device_mode == MODE_NORMAL) {
+		settings_ok = EE_RestoreSettings();
+		if (settings_ok) {
+			DAC_RestoreSettings();
+			// other modules
+		}
 	}
+	
+	// Wait a bit for greeting message
+    DWT_DelayUs(500000);
+	
+	//if (system_settings_ok == 0) {
+	if (settings_ok == 0) {
+		// Show error message!
+		LCD_Clear();
+		LCD_PutStringXY(0,0,"Необходима");
+		LCD_PutStringXY(0,1,"     калибровка!");
+		// Wait a bit more
+		DWT_DelayUs(1000000);
+	}
+	
+	// GUI
+    GUI_Init();
 	// Power supply monitor
 	PowerMonitor_Init();
 	// Start ISR-based syncronizer
