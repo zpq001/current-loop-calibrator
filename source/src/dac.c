@@ -35,14 +35,14 @@ Calibration sequence:
 #include "led.h"
 #include "eeprom.h"
 
-#define DEFAULT_OFF_VALUE		4000
 #define WAVEFORM_BUFFER_SIZE	1000
 
 
 
 static struct {
-	uint32_t setting;		// [uA]
+	uint32_t setting[PROFILE_COUNT];	// [uA]
 	uint32_t dac_code;
+	uint8_t profile;
 	uint8_t mode;
 	uint8_t waveform;
 	uint32_t period;		// [ms]
@@ -148,12 +148,13 @@ void DAC_StopDMATimer(void) {
 
 
 // Sets DAC output to specified value [uA]
-static void DAC_UpdateOutput(uint32_t value) {
+void DAC_UpdateOutput(uint32_t value) {
 	uint32_t temp32u;
 	temp32u = GetCodeForValue(&dac_calibration, value);
 	if (temp32u > 4095)
 		temp32u = 4095;
 	DAC2_SetData(temp32u);
+	dac_state.dac_code = temp32u;	// save for calibration
 }
 
 
@@ -185,7 +186,7 @@ static void DAC_GenerateWaveform(void) {
 	
 	
 void DAC_Initialize(void) {
-	//uint16_t temp16u;
+	uint8_t i;
     PORT_InitTypeDef PORT_InitStructure;
 	
     // Setup GPIO
@@ -208,7 +209,9 @@ void DAC_Initialize(void) {
 	
 
 	// Default state after power-on
-	dac_state.setting = 4000;
+	for (i=0; i<PROFILE_COUNT; i++)
+		dac_state.setting[i] = 4000;
+	dac_state.profile = 0;
 	dac_state.mode = DAC_MODE_CONST;
 	dac_state.waveform = WAVE_MEANDR;
 	dac_state.period = 1000;
@@ -227,7 +230,7 @@ void DAC_Initialize(void) {
 	CalculateCoefficients(&dac_calibration);
 	DAC_GenerateWaveform();
 	DAC_SetDMATimerPeriod(dac_state.period);
-	DAC_UpdateOutput(dac_state.setting);
+	DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
 }
 
 
@@ -251,17 +254,17 @@ void DAC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {
 
 void DAC_Calibrate(void) {
 	CalculateCoefficients(&dac_calibration);
-	DAC_UpdateOutput(dac_state.setting);
+	DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
 }
 
-
+/*
 void DAC_ApplyCalibration(calibration_t *c) {           // FIXME
 	dac_calibration.point1.value = c->point1.value;
 	dac_calibration.point1.code = c->point1.code;
 	dac_calibration.point2.value = c->point2.value;
 	dac_calibration.point2.code = c->point2.code;
 	CalculateCoefficients(&dac_calibration);
-	DAC_UpdateOutput(dac_state.setting);
+	DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
 }
 
 
@@ -271,16 +274,19 @@ void DAC_SaveCalibration(calibration_t *points) {           // FIXME
 	points->point2.value = dac_calibration.point2.value;
 	points->point2.code = dac_calibration.point2.code;
 }
-
+*/
 
 void DAC_RestoreSettings(void) {
+	uint8_t i;
 	// State
-	dac_state.setting 		= settings.dac.setting;
-	dac_state.waveform 		= settings.dac.waveform;
-	dac_state.period 		= settings.dac.period;
-	dac_state.wave_min 		= settings.dac.wave_min;
-	dac_state.wave_max 		= settings.dac.wave_max;
-	dac_state.total_cycles 	= settings.dac.total_cycles;
+	for (i=0; i<PROFILE_COUNT; i++)
+		dac_state.setting[i] = settings.dac.setting[i];
+	dac_state.profile	     = settings.dac.profile;
+	dac_state.waveform 		 = settings.dac.waveform;
+	dac_state.period 		 = settings.dac.period;
+	dac_state.wave_min 		 = settings.dac.wave_min;
+	dac_state.wave_max 		 = settings.dac.wave_max;
+	dac_state.total_cycles 	 = settings.dac.total_cycles;
 	// Calibration
 	dac_calibration.point1.value 	= settings.dac.calibration_point1.value;
 	dac_calibration.point1.code 	= settings.dac.calibration_point1.code;
@@ -289,12 +295,15 @@ void DAC_RestoreSettings(void) {
 	CalculateCoefficients(&dac_calibration);
 	DAC_GenerateWaveform();
 	DAC_SetDMATimerPeriod(dac_state.period);
-	DAC_UpdateOutput(dac_state.setting);
+	DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
 }
 
 void DAC_SaveSettings(void) {
+	uint8_t i;
 	// State
-	settings.dac.setting 		= dac_state.setting; 	
+	for (i=0; i<PROFILE_COUNT; i++)
+		settings.dac.setting[i] = dac_state.setting[i]; 	
+	settings.dac.profile 		= dac_state.profile;
 	settings.dac.waveform 		= dac_state.waveform; 	
 	settings.dac.period 		= dac_state.period; 		
 	settings.dac.wave_min 		= dac_state.wave_min; 	
@@ -310,9 +319,20 @@ void DAC_SaveSettings(void) {
 
 
 void DAC_SetSettingConst(uint32_t value) {
-    dac_state.setting = value;
+    dac_state.setting[dac_state.profile] = value;
 	if (dac_state.mode == DAC_MODE_CONST) {
-		DAC_UpdateOutput(dac_state.setting);
+		DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
+	}
+}
+
+void DAC_SetProfile(int16_t num) {
+	if (num >= PROFILE_COUNT)
+		num = 0;
+	else if (num < 0)
+		num = PROFILE_COUNT - 1;
+	dac_state.profile = num;
+		if (dac_state.mode == DAC_MODE_CONST) {
+		DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
 	}
 }
 
@@ -358,10 +378,12 @@ void DAC_SetMode(uint8_t new_mode) {
 		} else {
 			dac_state.mode = DAC_MODE_CONST;
 			DAC_StopDMATimer();
-			DAC_UpdateOutput(dac_state.setting);
+			DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
 		}
 	}
 }
+
+
 
 void DAC_SetTotalCycles(uint32_t number) {
 	DAC_StopDMATimer();
@@ -381,7 +403,11 @@ void DAC_RestartCycles(void) {
 
 
 uint32_t DAC_GetSettingConst(void) {
-    return dac_state.setting;
+    return dac_state.setting[dac_state.profile];
+}
+
+uint8_t DAC_GetActiveProfile(void) {
+	return dac_state.profile;
 }
 
 uint32_t DAC_GetSettingWaveMax(void) {
@@ -411,6 +437,7 @@ uint32_t DAC_GetTotalCycles(void) {
 uint32_t DAC_GetCurrentCycle(void) {
 	return dac_state.current_cycle;
 }
+
 
 
 

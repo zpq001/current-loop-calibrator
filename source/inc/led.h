@@ -2,7 +2,7 @@
 
 
 #define LED_PORT        MDR_PORTC
-#define LED_STATE       0
+#define LED_ERROR       0
 #define LED_BREAK    	1
 
 

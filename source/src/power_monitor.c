@@ -4,10 +4,13 @@
 	Power supply monitor
 
 ********************************************************************/
-
+#include <string.h>
 #include "MDR32F9Qx_config.h"
 #include "MDR32F9Qx_port.h"
 #include "MDR32F9Qx_comp.h"
+#include "hw_utils.h"
+#include "eeprom.h"
+#include "dac.h"
 #include "power_monitor.h"
 
 
@@ -44,8 +47,31 @@ void PowerMonitor_Init(void) {
 
 
 void COMPARATOR_IRQHandler(void) {
+	settings_t settings_copy;
     // Save all settings to EEPROM here
-    // TODO
-    
+	// When we get here,  main power supply is off and MCU operates from on-board capacitors
+	// Disable all power-consuming devices and reduce F_CPU
+    __disable_irq();
+	// Stop watchdog
+	// TODO
+	
+	PORT_DeInit(MDR_PORTA);
+	PORT_DeInit(MDR_PORTB);
+	PORT_DeInit(MDR_PORTC);
+	PORT_DeInit(MDR_PORTD);
+	PORT_DeInit(MDR_PORTE);
+	PORT_DeInit(MDR_PORTF);
+	
+	hw_Switch_CPU_Clock_to_HSI();
+	
+	// Make a copy of settings structure
+	memcpy(&settings_copy, &settings, sizeof(settings));
+	// Gather settings and states from all modules (using global variable settings)
+	DAC_SaveSettings();
+	// Add more - TODO
+	// Check if EEPROM update is required
+	if (memcmp(&settings, &settings, sizeof(settings)) != 0) {
+		EE_SaveSettings();
+	}
 }
 
