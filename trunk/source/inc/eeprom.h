@@ -2,7 +2,7 @@
 #ifndef __EEPROM_H_
 #define __EEPROM_H_
 
-
+#include "dac.h"
 #include "linear_calibration.h"
 
 
@@ -11,7 +11,8 @@ typedef struct {
 	struct {
 		calibration_point_t calibration_point1;
 		calibration_point_t calibration_point2;
-		uint32_t setting;		// [uA]
+		uint32_t setting[PROFILE_COUNT];		// [uA]
+		uint8_t profile;
 		uint8_t waveform;
 		uint32_t period;
 		uint32_t wave_min;

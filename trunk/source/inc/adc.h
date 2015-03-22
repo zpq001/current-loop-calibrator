@@ -6,8 +6,11 @@
 #define ADC_PIN_CONTRAST	4
 
 #define LOOP_BREAK_TRESHOLD 3900    // [uA]
-#define LOOP_OK     0
-#define LOOP_BREAK  1
+#define LOOP_ERROR_TRESHOLD 100     // [uA]
+// Loop errors may be ORed
+#define LOOP_OK     0               // Loop current is equal to the setting
+#define LOOP_BREAK  0x1             // Loop current is less than 4mA
+#define LOOP_ERROR  0x2             // Loop current is not equal to the setting
 
 
 void ADC_Initialize(void);

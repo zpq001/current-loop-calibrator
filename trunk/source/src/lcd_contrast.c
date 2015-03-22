@@ -101,6 +101,16 @@ void LCD_ProcessContrastBooster(void) {
 	
 }
 
+uint8_t LCD_SetContrastSetting(int32_t value) {
+	if (value < 0) value = 0;
+	else if (value > 20) value = 20;
+	contrastSetting = value;
+	return contrastSetting;
+}
+
+uint8_t LCD_GetContrastSetting(void) {
+	return contrastSetting;
+}
 
 
 

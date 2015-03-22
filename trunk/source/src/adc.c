@@ -6,7 +6,7 @@
 #include "linear_calibration.h"
 #include "led.h"
 #include "adc.h"
-
+#include "dac.h"
 
 static uint32_t loop_voltage;
 static uint32_t loop_current;
@@ -80,12 +80,24 @@ void ADC_UpdateLoopCurrent(void) {
 }
 
 void ADC_UpdateLoopMonitor(void) {
+    int32_t temp32;
+    loop_status = LOOP_OK;
+    // Check loop break
     if (loop_current <= LOOP_BREAK_TRESHOLD) {
-        loop_status = LOOP_BREAK;
+        loop_status |= LOOP_BREAK;
 		LED_Set(LED_BREAK, 1);
     } else {
-        loop_status = LOOP_OK;
 		LED_Set(LED_BREAK, 0);
+    }
+    // Check loop error
+    temp32 = loop_current - DAC_GetSettingConst();
+    if (temp32 < 0)
+        temp32 = -temp32;
+    if (temp32 >= LOOP_ERROR_TRESHOLD) {
+        loop_status |= LOOP_ERROR;
+		LED_Set(LED_ERROR, 1);
+    } else {
+		LED_Set(LED_ERROR, 0);
     }
 }
 

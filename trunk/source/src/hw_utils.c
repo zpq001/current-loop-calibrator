@@ -82,6 +82,20 @@ void hw_Setup_CPU_Clock(void) {
 }
 
 
+//-------------------------------------------------------//
+/// @brief  Setup clocks to use HSI
+//  HSI freq = 8MHz
+//-------------------------------------------------------//
+void hw_Switch_CPU_Clock_to_HSI(void) {
+	// HCLK = HSI
+	RST_CLK_CPUclkSelection(RST_CLK_CPUclkHSI);
+	// Disable HSE
+	RST_CLK_HSEconfig(RST_CLK_HSE_OFF);
+	// Disable PLL
+	RST_CLK_CPU_PLLcmd(DISABLE);
+}
+
+
 
 // Globally initializes DMA controller
 void my_DMA_GlobalInit(void)

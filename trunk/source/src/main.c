@@ -55,11 +55,18 @@ int main(void) {
 	// TODO
     // GUI
     GUI_Init();
-	// EEPROM memory - restore settings
+    // Wait a bit for greeting message
+    DWT_DelayUs(500000);
+    // EEPROM memory - restore settings
     if (EE_RestoreSettings()) {
-		DAC_RestoreSettings();
+        DAC_RestoreSettings();
 	} else {
-		// Showm error message!
+        // Show error message!
+        LCD_Clear();
+        LCD_PutStringXY(0,0,"Необходима");
+        LCD_PutStringXY(0,1,"     калибровка!");
+        // Wait a bit more
+        DWT_DelayUs(500000);
 	}
 	// Power supply monitor
 	PowerMonitor_Init();
@@ -81,7 +88,21 @@ int main(void) {
             LCD_CaptureKeyboard();
             ProcessButtons();
 			Encoder_UpdateDelta();
-		
+			
+/*
+    if (buttons.action_hold & KEY_NUM2) {
+        DAC_SaveSettings();
+		__disable_irq();
+		EE_SaveSettings();
+		__enable_irq();
+	}
+    else if (buttons.action_hold & KEY_NUM1) {
+		__disable_irq();
+		EE_RestoreSettings();
+		__enable_irq();
+        DAC_RestoreSettings();
+	}
+	*/	
             GUI_Process();
 		}
 	}
