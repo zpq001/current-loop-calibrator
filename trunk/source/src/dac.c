@@ -154,6 +154,12 @@ void DAC_UpdateOutput(uint32_t value) {
 	if (temp32u > 4095)
 		temp32u = 4095;
 	DAC2_SetData(temp32u);
+}
+
+void DAC_SetCalibrationPoint(uint8_t pointNumber) {
+	uint32_t temp32u;
+	temp32u = (pointNumber == 1) ? 655 : 3276;	// corresponds to 4mA / 20mA with ideal components
+	DAC2_SetData(temp32u);
 	dac_state.dac_code = temp32u;	// save for calibration
 }
 
@@ -237,14 +243,7 @@ void DAC_Initialize(void) {
 
 
 
-uint32_t DAC_GetCalibrationPoint(uint8_t pointNumber) {
-	uint32_t temp32u;
-	if (pointNumber == 1)
-		temp32u = 4000;
-	else
-		temp32u = 20000;
-	return temp32u;
-}
+
 
 
 void DAC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {

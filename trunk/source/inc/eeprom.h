@@ -19,7 +19,7 @@ typedef struct {
 	} dac;
 	uint32_t num_power_cycles;
 	uint16_t crc;
-	uint32_t dummy;
+	uint32_t dummy;     // Padding for 32-bit word access
 } settings_t;
 
 typedef struct {
@@ -46,7 +46,7 @@ typedef struct {
 	uint8_t contrast_level;
 	uint8_t beeper_func;
 	uint16_t crc;
-	uint32_t dummy;
+	uint32_t dummy;     // Padding for 32-bit word access
 } system_settings_t;
 
 

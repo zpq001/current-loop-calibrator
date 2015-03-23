@@ -11,6 +11,8 @@
 #include "hw_utils.h"
 #include "eeprom.h"
 #include "dac.h"
+#include "adc.h"
+#include "external_adc.h"
 #include "power_monitor.h"
 
 
@@ -76,7 +78,11 @@ void COMPARATOR_IRQHandler(void) {
 	} else {
 		// Gather system settings
 		DAC_SaveCalibration();
-		// Add more modules if required
+        ADC_LC_SaveCalibration();
+        ADC_LV_SaveCalibration();
+        ExtADC_SaveCalibration();
+		// Contrast - TODO
+        // Beeper - TODO
 		
 		EE_SaveSystemSettings();
 	}

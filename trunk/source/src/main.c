@@ -1,5 +1,5 @@
 
-
+#include <string.h>
 #include "hw_utils.h"
 #include "dwt_delay.h"
 #include "lcd_melt20s4.h"
@@ -21,6 +21,8 @@
 	timer1 -> DMA for waveform
 */
 
+
+SoftTimer16b_t adcUpdateTimer;
 
 
 int main(void) {
@@ -64,9 +66,11 @@ int main(void) {
 	if (system_settings_ok) {
 		// Apply system settings:
 		DAC_ApplyCalibration();
-		// Contrast
-		// ADC
-		// extADC
+		ADC_LC_ApplyCalibration();
+        ADC_LV_ApplyCalibration();
+		ExtADC_ApplyCalibration();
+        // Contrast - TODO
+        // Beeper - TODO
 	}
 	// Restore settings
 	if (device_mode == MODE_NORMAL) {
@@ -90,7 +94,13 @@ int main(void) {
 		DWT_DelayUs(1000000);
 	}
 	
-	// GUI
+	
+    // Setup software timers
+	memset(&adcUpdateTimer, 0, sizeof(adcUpdateTimer));
+	adcUpdateTimer.top = 4;
+	adcUpdateTimer.enabled = 1;
+    
+    // GUI
     GUI_Init();
 	// Power supply monitor
 	PowerMonitor_Init();
@@ -104,29 +114,19 @@ int main(void) {
 			mainLoopTimer.flags.ovfl = 0;
 			__enable_irq();
 			
-			ADC_UpdateLoopVoltage();
+            processSoftTimer16b(&adcUpdateTimer);
+            if ((adcUpdateTimer.flags.ovfl) || (device_mode == MODE_CALIBRATION)) {
+                adcUpdateTimer.flags.ovfl = 0;
+                ADC_UpdateLoopVoltage();
+                ExtADC_UpdateCurrent();
+            }
 			ADC_UpdateLoopCurrent();
 			ADC_UpdateLoopMonitor();
-            ExtADC_UpdateCurrent();
             
             LCD_CaptureKeyboard();
             ProcessButtons();
 			Encoder_UpdateDelta();
 			
-/*
-    if (buttons.action_hold & KEY_NUM2) {
-        DAC_SaveSettings();
-		__disable_irq();
-		EE_SaveSettings();
-		__enable_irq();
-	}
-    else if (buttons.action_hold & KEY_NUM1) {
-		__disable_irq();
-		EE_RestoreSettings();
-		__enable_irq();
-        DAC_RestoreSettings();
-	}
-	*/	
             GUI_Process();
 		}
 	}

@@ -17,9 +17,17 @@ void ADC_Initialize(void);
 
 void ADC_UpdateLoopCurrent(void);
 void ADC_UpdateLoopMonitor(void);
-uint32_t ADC_GetLoopCurrent(void);
 uint8_t ADC_GetLoopStatus(void);
+uint32_t ADC_GetLoopCurrent(void);
+void ADC_SaveLoopCurrentCalibrationPoint(uint8_t pointNum, uint32_t measuredValue);
+void ADC_LoopCurrentCalibrate(void);
+void ADC_LC_ApplyCalibration(void);
+void ADC_LC_SaveCalibration(void);
 
 void ADC_UpdateLoopVoltage(void);
 uint32_t ADC_GetLoopVoltage(void);
+void ADC_SaveLoopVoltageCalibrationPoint(uint8_t pointNum, uint32_t measuredValue);
+void ADC_LoopVoltageCalibrate(void);
+void ADC_LV_ApplyCalibration(void);
+void ADC_LV_SaveCalibration(void);
 

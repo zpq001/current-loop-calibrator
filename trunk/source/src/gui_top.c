@@ -420,24 +420,48 @@ enum SysMenuItems{
     SYS_DAC_CALIBRATION_HIGH,
     SYS_ADC_VOLTAGE_CALIBRATION_LOW,
     SYS_ADC_VOLTAGE_CALIBRATION_HIGH,
+    SYS_EXTADC_CALIBRATION_ZERO,
+    SYS_EXTADC_CALIBRATION_LOW_RANGE,
+    SYS_EXTADC_CALIBRATION_HIGH_RANGE,
     SYS_DONE
 };
 static uint8_t sys_state;
+static uint8_t first_visit;
+
+static void drawSysMenuHeader(void) {
+    LCD_Clear();
+    LCD_PutStringXY(0,0,"Системные настройки:");
+}
+
+static void drawCalibrateDACMenuHeader(void) {
+    LCD_Clear();
+    LCD_PutStringXY(0,0,"Источник тока:");
+}
+
+static void drawCalibrateExtADCMenuHeader(void) {
+    LCD_Clear();
+    LCD_PutStringXY(0,0,"Амперметр:");
+}
 
 static void mfCalibration_Select(void) {
-    // Draw static text
-    LCD_Clear();
-    LCD_PutStringXY(0,0,"===Системное меню===");
     sys_state = SYS_CONTRAST;
+    first_visit = 1;
 }
 
 static void mfCalibration_Run(void) {
     int32_t temp32;
+    uint8_t temp8u;
+    uint8_t new_state = sys_state;
     char str[10];
+    encodeEditorKeys();
+
     switch (sys_state) {
         case SYS_CONTRAST:
             // Display and adjust contrast setting
-            LCD_PutStringXY(0,2,"Контраст (0-20): ");
+            if (first_visit) {
+                drawSysMenuHeader();
+                LCD_PutStringXY(0,2,"Контраст (0-20):    ");
+            }
             temp32 = LCD_GetContrastSetting();
             if (encoder_delta) {
                 temp32 += encoder_delta;
@@ -447,13 +471,15 @@ static void mfCalibration_Run(void) {
             LCD_InsertCharsXY(18, 2, &str[7], 2);
             // Next item
             if (buttons.action_down & KEY_OK) {
-                LCD_Clear();
-                sys_state = SYS_BEEPER;
+                new_state = SYS_BEEPER;
             }
             break;
         case SYS_BEEPER:
             // Display and adjust beeper setting
-            LCD_PutStringXY(0,0,"Звук: ");
+            if (first_visit) {
+                drawSysMenuHeader();
+                LCD_PutStringXY(0,2,"Звук: ");
+            }
             //temp32 = LCD_GetBeeperSetting();
             temp32 = 1;
             if (encoder_delta) {
@@ -461,113 +487,197 @@ static void mfCalibration_Run(void) {
                 temp32 = (temp32 < 0) ? 0 : 1;
             }
             if (temp32 != 0)
-                LCD_PutStringXY(15,0," вкл");
+                LCD_PutStringXY(15,2," вкл");
             else
-                LCD_PutStringXY(15,0,"выкл");
+                LCD_PutStringXY(15,2,"выкл");
             // Next item
             if (buttons.action_down & KEY_OK) {
-                LCD_Clear();
-                sys_state = SYS_DAC_CALIBRATION_LOW;
+                new_state = SYS_DAC_CALIBRATION_LOW;
             }
             break;
         case SYS_DAC_CALIBRATION_LOW:
             // Display and adjust DAC calibration point 1
-            LCD_PutStringXY(0,0,"Калибровка 1");
-            LCD_PutStringXY(0,1,"Измеренное значение:");
-            // Set current for first calibration point
-		
-			// !!!! CHECKME
-			// should set DAC code not using calibration coefficients - what if user failed EPIC!
-		
-            DAC_UpdateOutput(DAC_GetCalibrationPoint(1));
-
-            // TODO - user input
-            temp32 = 4000;
-
+            if (first_visit) {
+                drawCalibrateDACMenuHeader();
+                LCD_PutStringXY(0,1,"Калибровка 4мА");
+                LCD_PutStringXY(0,2,"Измеренное значение:");
+                LCD_PutStringXY(18,3,"мА");
+                // Set current for first calibration point
+                DAC_SetCalibrationPoint(1);
+                startEditor(&edit, EDIT_NUM0, 3);
+            }
+            // User input
+            if (editorCodeValid)
+                processEditor(&edit, editorCode);
+            temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
+            i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
+            LCD_InsertCharsXY(11, 3, &str[2], 7);
             // Next item
             if (buttons.action_down & KEY_OK) {
-                // Measured value is entered and confirmed.
-                // Save first calibration point for DAC and current ADC
+                //temp32 = 4000;
+                temp32 = getScaledEditValue(&edit, 3);
                 DAC_SaveCalibrationPoint(1, temp32);
-                // ADC_UpdateLoopCurrent()
-                // ADC_SaveCurrentCalibrationPoint(1)
-                LCD_Clear();
-                sys_state = SYS_DAC_CALIBRATION_HIGH;
+                ADC_SaveLoopCurrentCalibrationPoint(1, temp32);
+                new_state = SYS_DAC_CALIBRATION_HIGH;
             }
             break;
         case SYS_DAC_CALIBRATION_HIGH:
-            // Display and adjust DAC calibration point 2
-            LCD_PutStringXY(0,0,"Калибровка 2");
-            LCD_PutStringXY(0,1,"Измеренное значение:");
-            // Set current for first calibration point
-            DAC_UpdateOutput(DAC_GetCalibrationPoint(2));
-
-            // TODO - user input
-            temp32 = 20000;
-
+            if (first_visit) {
+                drawCalibrateDACMenuHeader();
+                LCD_PutStringXY(0,1,"Калибровка 20мА");
+                LCD_PutStringXY(0,2,"Измеренное значение:");
+                LCD_PutStringXY(18,3,"мА");
+                // Set current for second calibration point
+                DAC_SetCalibrationPoint(2);
+                startEditor(&edit, EDIT_NUM0, 3);
+            }
+            // User input
+            if (editorCodeValid)
+                processEditor(&edit, editorCode);
+            temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
+            i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
+            LCD_InsertCharsXY(11, 3, &str[2], 7);
             // Next item
             if (buttons.action_down & KEY_OK) {
-                // Measured value is entered and confirmed.
-                // Save second calibration point for DAC and current ADC
+                //temp32 = 20000;
+                temp32 = getScaledEditValue(&edit, 3);
                 DAC_SaveCalibrationPoint(2, temp32);
                 DAC_Calibrate();
-                // ADC_UpdateLoopCurrent()
-                // ADC_SaveCurrentCalibrationPoint(2)
-                // ADC_CalibrateLoopCurrent();
-                LCD_Clear();
-                sys_state = SYS_ADC_VOLTAGE_CALIBRATION_LOW;
+                ADC_SaveLoopCurrentCalibrationPoint(1, temp32);
+                ADC_LoopCurrentCalibrate();
+                new_state = SYS_ADC_VOLTAGE_CALIBRATION_LOW;
             }
             break;
         case SYS_ADC_VOLTAGE_CALIBRATION_LOW:
             // Display and adjust V ADC calibration point 1
-            LCD_PutStringXY(0,0,"Калибровка 3");
-            LCD_PutStringXY(0,1,"Измеренное значение:");
-            // Set current for first calibration point
-            DAC_UpdateOutput(2000);
-
-            // TODO - user input
-            temp32 = 670;   // mV
-
+            if (first_visit) {
+                drawCalibrateDACMenuHeader();
+                LCD_PutStringXY(0,1,"Калибровка 4В");
+                LCD_PutStringXY(0,2,"Измеренное значение:");
+                LCD_PutStringXY(18,3,"В");
+                // Set current for first calibration point
+                DAC_UpdateOutput(4000);
+                startEditor(&edit, EDIT_NUM0, 3);
+            }
+            // User input
+            if (editorCodeValid)
+                processEditor(&edit, editorCode);
+            temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
+            i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
+            LCD_InsertCharsXY(11, 3, &str[2], 7);
             // Next item
             if (buttons.action_down & KEY_OK) {
-                // Measured value is entered and confirmed.
-                // Save first calibration point for voltage ADC
-                // ADC_UpdateLoopVoltage()
-                // ADC_SaveVoltageCalibrationPoint(1)
-                LCD_Clear();
-                sys_state = SYS_ADC_VOLTAGE_CALIBRATION_HIGH;
+                // temp32 = 4000;
+                temp32 = getScaledEditValue(&edit, 3);
+                ADC_SaveLoopVoltageCalibrationPoint(1, temp32);
+                new_state = SYS_ADC_VOLTAGE_CALIBRATION_HIGH;
             }
             break;
         case SYS_ADC_VOLTAGE_CALIBRATION_HIGH:
             // Display and adjust V ADC calibration point 2
-            LCD_PutStringXY(0,0,"Калибровка 4");
-            LCD_PutStringXY(0,1,"Измеренное значение:");
-            // Set current for first calibration point
-            DAC_UpdateOutput(20000);
-
-            // TODO - user input
-            temp32 = 21768;   // mV
-
+            if (first_visit) {
+                drawCalibrateDACMenuHeader();
+                LCD_PutStringXY(0,1,"Калибровка 20В");
+                LCD_PutStringXY(0,2,"Измеренное значение:");
+                LCD_PutStringXY(18,3,"В");
+                // Set current for first calibration point
+                DAC_UpdateOutput(20000);
+                startEditor(&edit, EDIT_NUM0, 3);
+            }
+            // User input
+            if (editorCodeValid)
+                processEditor(&edit, editorCode);
+            temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
+            i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
+            LCD_InsertCharsXY(11, 3, &str[2], 7);
             // Next item
             if (buttons.action_down & KEY_OK) {
-                // Measured value is entered and confirmed.
-                // Save second calibration point for voltage ADC
-                // ADC_UpdateLoopVoltage()
-                // ADC_SaveVoltageCalibrationPoint(2)
-                // ADC_CalibrateVOltage();
-                LCD_Clear();
-                sys_state = SYS_DONE;
+                // temp32 = 20000;
+                temp32 = getScaledEditValue(&edit, 3);
+                ADC_SaveLoopVoltageCalibrationPoint(1, temp32);
+                ADC_LoopVoltageCalibrate();
+                new_state = SYS_EXTADC_CALIBRATION_ZERO;
+            }
+            break;
+        case SYS_EXTADC_CALIBRATION_ZERO:
+            // Display ampermeter zero calibration
+            if (first_visit) {
+                drawCalibrateExtADCMenuHeader();
+                LCD_PutStringXY(0,1,"Калибровка 0мА");
+            }
+            // No user input
+            // Next item
+            if (buttons.action_down & KEY_OK) {
+                // Save zero calibration point
+                ExtADC_SaveCalibrationPoint(1, 0);
+                new_state = SYS_EXTADC_CALIBRATION_LOW_RANGE;
+            }
+            break;
+        case SYS_EXTADC_CALIBRATION_LOW_RANGE:
+            // Display and adjust ampermeter calibration point for low range
+            if (first_visit) {
+                drawCalibrateExtADCMenuHeader();
+                LCD_PutStringXY(0,1,"Калибровка 30мА");
+                LCD_PutStringXY(0,2,"Измеренное значение:");
+                LCD_PutStringXY(18,3,"мА");
+                // Set current for first calibration point
+                DAC_UpdateOutput(20000);
+                startEditor(&edit, EDIT_NUM0, 3);
+            }
+            // User input
+            if (editorCodeValid)
+                processEditor(&edit, editorCode);
+            temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
+            i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
+            LCD_InsertCharsXY(11, 3, &str[2], 7);
+            // Next item
+            if (buttons.action_down & KEY_OK) {
+                // temp32 = 20000;
+                temp32 = getScaledEditValue(&edit, 3);
+                ExtADC_SaveCalibrationPoint(2, temp32);
+                new_state = SYS_EXTADC_CALIBRATION_HIGH_RANGE;
+            }
+            break;
+        case SYS_EXTADC_CALIBRATION_HIGH_RANGE:
+            // Display and adjust ampermeter calibration point for low range
+            if (first_visit) {
+                drawCalibrateExtADCMenuHeader();
+                LCD_PutStringXY(0,1,"Калибровка 300мА");
+                LCD_PutStringXY(0,2,"Измеренное значение:");
+                // Set current for first calibration point
+                DAC_UpdateOutput(20000);
+                startEditor(&edit, EDIT_NUM0, 3);
+            }
+            // User input
+            if (editorCodeValid)
+                processEditor(&edit, editorCode);
+            temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
+            i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
+            LCD_InsertCharsXY(11, 3, &str[2], 7);
+            // Next item
+            if (buttons.action_down & KEY_OK) {
+                // temp32 = 20000;
+                temp32 = getScaledEditValue(&edit, 3);
+                ExtADC_SaveCalibrationPoint(3, temp32);
+                ExtADC_Calibrate();
+                new_state = SYS_DONE;
             }
             break;
         default:
-            // Display and adjust V ADC calibration point 2
-            LCD_PutStringXY(0,0,"Калибровка прибора");
-            LCD_PutStringXY(0,1,"     завершена.");
-            LCD_PutStringXY(0,3,"Перезапустите прибор");
+            if (first_visit) {
+                LCD_Clear();
+                LCD_PutStringXY(0,0,"Калибровка прибора");
+                LCD_PutStringXY(0,1,"     завершена.");
+                LCD_PutStringXY(0,3,"Перезапустите прибор");
+            }
             break;
     }
-
-
+    if (new_state != sys_state) {
+        sys_state = new_state;
+        first_visit = 1;
+    } else {
+        first_visit = 0;
+    }
 }
 
 static void mfCalibration_Leave(void) {
