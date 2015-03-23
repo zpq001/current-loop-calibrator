@@ -225,7 +225,7 @@ static void mfConstSource_Run(void) {
             LCD_InsertCharsXY(13, 3, &str[0], 5);
             break;
         default:
-            str[3] = str[4] = '-';  // Overload
+            str[1] = str[2] = str[3] = str[4] = '-';  // Overload
             LCD_InsertCharsXY(13, 3, &str[0], 5);
     }
 }
@@ -472,7 +472,9 @@ static void mfCalibration_Run(void) {
             // Next item
             if (buttons.action_down & KEY_OK) {
                 new_state = SYS_BEEPER;
-            }
+            } else if (buttons.action_down & KEY_ESC) {
+				new_state = SYS_BEEPER;
+			}
             break;
         case SYS_BEEPER:
             // Display and adjust beeper setting
@@ -493,7 +495,9 @@ static void mfCalibration_Run(void) {
             // Next item
             if (buttons.action_down & KEY_OK) {
                 new_state = SYS_DAC_CALIBRATION_LOW;
-            }
+            } else if (buttons.action_down & KEY_ESC) {
+				new_state = SYS_DAC_CALIBRATION_LOW;
+			}
             break;
         case SYS_DAC_CALIBRATION_LOW:
             // Display and adjust DAC calibration point 1
@@ -519,7 +523,9 @@ static void mfCalibration_Run(void) {
                 DAC_SaveCalibrationPoint(1, temp32);
                 ADC_SaveLoopCurrentCalibrationPoint(1, temp32);
                 new_state = SYS_DAC_CALIBRATION_HIGH;
-            }
+            } else if (buttons.action_down & KEY_ESC) {
+				new_state = SYS_DAC_CALIBRATION_HIGH;
+			}
             break;
         case SYS_DAC_CALIBRATION_HIGH:
             if (first_visit) {
@@ -546,7 +552,9 @@ static void mfCalibration_Run(void) {
                 ADC_SaveLoopCurrentCalibrationPoint(1, temp32);
                 ADC_LoopCurrentCalibrate();
                 new_state = SYS_ADC_VOLTAGE_CALIBRATION_LOW;
-            }
+            } else if (buttons.action_down & KEY_ESC) {
+				new_state = SYS_ADC_VOLTAGE_CALIBRATION_LOW;
+			}
             break;
         case SYS_ADC_VOLTAGE_CALIBRATION_LOW:
             // Display and adjust V ADC calibration point 1
@@ -571,7 +579,9 @@ static void mfCalibration_Run(void) {
                 temp32 = getScaledEditValue(&edit, 3);
                 ADC_SaveLoopVoltageCalibrationPoint(1, temp32);
                 new_state = SYS_ADC_VOLTAGE_CALIBRATION_HIGH;
-            }
+            } else if (buttons.action_down & KEY_ESC) {
+				new_state = SYS_ADC_VOLTAGE_CALIBRATION_HIGH;
+			}
             break;
         case SYS_ADC_VOLTAGE_CALIBRATION_HIGH:
             // Display and adjust V ADC calibration point 2
@@ -594,10 +604,12 @@ static void mfCalibration_Run(void) {
             if (buttons.action_down & KEY_OK) {
                 // temp32 = 20000;
                 temp32 = getScaledEditValue(&edit, 3);
-                ADC_SaveLoopVoltageCalibrationPoint(1, temp32);
+                ADC_SaveLoopVoltageCalibrationPoint(2, temp32);
                 ADC_LoopVoltageCalibrate();
                 new_state = SYS_EXTADC_CALIBRATION_ZERO;
-            }
+            } else if (buttons.action_down & KEY_ESC) {
+				new_state = SYS_EXTADC_CALIBRATION_ZERO;
+			}
             break;
         case SYS_EXTADC_CALIBRATION_ZERO:
             // Display ampermeter zero calibration
@@ -611,7 +623,9 @@ static void mfCalibration_Run(void) {
                 // Save zero calibration point
                 ExtADC_SaveCalibrationPoint(1, 0);
                 new_state = SYS_EXTADC_CALIBRATION_LOW_RANGE;
-            }
+            } else if (buttons.action_down & KEY_ESC) {
+				new_state = SYS_EXTADC_CALIBRATION_LOW_RANGE;
+			}
             break;
         case SYS_EXTADC_CALIBRATION_LOW_RANGE:
             // Display and adjust ampermeter calibration point for low range
@@ -636,7 +650,9 @@ static void mfCalibration_Run(void) {
                 temp32 = getScaledEditValue(&edit, 3);
                 ExtADC_SaveCalibrationPoint(2, temp32);
                 new_state = SYS_EXTADC_CALIBRATION_HIGH_RANGE;
-            }
+            } else if (buttons.action_down & KEY_ESC) {
+				new_state = SYS_EXTADC_CALIBRATION_HIGH_RANGE;
+			}
             break;
         case SYS_EXTADC_CALIBRATION_HIGH_RANGE:
             // Display and adjust ampermeter calibration point for low range
@@ -661,7 +677,9 @@ static void mfCalibration_Run(void) {
                 ExtADC_SaveCalibrationPoint(3, temp32);
                 ExtADC_Calibrate();
                 new_state = SYS_DONE;
-            }
+            } else if (buttons.action_down & KEY_ESC) {
+				new_state = SYS_DONE;
+			}
             break;
         default:
             if (first_visit) {
