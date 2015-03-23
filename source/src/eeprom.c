@@ -59,9 +59,9 @@ uint8_t EE_RestoreSettings(void) {
 	num_power_cycles = 0;
 	
 	// Find more recent data
-	for (j=0; j<5; j++) {
+	for (j=0; j<4; j++) {
 
-		if (j < 4) {
+		if (j < 3) {
 			address = EEMEM_ADDRESS + j*4;
 		} else {
 			if (num_power_cycles == 0) {
@@ -102,7 +102,7 @@ uint8_t EE_RestoreSettings(void) {
 	
 	if (result != 0) {
 		// Use next sector
-		eeprom_sector = (eeprom_sector == 3) ? 0 : eeprom_sector + 1;
+		eeprom_sector = (eeprom_sector == 2) ? 0 : eeprom_sector + 1;
 	} else {
 		eeprom_sector = 0;
 		num_power_cycles = 1;
@@ -124,7 +124,7 @@ uint8_t EE_RestoreSystemSettings(uint8_t erase_current) {
 	uint32_t *ptr32;
 	uint8_t *ptr8;
 	uint32_t address;
-	uint16_t size = sizeof(settings_t);
+	uint16_t size = sizeof(system_settings);
 	size /= 4;	// using 32-bit word access
 	
 	// Read data
@@ -216,7 +216,7 @@ void EE_SaveSystemSettings(void) {
 	system_settings.crc = crc;
 		
 	
-	ptr32 = (uint32_t *)&settings;
+	ptr32 = (uint32_t *)&system_settings;
 	address = EEMEM_ADDRESS + 0x0C;
 	for (i=0; i<size/4; i++) {
 		EEPROM_ProgramWord(address, EEPROM_Info_Bank_Select, *ptr32++);

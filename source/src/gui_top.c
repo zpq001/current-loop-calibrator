@@ -9,6 +9,7 @@
 #include "dac.h"
 #include "encoder.h"
 #include "lcd_contrast.h"
+#include "power_monitor.h"
 
 #ifndef _MENU_SIMULATOR_
 #include "lcd_melt20s4.h"
@@ -41,8 +42,8 @@ static void mfCalibration_Leave(void);
 const MenuJumpRecord_t menuJumpSet[] = 
 {
 //        Item       |       Jump condition      |     Next item      |    Flags
-    { mi_START,             KEY_OK,                 mi_CALIBRATION,         JUMP_IF_EXACT   | KEY_ACT_DOWN  },
-    { mi_START,             0,                      mi_CONSTSOURCE,         JUMP_ALWAYS                     },
+    //{ mi_START,             KEY_OK,                 mi_CALIBRATION,         JUMP_IF_EXACT   | KEY_ACT_DOWN  },
+    //{ mi_START,             0,                      mi_CONSTSOURCE,         JUMP_ALWAYS                     },
     { mi_CONSTSOURCE, 	    KEY_OUTPUT_ALTERN,      mi_ALTERNSOURCE,        JUMP_IF_EXACT   | KEY_ACT_DOWN  },
     { mi_ALTERNSOURCE, 	    KEY_OUTPUT_CONST,       mi_CONSTSOURCE,         JUMP_IF_EXACT   | KEY_ACT_DOWN  },
     { mi_ALTERNSOURCE, 	    KEY_NUM7,               mi_WAVEAMPLOWEDIT,      JUMP_IF_EXACT   | KEY_ACT_HOLD  },
@@ -102,8 +103,12 @@ static void encodeEditorKeys(void) {
 
 
 void GUI_Init(void) {
-    selectedMenuItemId = mi_START;
+	if (device_mode == MODE_NORMAL)
+		selectedMenuItemId = mi_CONSTSOURCE;
+	else
+		selectedMenuItemId = mi_CALIBRATION;
     selectedMenuFunctionRecord = getMenuFunctionRecord(selectedMenuItemId);
+	processItemFunction(selectedMenuFunctionRecord, SELECT_FUNCTION);
     editMode = 0;
 }
 
@@ -470,10 +475,14 @@ static void mfCalibration_Run(void) {
             LCD_PutStringXY(0,0,"Калибровка 1");
             LCD_PutStringXY(0,1,"Измеренное значение:");
             // Set current for first calibration point
+		
+			// !!!! CHECKME
+			// should set DAC code not using calibration coefficients - what if user failed EPIC!
+		
             DAC_UpdateOutput(DAC_GetCalibrationPoint(1));
 
             // TODO - user input
-            temp32 = 4123;
+            temp32 = 4000;
 
             // Next item
             if (buttons.action_down & KEY_OK) {
@@ -494,7 +503,7 @@ static void mfCalibration_Run(void) {
             DAC_UpdateOutput(DAC_GetCalibrationPoint(2));
 
             // TODO - user input
-            temp32 = 19317;
+            temp32 = 20000;
 
             // Next item
             if (buttons.action_down & KEY_OK) {

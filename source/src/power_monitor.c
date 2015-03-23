@@ -74,7 +74,10 @@ void COMPARATOR_IRQHandler(void) {
 		
 		EE_SaveSettings();
 	} else {
-		// System settings are already updated
+		// Gather system settings
+		DAC_SaveCalibration();
+		// Add more modules if required
+		
 		EE_SaveSystemSettings();
 	}
 	

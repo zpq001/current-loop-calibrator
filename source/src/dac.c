@@ -210,19 +210,21 @@ void DAC_Initialize(void) {
 
 	// Default state after power-on
 	for (i=0; i<PROFILE_COUNT; i++)
-		dac_state.setting[i] = 4000;
+		dac_state.setting[i] = 0;
 	dac_state.profile = 0;
 	dac_state.mode = DAC_MODE_CONST;
 	dac_state.waveform = WAVE_MEANDR;
-	dac_state.period = 1000;
-	dac_state.wave_min = 0000;
-	dac_state.wave_max = 20000;
+	dac_state.period = 1000;		// ms
+	dac_state.wave_min = 4000;		// uA
+	dac_state.wave_max = 20000;		// uA
 	dac_state.total_cycles = 10;
 	dac_state.current_cycle = 1;
 	
 	// Default calibration
-	dac_calibration.point1.value = 4000;
-	dac_calibration.point1.code = 655;
+	//dac_calibration.point1.value = 4000;
+	//dac_calibration.point1.code = 655;
+	dac_calibration.point1.value = 0;
+	dac_calibration.point1.code = 0;
 	dac_calibration.point2.value = 20000;
 	dac_calibration.point2.code = 3276;
     dac_calibration.scale = 10000L;
@@ -257,24 +259,25 @@ void DAC_Calibrate(void) {
 	DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
 }
 
-/*
-void DAC_ApplyCalibration(calibration_t *c) {           // FIXME
-	dac_calibration.point1.value = c->point1.value;
-	dac_calibration.point1.code = c->point1.code;
-	dac_calibration.point2.value = c->point2.value;
-	dac_calibration.point2.code = c->point2.code;
+
+void DAC_ApplyCalibration(void) {          
+	dac_calibration.point1.value = system_settings.dac.point1.value;
+	dac_calibration.point1.code  = system_settings.dac.point1.code;
+	dac_calibration.point2.value = system_settings.dac.point2.value;
+	dac_calibration.point2.code  = system_settings.dac.point2.code;
 	CalculateCoefficients(&dac_calibration);
+	DAC_GenerateWaveform();
 	DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
 }
 
 
-void DAC_SaveCalibration(calibration_t *points) {           // FIXME
-	points->point1.value = dac_calibration.point1.value;
-	points->point1.code = dac_calibration.point1.code;
-	points->point2.value = dac_calibration.point2.value;
-	points->point2.code = dac_calibration.point2.code;
+void DAC_SaveCalibration(void) {           
+	system_settings.dac.point1.value = dac_calibration.point1.value;
+	system_settings.dac.point1.code = dac_calibration.point1.code;
+	system_settings.dac.point2.value = dac_calibration.point2.value;
+	system_settings.dac.point2.code = dac_calibration.point2.code;
 }
-*/
+
 
 void DAC_RestoreSettings(void) {
 	uint8_t i;
@@ -287,12 +290,7 @@ void DAC_RestoreSettings(void) {
 	dac_state.wave_min 		 = settings.dac.wave_min;
 	dac_state.wave_max 		 = settings.dac.wave_max;
 	dac_state.total_cycles 	 = settings.dac.total_cycles;
-	// Calibration
-	dac_calibration.point1.value 	= settings.dac.calibration_point1.value;
-	dac_calibration.point1.code 	= settings.dac.calibration_point1.code;
-	dac_calibration.point2.value 	= settings.dac.calibration_point2.value;
-	dac_calibration.point2.code 	= settings.dac.calibration_point2.code;
-	CalculateCoefficients(&dac_calibration);
+
 	DAC_GenerateWaveform();
 	DAC_SetDMATimerPeriod(dac_state.period);
 	DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
@@ -309,11 +307,6 @@ void DAC_SaveSettings(void) {
 	settings.dac.wave_min 		= dac_state.wave_min; 	
 	settings.dac.wave_max 		= dac_state.wave_max; 	
 	settings.dac.total_cycles 	= dac_state.total_cycles; 
-	// Calibration
-	settings.dac.calibration_point1.value =  dac_calibration.point1.value;
-	settings.dac.calibration_point1.code  =  dac_calibration.point1.code;
-	settings.dac.calibration_point2.value =  dac_calibration.point2.value;
-	settings.dac.calibration_point2.code  =  dac_calibration.point2.code;
 }
 
 

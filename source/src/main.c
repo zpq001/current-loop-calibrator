@@ -58,19 +58,21 @@ int main(void) {
 	
 	// Get mode of operation
 	LCD_CaptureKeyboard();	
-//	device_mode = (GetRawButtonState() & KEY_OK) ? MODE_CALIBRATION : MODE_NORMAL;
-	device_mode = MODE_NORMAL;
+	device_mode = (GetRawButtonState() & KEY_OUTPUT_CTRL) ? MODE_CALIBRATION : MODE_NORMAL;
 	// Restore system settings
-//	system_settings_ok = EE_RestoreSystemSettings((device_mode == MODE_CALIBRATION));
-	// Apply system settings:
-	// DAC
-	// Contrast
-	// ADC
-	// extADC
-	
+	system_settings_ok = EE_RestoreSystemSettings((device_mode == MODE_CALIBRATION));
+	if (system_settings_ok) {
+		// Apply system settings:
+		DAC_ApplyCalibration();
+		// Contrast
+		// ADC
+		// extADC
+	}
+	// Restore settings
 	if (device_mode == MODE_NORMAL) {
 		settings_ok = EE_RestoreSettings();
 		if (settings_ok) {
+			// Apply settings
 			DAC_RestoreSettings();
 			// other modules
 		}
@@ -79,8 +81,7 @@ int main(void) {
 	// Wait a bit for greeting message
     DWT_DelayUs(500000);
 	
-	//if (system_settings_ok == 0) {
-	if (settings_ok == 0) {
+	if ((system_settings_ok == 0) && (device_mode == MODE_NORMAL)) {
 		// Show error message!
 		LCD_Clear();
 		LCD_PutStringXY(0,0,"Необходима");

@@ -19,9 +19,9 @@ void DAC_UpdateOutput(uint32_t value);	// Directly sets output to value
 
 uint32_t DAC_GetCalibrationPoint(uint8_t pointNumber);
 void DAC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue);
-//void DAC_Calibrate(void);
-//void DAC_ApplyCalibration(calibration_t *points);
-//void DAC_SaveCalibration(calibration_t *points);
+void DAC_Calibrate(void);
+void DAC_ApplyCalibration(void);
+void DAC_SaveCalibration(void);
 void DAC_RestoreSettings(void);
 void DAC_SaveSettings(void);
 
