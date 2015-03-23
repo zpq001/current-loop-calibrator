@@ -11,6 +11,7 @@
 #include "lcd_contrast.h"
 
 static uint8_t contrastSetting = 10;	// 0 to 20
+static uint8_t contrastBoosterState;
 
 /*
 static void enableCPWM(void) {
@@ -85,20 +86,38 @@ void LCD_InitContrastBooster(void) {
     PORT_InitStructure.PORT_OE = PORT_OE_OUT;
     PORT_InitStructure.PORT_SPEED = PORT_SPEED_FAST;
 	PORT_Init(CPWM_PORT, &PORT_InitStructure);
+    
+    contrastBoosterState = 0;
 }
 
 void LCD_ProcessContrastBooster(void) {
 	uint16_t temp16u;
-	
+    
+    switch (contrastBoosterState) {
+        case 0:
+            ADC_Contrast_Start();
+            break;
+        case 2:
+            temp16u = ADC_Contrast_GetResult();
+            break;
+        case 9:
+            contrastBoosterState = 0;
+            break;
+    }
+    if (contrastBoosterState)
+        contrastBoosterState++;
+    
+    
+    
+    
+	/*
 	TIMER_SetCntAutoreload(MDR_TIMER2, 900);
 	// Set contrast PWM duty cycle 50%
 	MDR_TIMER2->CCR3 = MDR_TIMER2->ARR >> 1; 
 	
-	
-	
 	temp16u = 36 - contrastSetting;
 	temp16u *= 100;
-	
+	*/
 }
 
 uint8_t LCD_SetContrastSetting(int32_t value) {

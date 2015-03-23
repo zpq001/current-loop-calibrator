@@ -7,12 +7,15 @@
 #include "adc.h"
 #include "external_adc.h"
 #include "dac.h"
+#include "power_monitor.h"
 
 
 
 buttons_t buttons;
 int16_t encoder_delta;
 uint8_t contrastSetting;	// 0 to 20
+
+uint8_t device_mode;
 
 struct {
     char *strings[4];    // + \0
@@ -60,6 +63,9 @@ void guiInitialize(void)
     dac_state.wave_max = 20000;
     dac_state.total_cycles = 95684;
     dac_state.current_cycle = 87521;
+
+    //device_mode = MODE_NORMAL;
+    device_mode = MODE_CALIBRATION;
 
     contrastSetting = 10;
 
@@ -134,8 +140,21 @@ uint32_t ADC_GetLoopCurrent(void) {
     return 0;
 }
 
+
+void ADC_SaveLoopCurrentCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {
+}
+
+void ADC_LoopCurrentCalibrate(void) {
+}
+
 uint32_t ADC_GetLoopVoltage(void) {
     return 18562;
+}
+
+void ADC_SaveLoopVoltageCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {
+}
+
+void ADC_LoopVoltageCalibrate(void) {
 }
 
 
@@ -145,6 +164,13 @@ int32_t ExtADC_GetCurrent(void) {
 
 uint8_t ExtADC_GetRange(void) {
     return 0;
+}
+
+void ExtADC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {
+}
+
+void ExtADC_Calibrate(void) {
+
 }
 
 
@@ -160,6 +186,9 @@ void DAC_SaveSettings(void) {
 
 void DAC_SetSettingConst(uint32_t value) {
     dac_state.setting[dac_state.profile] = value;
+}
+
+void DAC_SetCalibrationPoint(uint8_t pointNumber) {
 }
 
 void DAC_SetProfile(int16_t num) {

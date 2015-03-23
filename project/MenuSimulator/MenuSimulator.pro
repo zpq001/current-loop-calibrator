@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     ../../source/src/gui_core.c \
     ../../source/src/gui_top.c \
     ../../source/src/utils.c \
-    ../../source/src/linear_calibration.c
+    ../../source/src/linear_calibration.c \
+    tdd_verification.cpp
 
 HEADERS  += mainwindow.h \
     keydriver.h \
@@ -39,6 +40,8 @@ HEADERS  += mainwindow.h \
     ../../source/inc/external_adc.h \
     ../../source/inc/led.h \
     ../../source/inc/linear_calibration.h \
-    ../../source/inc/encoder.h
+    ../../source/inc/encoder.h \
+    tdd_verification.h \
+    ../../source/inc/power_monitor.h
 
 FORMS    += mainwindow.ui

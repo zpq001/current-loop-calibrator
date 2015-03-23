@@ -15,3 +15,12 @@ void ExtADC_Initialize(void);
 void ExtADC_UpdateCurrent(void);
 int32_t ExtADC_GetCurrent(void);
 uint8_t ExtADC_GetRange(void);
+
+
+void ExtADC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue);
+void ExtADC_Calibrate(void);
+void ExtADC_ApplyCalibration(void);
+void ExtADC_SaveCalibration(void);
+
+
+
