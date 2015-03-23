@@ -91,7 +91,7 @@ void LCD_InitContrastBooster(void) {
 }
 
 void LCD_ProcessContrastBooster(void) {
-	uint16_t temp16u;
+/*	uint16_t temp16u;
     
     switch (contrastBoosterState) {
         case 0:
@@ -107,17 +107,15 @@ void LCD_ProcessContrastBooster(void) {
     if (contrastBoosterState)
         contrastBoosterState++;
     
+    */
     
     
-    
-	/*
+	
 	TIMER_SetCntAutoreload(MDR_TIMER2, 900);
 	// Set contrast PWM duty cycle 50%
 	MDR_TIMER2->CCR3 = MDR_TIMER2->ARR >> 1; 
 	
-	temp16u = 36 - contrastSetting;
-	temp16u *= 100;
-	*/
+
 }
 
 uint8_t LCD_SetContrastSetting(int32_t value) {

@@ -178,7 +178,7 @@ void ADC_LV_ApplyCalibration(void) {
 	adc_voltage_calibration.point1.code  = system_settings.adc_voltage.point1.code;
 	adc_voltage_calibration.point2.value = system_settings.adc_voltage.point2.value;
 	adc_voltage_calibration.point2.code  = system_settings.adc_voltage.point2.code;
-	CalculateCoefficients(&adc_current_calibration);
+	CalculateCoefficients(&adc_voltage_calibration);
 }
 
 void ADC_LV_SaveCalibration(void) {           
