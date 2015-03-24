@@ -41,6 +41,9 @@ void ADC_Initialize(void) {
 	sADCx.ADC_Prescaler        = ADC_CLK_div_128;
 	sADCx.ADC_DelayGo          = 7;
 	ADC1_Init (&sADCx);
+    
+    // Using AVDD as reference for ADC2
+    sADCx.ADC_VRefSource       = ADC_VREF_SOURCE_INTERNAL;
 	ADC2_Init (&sADCx);
 	
 	// ADC1 enable
@@ -212,7 +215,7 @@ uint16_t ADC_Contrast_GetResult(void) {
     uint16_t temp16u;
     temp16u = ADC2_GetResult();
     temp16u &= 0xFFF;
-    
+    return temp16u;
 }
 
 

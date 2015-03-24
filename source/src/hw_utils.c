@@ -9,7 +9,7 @@
 #include "MDR32F9Qx_rst_clk.h"
 #include "MDR32F9Qx_dma.h"
 #include "MDR32F9Qx_ssp.h"
-
+#include "MDR32F9Qx_iwdg.h"
 
 extern DMA_CtrlDataTypeDef DMA_ControlTable[];
 void DMA_CtrlDataInit(DMA_CtrlDataInitTypeDef *DMA_ctrl_data_ptr, DMA_CtrlDataTypeDef *DMA_ctrl_table_ptr);
@@ -29,7 +29,8 @@ void DMA_CtrlDataInit(DMA_CtrlDataInitTypeDef *DMA_ctrl_data_ptr, DMA_CtrlDataTy
                          RST_CLK_PCLK_DAC |     \
 						 RST_CLK_PCLK_DMA |     \
                          RST_CLK_PCLK_COMP) | 	\
-						 RST_CLK_PCLK_EEPROM
+						 RST_CLK_PCLK_EEPROM |  \
+                         RST_CLK_PCLK_IWDG
 
 
 
@@ -94,6 +95,30 @@ void hw_Switch_CPU_Clock_to_HSI(void) {
 	// Disable PLL
 	RST_CLK_CPU_PLLcmd(DISABLE);
 }
+
+
+// Period may vary from 100 to 409500 us
+void hw_SetupWatchdog(uint16_t period_us) {
+  // Watchdog is fed by LSI generator (40kHz)
+    
+  // Enable IWDG
+  IWDG_Enable();
+
+  // Enables write access to IWDG_PR,IWDG_RLR registers
+  IWDG_WriteAccessEnable();
+
+  // Set IWDG Prescaler value
+  IWDG_SetPrescaler(IWDG_Prescaler_4);    // 40kHz / 4 = 10kHz (T = 100us)
+
+  // Wait when Prescaler Value was updated
+  while (IWDG_GetFlagStatus(IWDG_FLAG_PVU) != 1);
+
+  // Set IWDG Reload value
+  IWDG_SetReload(period_us / 100);
+    
+  IWDG_WriteAccessDisable();
+}
+  
 
 
 

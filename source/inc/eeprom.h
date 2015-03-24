@@ -44,7 +44,7 @@ typedef struct {
 		calibration_point_t point2;
 	} extadc_low_gain;
 	uint8_t contrast_level;
-	uint8_t beeper_func;
+	uint8_t sound_state;
 	uint16_t crc;
 	uint32_t dummy;     // Padding for 32-bit word access
 } system_settings_t;

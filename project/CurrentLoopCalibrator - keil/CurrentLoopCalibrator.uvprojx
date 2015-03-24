@@ -14,6 +14,8 @@
         <TargetCommonOption>
           <Device>MDR1986BE92</Device>
           <Vendor>Milandr</Vendor>
+          <PackID>Keil.MDR1986BExx.1.3.0</PackID>
+          <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IROM(0x08000000,0x20000) IRAM(0x20000000,0x8000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -72,6 +74,8 @@
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
+            <nStopB1X>0</nStopB1X>
+            <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
@@ -128,6 +132,7 @@
             <RestoreFunctions>1</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
+            <RestoreSysVw>1</RestoreSysVw>
           </Simulator>
           <Target>
             <UseTarget>1</UseTarget>
@@ -139,9 +144,10 @@
             <RestoreFunctions>0</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <RestoreTracepoints>1</RestoreTracepoints>
+            <RestoreSysVw>1</RestoreSysVw>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>7</TargetSelection>
+          <TargetSelection>6</TargetSelection>
           <SimDlls>
             <CpuDll></CpuDll>
             <CpuDllArguments></CpuDllArguments>
@@ -353,6 +359,8 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
+            <uC99>0</uC99>
+            <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define>USE_MDR1986VE9x</Define>
@@ -369,6 +377,7 @@
             <SwStkChk>0</SwStkChk>
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
+            <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -385,6 +394,7 @@
             <useFile>0</useFile>
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
+            <pXoBase></pXoBase>
             <ScatterFile></ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
@@ -499,6 +509,8 @@
                     <wLevel>0</wLevel>
                     <uThumb>2</uThumb>
                     <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <useXO>2</useXO>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
@@ -508,6 +520,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>MDR32F9Qx_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_iwdg.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -618,6 +635,16 @@
               <FileName>eeprom_utils.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\source\inc\eeprom_utils.h</FilePath>
+            </File>
+            <File>
+              <FileName>sound.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\sound.h</FilePath>
+            </File>
+            <File>
+              <FileName>sound_samples.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\sound_samples.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -755,6 +782,8 @@
                     <wLevel>0</wLevel>
                     <uThumb>2</uThumb>
                     <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <useXO>2</useXO>
                     <VariousControls>
                       <MiscControls></MiscControls>
                       <Define></Define>
@@ -764,6 +793,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>sound.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\source\src\sound.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -835,6 +869,8 @@
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
+            <nStopB1X>0</nStopB1X>
+            <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
@@ -891,6 +927,7 @@
             <RestoreFunctions>1</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <LimitSpeedToRealTime>0</LimitSpeedToRealTime>
+            <RestoreSysVw>1</RestoreSysVw>
           </Simulator>
           <Target>
             <UseTarget>1</UseTarget>
@@ -902,6 +939,7 @@
             <RestoreFunctions>0</RestoreFunctions>
             <RestoreToolbox>1</RestoreToolbox>
             <RestoreTracepoints>1</RestoreTracepoints>
+            <RestoreSysVw>1</RestoreSysVw>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
           <TargetSelection>1</TargetSelection>
@@ -1116,6 +1154,8 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
+            <uC99>0</uC99>
+            <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -1132,6 +1172,7 @@
             <SwStkChk>0</SwStkChk>
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
+            <useXO>0</useXO>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -1148,6 +1189,7 @@
             <useFile>0</useFile>
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
+            <pXoBase></pXoBase>
             <ScatterFile></ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
@@ -1230,6 +1272,11 @@
               <FileName>MDR32F9Qx_eeprom.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_eeprom.c</FilePath>
+            </File>
+            <File>
+              <FileName>MDR32F9Qx_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\library\MDR32F9Qx_StdPeriph_Driver\src\MDR32F9Qx_iwdg.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1341,6 +1388,16 @@
               <FileType>5</FileType>
               <FilePath>..\..\source\inc\eeprom_utils.h</FilePath>
             </File>
+            <File>
+              <FileName>sound.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\sound.h</FilePath>
+            </File>
+            <File>
+              <FileName>sound_samples.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\source\inc\sound_samples.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1445,6 +1502,11 @@
               <FileName>eeprom_utils.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\source\src\eeprom_utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>sound.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\source\src\sound.c</FilePath>
             </File>
           </Files>
         </Group>

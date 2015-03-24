@@ -31,3 +31,5 @@ void ADC_LoopVoltageCalibrate(void);
 void ADC_LV_ApplyCalibration(void);
 void ADC_LV_SaveCalibration(void);
 
+void ADC_Contrast_Start(void);
+uint16_t ADC_Contrast_GetResult(void);

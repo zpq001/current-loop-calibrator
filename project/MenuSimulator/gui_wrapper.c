@@ -14,7 +14,7 @@
 buttons_t buttons;
 int16_t encoder_delta;
 uint8_t contrastSetting;	// 0 to 20
-
+uint8_t sound_enabled;
 uint8_t device_mode;
 
 struct {
@@ -68,6 +68,8 @@ void guiInitialize(void)
     device_mode = MODE_CALIBRATION;
 
     contrastSetting = 10;
+    sound_enabled = 1;
+
 
     for (i=0; i<4; i++)
     {
@@ -79,11 +81,14 @@ void guiInitialize(void)
 
 void guiButtonEvent(void)
 {
+    encoder_delta = 0;
     GUI_Process();
+
 }
 
 void guiUpdate(void)
 {
+    encoder_delta = 0;
     GUI_Process();
 }
 
@@ -313,5 +318,13 @@ uint8_t LCD_GetContrastSetting(void) {
 
 
 
+uint8_t Sound_SetEnabled(uint8_t state) {
+    sound_enabled = state;
+    return sound_enabled;
+}
+
+uint8_t Sound_GetEnabled(void) {
+    return sound_enabled;
+}
 
 

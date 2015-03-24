@@ -10,6 +10,7 @@
 #include "encoder.h"
 #include "lcd_contrast.h"
 #include "power_monitor.h"
+#include "sound.h"
 
 #ifndef _MENU_SIMULATOR_
 #include "lcd_melt20s4.h"
@@ -462,6 +463,10 @@ static void mfCalibration_Run(void) {
                 drawSysMenuHeader();
                 LCD_PutStringXY(0,2,"Контраст (0-20):    ");
             }
+            if (encoder_delta == 0) {
+                if (buttons.action_down & KEY_NUM1) encoder_delta = -1;
+                else if (buttons.action_down & KEY_NUM2) encoder_delta = 1;
+            }
             temp32 = LCD_GetContrastSetting();
             if (encoder_delta) {
                 temp32 += encoder_delta;
@@ -482,11 +487,15 @@ static void mfCalibration_Run(void) {
                 drawSysMenuHeader();
                 LCD_PutStringXY(0,2,"Звук: ");
             }
-            //temp32 = LCD_GetBeeperSetting();
-            temp32 = 1;
+            if (encoder_delta == 0) {
+                if (buttons.action_down & KEY_NUM1) encoder_delta = -1;
+                else if (buttons.action_down & KEY_NUM2) encoder_delta = 1;
+            }
+            temp32 = Sound_GetEnabled();
             if (encoder_delta) {
                 temp32 += encoder_delta;
-                temp32 = (temp32 < 0) ? 0 : 1;
+                temp32 = (temp32 <= 0) ? 0 : 1;
+                temp32 = Sound_SetEnabled(temp32);
             }
             if (temp32 != 0)
                 LCD_PutStringXY(15,2," вкл");
