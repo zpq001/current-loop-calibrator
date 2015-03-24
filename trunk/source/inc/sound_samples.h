@@ -1,0 +1,45 @@
+
+
+#define FREQ(x)	(uint16_t)(1000000/x)
+
+
+const tone_t _beep_EncoderConfirm[] = {
+    { FREQ(1000),	10 },
+	{0,	0}
+};
+
+const tone_t _beep_EncoderIllegal[] = {
+    { FREQ(600),	10 },
+	{0,	0}
+};
+
+const tone_t _beep_KeyConfirm[] = {
+    { FREQ(1000),	20 },
+	{0,	0}
+};
+
+const tone_t _beep_KeyIllegal[] = {
+    { FREQ(600),	20 },
+	{0,	0}
+};
+
+const tone_t _beep_SyclesDone[] = {
+    { FREQ(1000),	500 },
+	{0,	0}
+};
+
+const tone_t _melody_SettingConfirm[] = {
+    { FREQ(1000),	20 },
+    { FREQ(1400),	20 },
+};
+
+const tone_t _melody_SettingIllegal[] = {
+    { FREQ(600),	20 },
+    { 0,	20 },
+    { FREQ(600),	20 },
+    { 0,	20 },
+    { FREQ(600),	20 },
+};
+
+
+

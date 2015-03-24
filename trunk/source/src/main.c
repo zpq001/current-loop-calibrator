@@ -1,5 +1,6 @@
 
 #include <string.h>
+#include "MDR32F9Qx_iwdg.h"
 #include "hw_utils.h"
 #include "dwt_delay.h"
 #include "lcd_melt20s4.h"
@@ -14,10 +15,11 @@
 #include "power_monitor.h"
 #include "gui_top.h"
 #include "eeprom.h"
+#include "sound.h"
 
 /*
 	timer3 -> buzzer
-	timer2 -> contrast
+	timer2 -> contrast charge pump
 	timer1 -> DMA for waveform
 */
 
@@ -54,9 +56,7 @@ int main(void) {
 	// DAC driver
     DAC_Initialize();
 	// Buzzer
-	// TODO
-	// Watchdog
-	// TODO
+	Sound_Init();
 	
 	// Get mode of operation
 	LCD_CaptureKeyboard();	
@@ -69,8 +69,8 @@ int main(void) {
 		ADC_LC_ApplyCalibration();
         ADC_LV_ApplyCalibration();
 		ExtADC_ApplyCalibration();
-        // Contrast - TODO
-        // Beeper - TODO
+        LCD_RestoreContrastSetting();
+        Sound_RestoreSetting();
 	}
 	// Restore settings
 	if (device_mode == MODE_NORMAL) {
@@ -84,6 +84,7 @@ int main(void) {
 	
 	// Wait a bit for greeting message
     DWT_DelayUs(500000);
+    Sound_Event(SE_Start);
 	
 	if ((system_settings_ok == 0) && (device_mode == MODE_NORMAL)) {
 		// Show error message!
@@ -94,14 +95,15 @@ int main(void) {
 		DWT_DelayUs(1000000);
 	}
 	
-	
     // Setup software timers
 	memset(&adcUpdateTimer, 0, sizeof(adcUpdateTimer));
 	adcUpdateTimer.top = 4;
 	adcUpdateTimer.enabled = 1;
     
-    // GUI
+    // GUI initialization depends on device mode
     GUI_Init();
+    // Watchdog
+    hw_SetupWatchdog(25000);
 	// Power supply monitor
 	PowerMonitor_Init();
 	// Start ISR-based syncronizer
@@ -113,7 +115,9 @@ int main(void) {
 			__disable_irq();
 			mainLoopTimer.flags.ovfl = 0;
 			__enable_irq();
-			
+            
+			IWDG_ReloadCounter();
+            
             processSoftTimer16b(&adcUpdateTimer);
             if ((adcUpdateTimer.flags.ovfl) || (device_mode == MODE_CALIBRATION)) {
                 adcUpdateTimer.flags.ovfl = 0;
@@ -127,6 +131,12 @@ int main(void) {
             ProcessButtons();
 			Encoder_UpdateDelta();
 			
+            // Temporary!
+            if (buttons.action_down)
+                Sound_Event(SE_KeyConfirm);
+            else if (encoder_delta)
+                Sound_Event(SE_EncoderConfirm);
+            
             GUI_Process();
 		}
 	}

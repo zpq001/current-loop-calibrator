@@ -13,7 +13,7 @@
 #include "adc.h"
 #include "lcd_contrast.h"
 #include "encoder.h"
-
+#include "sound.h"
 
 SoftTimer16b_t mainLoopTimer;
 
@@ -33,12 +33,10 @@ void Systick_Init(void) {
 
 
 void SysTick_Handler(void) {
-	
 	processSoftTimer16b(&mainLoopTimer);
 	LCD_ProcessContrastBooster();
 	Encoder_Process();
-	
-	
+	Sound_Process();
 }
 
 

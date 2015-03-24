@@ -14,7 +14,8 @@
 #include "adc.h"
 #include "external_adc.h"
 #include "power_monitor.h"
-
+#include "lcd_contrast.h"
+#include "sound.h"
 
 uint8_t device_mode;
 
@@ -81,8 +82,8 @@ void COMPARATOR_IRQHandler(void) {
         ADC_LC_SaveCalibration();
         ADC_LV_SaveCalibration();
         ExtADC_SaveCalibration();
-		// Contrast - TODO
-        // Beeper - TODO
+		LCD_SaveContrastSetting();
+        Sound_SaveSetting();
 		
 		EE_SaveSystemSettings();
 	}

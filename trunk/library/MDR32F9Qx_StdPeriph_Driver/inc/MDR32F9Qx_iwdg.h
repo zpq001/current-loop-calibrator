@@ -26,6 +26,7 @@
 #define __MDR32F9Qx_IWDG_H
 
 /* Includes ------------------------------------------------------------------*/
+#include "MDR32F9Qx_config.h"
 #include "MDR32F9Qx_lib.h"
 
 /** @addtogroup __MDR32F9Qx_StdPeriph_Driver MDR32F9Qx Standard Peripherial Driver
