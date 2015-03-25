@@ -139,7 +139,7 @@ void LCD_Init(void) {
     set_ctrl(LCD_E, 0);
     set_ctrl(LCD_RW, 0);
     set_ctrl(LCD_A0, 0);
-    DWT_DelayUs(20000);
+    DWT_DelayUs(50000);
 	set_db_dir(DB_OUTPUT);
     write_db4(0x03);
 	DWT_DelayUs(50);

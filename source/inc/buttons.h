@@ -52,8 +52,8 @@
 
 
 // Set time options - all delays are in units of ProcessButtons() call period.
-#define LONG_PRESS_DELAY	10		// After this delay button actions will be considered as long
-#define REPEAT_DELAY		6		// After this delay emulation of repeated pressing becomes active
+#define LONG_PRESS_DELAY	25		// After this delay button actions will be considered as long
+#define REPEAT_DELAY		15		// After this delay emulation of repeated pressing becomes active
 
 // Set inversion of raw_button_state
 #define RAW_BUTTON_INVERSE_MASK		0x00

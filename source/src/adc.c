@@ -38,7 +38,7 @@ void ADC_Initialize(void) {
 	sADCx.ADC_ClockSource      = ADC_CLOCK_SOURCE_ADC;
 	//sADCx.ADC_ChannelNumber    = ADC_CH_TEMP_SENSOR;		
 	sADCx.ADC_VRefSource       = ADC_VREF_SOURCE_EXTERNAL;
-	sADCx.ADC_Prescaler        = ADC_CLK_div_128;
+	sADCx.ADC_Prescaler        = ADC_CLK_div_512;
 	sADCx.ADC_DelayGo          = 7;
 	ADC1_Init (&sADCx);
     

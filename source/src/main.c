@@ -26,16 +26,17 @@
 
 SoftTimer16b_t adcUpdateTimer;
 
-
 int main(void) {
 	uint8_t system_settings_ok;
 	uint8_t settings_ok;
+	uint32_t dwt_time_mark;
 	
     // Initialize system 
 	hw_Setup_CPU_Clock();
 	hw_Init_DMA();
     DWT_Init();
-    
+	dwt_time_mark = DWT_StartDelayUs(1000000);
+	
     // Initialize software modules. 
     // All required HW setup is performed inside modules.
 	
@@ -81,10 +82,19 @@ int main(void) {
 			// other modules
 		}
 	}
+		
+    // Setup software timers
+	memset(&adcUpdateTimer, 0, sizeof(adcUpdateTimer));
+	adcUpdateTimer.top = 4;
+	adcUpdateTimer.enabled = 1;
+    
+	// Power supply monitor
+	PowerMonitor_Init();
+	// Start ISR-based syncronizer
+	Systick_Init();
 	
 	// Wait a bit for greeting message
-    DWT_DelayUs(500000);
-    Sound_Event(SE_Start);
+	while (DWT_DelayInProgress(dwt_time_mark));
 	
 	if ((system_settings_ok == 0) && (device_mode == MODE_NORMAL)) {
 		// Show error message!
@@ -95,22 +105,16 @@ int main(void) {
 		DWT_DelayUs(1000000);
 	}
 	
-    // Setup software timers
-	memset(&adcUpdateTimer, 0, sizeof(adcUpdateTimer));
-	adcUpdateTimer.top = 4;
-	adcUpdateTimer.enabled = 1;
-    
-    // GUI initialization depends on device mode
-    GUI_Init();
-    // Watchdog
+	// Setup and start watchdog
     hw_SetupWatchdog(25000);
-	// Power supply monitor
-	PowerMonitor_Init();
-	// Start ISR-based syncronizer
-	Systick_Init();
+	// GUI initialization depends on device mode
+    GUI_Init();
+	// Start main loop
+	mainLoopTimer.enabled = 1;	
+	Sound_Event(SE_Start);
 	
 	while (1) {
-		// Syncronize
+		// Synchronize
 		if (mainLoopTimer.flags.ovfl) {
 			__disable_irq();
 			mainLoopTimer.flags.ovfl = 0;
@@ -119,6 +123,7 @@ int main(void) {
 			IWDG_ReloadCounter();
             
             processSoftTimer16b(&adcUpdateTimer);
+			
             if ((adcUpdateTimer.flags.ovfl) || (device_mode == MODE_CALIBRATION)) {
                 adcUpdateTimer.flags.ovfl = 0;
                 ADC_UpdateLoopVoltage();
@@ -137,7 +142,9 @@ int main(void) {
             else if (encoder_delta)
                 Sound_Event(SE_EncoderConfirm);
             
-            GUI_Process();
+
+			GUI_Process();
+
 		}
 	}
 }

@@ -13,7 +13,7 @@
 
 #define KEYBOARD_SCAN_LINES     4
 #define KEYBOARD_FEEDBACK_LINES 5
-#define KEYBOARD_DELAY_US       10
+#define KEYBOARD_DELAY_US       20
 
 
 
