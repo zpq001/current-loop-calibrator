@@ -8,6 +8,8 @@
 #include "MDR32F9Qx_config.h"
 #include "MDR32F9Qx_port.h"
 #include "MDR32F9Qx_comp.h"
+#include "MDR32F9Qx_dac.h"
+#include "MDR32F9Qx_iwdg.h"
 #include "hw_utils.h"
 #include "eeprom.h"
 #include "dac.h"
@@ -16,11 +18,13 @@
 #include "power_monitor.h"
 #include "lcd_contrast.h"
 #include "sound.h"
+#include "dwt_delay.h"
 
 uint8_t device_mode;
 
 void PowerMonitor_Init(void) {
-    
+    uint32_t temp32u;
+	
     COMP_InitTypeDef COMP_InitStructure;
     COMP_CVRefInitTypeDef COMP_CVRefInitStructure;
     PORT_InitTypeDef PORT_InitStructure;
@@ -45,8 +49,17 @@ void PowerMonitor_Init(void) {
     PORT_InitStructure.PORT_Pin = (1 << POWER_MONITOR_PIN);
 	PORT_Init(POWER_MONITOR_PORT, &PORT_InitStructure);
     
+	// Wait until power supply is stable
+	temp32u = DWT_StartDelayUs(50000);
+	while (DWT_DelayInProgress(temp32u)) {
+		if (COMP_GetFlagStatus(COMP_STATUS_FLAG_SY) == SET) {
+			// False triggering - restart delay
+			temp32u = DWT_StartDelayUs(50000);
+		}
+	}
     // Read and clear comparator result latch
     COMP_GetResultLatch();
+	
     COMP_ITConfig(ENABLE);
 	
 	NVIC_EnableIRQ(COMPARATOR_IRQn);
@@ -58,8 +71,7 @@ void COMPARATOR_IRQHandler(void) {
 	// When we get here,  main power supply is off and MCU operates from on-board capacitors
 	// Disable all power-consuming devices and reduce F_CPU
     __disable_irq();
-	// Stop watchdog
-	// TODO
+	
 	
 	PORT_DeInit(MDR_PORTA);
 	PORT_DeInit(MDR_PORTB);
@@ -67,6 +79,7 @@ void COMPARATOR_IRQHandler(void) {
 	PORT_DeInit(MDR_PORTD);
 	PORT_DeInit(MDR_PORTE);
 	PORT_DeInit(MDR_PORTF);
+	DAC2_Cmd(DISABLE);
 	
 	hw_Switch_CPU_Clock_to_HSI();
 	
@@ -89,6 +102,8 @@ void COMPARATOR_IRQHandler(void) {
 	}
 	
 	// Safely wait until power suply goes down.
-	while(1);
+	while(1) {
+		IWDG_ReloadCounter();
+	}
 }
 

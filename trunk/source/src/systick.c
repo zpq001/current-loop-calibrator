@@ -27,7 +27,8 @@ void Systick_Init(void) {
 	// Setup software timers
 	memset(&mainLoopTimer, 0, sizeof(mainLoopTimer));
 	mainLoopTimer.top = 19;
-	mainLoopTimer.enabled = 1;
+	// Must be set by main() when it is ready
+	//mainLoopTimer.enabled = 1;
 }
 
 

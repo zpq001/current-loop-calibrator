@@ -64,16 +64,16 @@ void ExtADC_Initialize(void) {
     
     // Default calibration
 	adc_calibration_low_gain.point1.value = 0;
-	adc_calibration_low_gain.point1.code = 2048 * EXTADC_OVERSAMPLE;
+	adc_calibration_low_gain.point1.code = 4096 * EXTADC_OVERSAMPLE;
 	adc_calibration_low_gain.point2.value = 400000;
-	adc_calibration_low_gain.point2.code = (2048+1886) * EXTADC_OVERSAMPLE;
+	adc_calibration_low_gain.point2.code = (4096 + 1886) * EXTADC_OVERSAMPLE;
     adc_calibration_low_gain.scale = 1000L;
 	CalculateCoefficients(&adc_calibration_low_gain);
     
     adc_calibration_high_gain.point1.value = 0;
-	adc_calibration_high_gain.point1.code = 2048 * EXTADC_OVERSAMPLE;
+	adc_calibration_high_gain.point1.code = 4096 * EXTADC_OVERSAMPLE;
 	adc_calibration_high_gain.point2.value = 40000;
-	adc_calibration_high_gain.point2.code = (2048+1886) * EXTADC_OVERSAMPLE;
+	adc_calibration_high_gain.point2.code = (4096 + 1886) * EXTADC_OVERSAMPLE;
     adc_calibration_high_gain.scale = 10000L;
 	CalculateCoefficients(&adc_calibration_high_gain);
     
@@ -106,8 +106,8 @@ void ExtADC_UpdateCurrent(void) {
 	DWT_DelayUs(100);
     conversion_result[2] = getData(CH_HIGH_GAIN);
     // Pseudo-differential
-	adc_low_gain_code = conversion_result[1] + 4096;
-	adc_high_gain_code = conversion_result[2] + 4096;    
+	adc_low_gain_code = conversion_result[1] + (4096*EXTADC_OVERSAMPLE);
+	adc_high_gain_code = conversion_result[2] + (4096*EXTADC_OVERSAMPLE);
     adc_low_gain_code -= conversion_result[0];
     adc_high_gain_code -= conversion_result[0];
     

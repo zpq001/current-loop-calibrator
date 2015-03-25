@@ -169,7 +169,7 @@ void Sound_Process(void) {
                     } else {
                         set_output(0);  // Silence
                     }
-                    ms_counter = tone_ptr->tone_period;
+                    ms_counter = tone_ptr->duration;
                     fsm_state = PLAYING_TONE;
                 } else {
                     // End of melody
