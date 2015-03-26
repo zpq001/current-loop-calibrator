@@ -8,7 +8,7 @@
 #include "external_adc.h"
 #include "dac.h"
 #include "power_monitor.h"
-
+#include "sound.h"
 
 
 buttons_t buttons;
@@ -64,8 +64,8 @@ void guiInitialize(void)
     dac_state.total_cycles = 95684;
     dac_state.current_cycle = 87521;
 
-    //device_mode = MODE_NORMAL;
-    device_mode = MODE_CALIBRATION;
+    device_mode = MODE_NORMAL;
+    //device_mode = MODE_CALIBRATION;
 
     contrastSetting = 10;
     sound_enabled = 1;
@@ -189,19 +189,29 @@ void DAC_SaveSettings(void) {
 
 
 
-void DAC_SetSettingConst(uint32_t value) {
+uint8_t DAC_SetSettingConst(uint32_t value) {
+    uint8_t result = SETTING_OK;
+    if (value < DAC_MIN_SETTING) {
+        value = DAC_MIN_SETTING;
+        result = SETTING_LIM_BY_MIN;
+    } else if (value > DAC_MAX_SETTING) {
+        value = DAC_MAX_SETTING;
+        result = SETTING_LIM_BY_MAX;
+    }
     dac_state.setting[dac_state.profile] = value;
+    return result;
 }
 
 void DAC_SetCalibrationPoint(uint8_t pointNumber) {
 }
 
-void DAC_SetProfile(int16_t num) {
+uint8_t DAC_SetProfile(int16_t num) {
     if (num >= PROFILE_COUNT)
         num = 0;
     else if (num < 0)
         num = PROFILE_COUNT - 1;
     dac_state.profile = num;
+    return dac_state.profile;
 }
 
 void DAC_SetSettingWaveMax(uint32_t value) {
@@ -328,3 +338,34 @@ uint8_t Sound_GetEnabled(void) {
 }
 
 
+
+void Sound_Event(uint8_t event) {
+    if (sound_enabled) {
+        switch (event) {
+            case SE_Start:
+
+                break;
+            case SE_KeyConfirm:
+
+                break;
+            case SE_KeyIllegal:
+
+                break;
+            case SE_EncoderConfirm:
+
+                break;
+            case SE_EncoderIllegal:
+
+                break;
+            case SE_SettingConfirm:
+
+                break;
+            case SE_SettingIllegal:
+
+                break;
+            case SE_CyclesDone:
+
+                break;
+        }
+    }
+}

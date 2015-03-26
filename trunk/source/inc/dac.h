@@ -9,6 +9,19 @@
 #define PROFILE_COUNT	2
 
 
+#define DAC_MAX_SETTING     24000   // uA
+#define DAC_MIN_SETTING     100     // uA
+#define DAC_CYCLES_MAX      100000
+#define DAC_CYCLES_MIN      1
+
+
+#define SETTING_OK          0
+#define SETTING_LIM_BY_MIN  (1<<0)
+#define SETTING_LIM_BY_MAX  (1<<1)
+
+
+
+
 enum DacModes {DAC_MODE_CONST, DAC_MODE_WAVEFORM};
 enum SignalWaveforms {WAVE_MEANDR, WAVE_SAW_DIRECT, WAVE_SAW_REVERSED};
 
@@ -25,8 +38,8 @@ void DAC_SaveCalibration(void);
 void DAC_RestoreSettings(void);
 void DAC_SaveSettings(void);
 
-void DAC_SetSettingConst(uint32_t newValue);
-void DAC_SetProfile(int16_t num);
+uint8_t DAC_SetSettingConst(uint32_t value);
+uint8_t DAC_SetProfile(int16_t num);
 void DAC_SetSettingWaveMax(uint32_t value);
 void DAC_SetSettingWaveMin(uint32_t value);
 void DAC_SetWaveform(uint8_t newWaveForm);

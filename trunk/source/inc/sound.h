@@ -4,7 +4,7 @@
 
 
 enum SoundEvents {
-    SE_Start,
+    SE_Start = 1,
     SE_KeyConfirm,
     SE_KeyIllegal,
     SE_EncoderConfirm,

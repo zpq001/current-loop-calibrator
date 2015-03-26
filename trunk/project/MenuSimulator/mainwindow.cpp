@@ -32,7 +32,7 @@ keyCodeRecord_t keyCodeTable[] = {
     { APP_KEY_OK,       KEY_OK},
     { APP_KEY_ESC,      KEY_ESC},
     { APP_KEY_CONST,    KEY_OUTPUT_CONST},
-    { APP_KEY_ALTERN,   KEY_OUTPUT_ALTERN},
+    { APP_KEY_ALTERN,   KEY_OUTPUT_WAVE},
     { APP_KEY_NUM0,     KEY_NUM0},
     { APP_KEY_NUM1,     KEY_NUM1},
     { APP_KEY_NUM2,     KEY_NUM2},
