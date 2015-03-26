@@ -310,14 +310,23 @@ void DAC_SaveSettings(void) {
 
 
 
-void DAC_SetSettingConst(uint32_t value) {
+uint8_t DAC_SetSettingConst(uint32_t value) {
+    uint8_t result = SETTING_OK;
+    if (value < DAC_MIN_SETTING) {
+        value = DAC_MIN_SETTING;
+        result = SETTING_LIM_BY_MIN;
+    } else if (value > DAC_MAX_SETTING) {
+        value = DAC_MAX_SETTING;
+        result = SETTING_LIM_BY_MAX;
+    }
     dac_state.setting[dac_state.profile] = value;
 	if (dac_state.mode == DAC_MODE_CONST) {
 		DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
 	}
+    return result;
 }
 
-void DAC_SetProfile(int16_t num) {
+uint8_t DAC_SetProfile(int16_t num) {
 	if (num >= PROFILE_COUNT)
 		num = 0;
 	else if (num < 0)
@@ -326,6 +335,7 @@ void DAC_SetProfile(int16_t num) {
 		if (dac_state.mode == DAC_MODE_CONST) {
 		DAC_UpdateOutput(dac_state.setting[dac_state.profile]);
 	}
+    return dac_state.profile;
 }
 
 void DAC_SetSettingWaveMax(uint32_t value) {

@@ -207,6 +207,8 @@ void LCD_InsertCharsXY(uint8_t x, uint8_t y, const char *data, uint8_t count) {
     LCD_InsertChars(data, count);
 }
 
+// TODO: cursor blink!!
+
 void LCD_CaptureKeyboard(void) {
     uint8_t i,j;
     uint32_t keyboard_feedback;

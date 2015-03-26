@@ -26,7 +26,7 @@
 #define KEY_NUM8            (1<<6)
 #define KEY_NUM7            (1<<5)
 
-#define KEY_OUTPUT_ALTERN   (1<<3)
+#define KEY_OUTPUT_WAVE   (1<<3)
 #define KEY_BACKSPACE       (1<<2)
 #define KEY_DOT             (1<<1)
 #define KEY_NUM0            (1<<0)

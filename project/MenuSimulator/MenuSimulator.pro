@@ -22,18 +22,17 @@ SOURCES += main.cpp\
     keydriver.cpp \
     textdisplay.cpp \
     gui_wrapper.c \
-    ../../source/src/gui_core.c \
     ../../source/src/gui_top.c \
     ../../source/src/utils.c \
     ../../source/src/linear_calibration.c \
-    tdd_verification.cpp
+    tdd_verification.cpp \
+    ../../source/src/gui_core.c
 
 HEADERS  += mainwindow.h \
     keydriver.h \
     textdisplay.h \
     ../../source/inc/buttons.h \
     gui_wrapper.h \
-    ../../source/inc/gui_core.h \
     ../../source/inc/gui_top.h \
     ../../source/inc/adc.h \
     ../../source/inc/dac.h \
@@ -42,6 +41,8 @@ HEADERS  += mainwindow.h \
     ../../source/inc/linear_calibration.h \
     ../../source/inc/encoder.h \
     tdd_verification.h \
-    ../../source/inc/power_monitor.h
+    ../../source/inc/power_monitor.h \
+    ../../source/inc/gui_core.h \
+    ../../source/inc/sound.h
 
 FORMS    += mainwindow.ui
