@@ -25,8 +25,8 @@ static calibration_t adc_calibration_high_gain;
 static int32_t ext_current;
 static uint8_t ext_current_range;
 
-static uint32_t adc_low_gain_code;
-static uint32_t adc_high_gain_code;
+static int32_t adc_low_gain_code;
+static int32_t adc_high_gain_code;
 
 void ExtADC_Initialize(void) {
 	
@@ -64,16 +64,16 @@ void ExtADC_Initialize(void) {
     
     // Default calibration
 	adc_calibration_low_gain.point1.value = 0;
-	adc_calibration_low_gain.point1.code = 4096 * EXTADC_OVERSAMPLE;
+	adc_calibration_low_gain.point1.code = 0;
 	adc_calibration_low_gain.point2.value = 400000;
-	adc_calibration_low_gain.point2.code = (4096 + 1886) * EXTADC_OVERSAMPLE;
+	adc_calibration_low_gain.point2.code = 1886 * EXTADC_OVERSAMPLE;
     adc_calibration_low_gain.scale = 1000L;
 	CalculateCoefficients(&adc_calibration_low_gain);
     
     adc_calibration_high_gain.point1.value = 0;
-	adc_calibration_high_gain.point1.code = 4096 * EXTADC_OVERSAMPLE;
+	adc_calibration_high_gain.point1.code = 0;
 	adc_calibration_high_gain.point2.value = 40000;
-	adc_calibration_high_gain.point2.code = (4096 + 1886) * EXTADC_OVERSAMPLE;
+	adc_calibration_high_gain.point2.code = 1886 * EXTADC_OVERSAMPLE;
     adc_calibration_high_gain.scale = 10000L;
 	CalculateCoefficients(&adc_calibration_high_gain);
     
@@ -99,29 +99,25 @@ static uint32_t getData(uint8_t channel) {
 
 
 void ExtADC_UpdateCurrent(void) {
-    volatile uint32_t conversion_result[3];
-    conversion_result[0] = getData(CH_VGND);
+	int32_t vgnd_code = getData(CH_VGND);
 	DWT_DelayUs(100);
-    conversion_result[1] = getData(CH_LOW_GAIN);
+    adc_low_gain_code = getData(CH_LOW_GAIN);
 	DWT_DelayUs(100);
-    conversion_result[2] = getData(CH_HIGH_GAIN);
+    adc_high_gain_code = getData(CH_HIGH_GAIN);
     // Pseudo-differential
-	adc_low_gain_code = conversion_result[1] + (4096*EXTADC_OVERSAMPLE);
-	adc_high_gain_code = conversion_result[2] + (4096*EXTADC_OVERSAMPLE);
-    adc_low_gain_code -= conversion_result[0];
-    adc_high_gain_code -= conversion_result[0];
-    
-    // TODO : use signed arithmetic (remove 4096 offset - unnecessary)
-    
-    if ((conversion_result[2] > 100*EXTADC_OVERSAMPLE) && (conversion_result[2] < 4000*EXTADC_OVERSAMPLE)) {
-        ext_current = GetValueForCode(&adc_calibration_high_gain, adc_high_gain_code);
-        ext_current_range = EXTADC_LOW_RANGE;
-    } else {
+    adc_low_gain_code -= vgnd_code;
+    adc_high_gain_code -= vgnd_code;
+
+	ext_current = GetValueForCode(&adc_calibration_high_gain, adc_high_gain_code);
+	if ((ext_current >= -40000) && (ext_current <= 40000)) {
+		ext_current_range = EXTADC_LOW_RANGE;
+	} else {
         ext_current = GetValueForCode(&adc_calibration_low_gain, adc_low_gain_code);
-        if ((conversion_result[1] > 100*EXTADC_OVERSAMPLE) && (conversion_result[1] < 4000*EXTADC_OVERSAMPLE))
-            ext_current_range = EXTADC_HIGH_RANGE;
-        else
-            ext_current_range = EXTADC_HIGH_OVERLOAD;
+		if ((ext_current >= -400000) && (ext_current <= 400000)) {
+			ext_current_range = EXTADC_HIGH_RANGE;
+		} else {		
+			ext_current_range = EXTADC_HIGH_OVERLOAD;
+        }
     }
 }
 

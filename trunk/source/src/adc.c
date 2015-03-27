@@ -57,14 +57,14 @@ void ADC_Initialize(void) {
     
    	// Default calibration
 	adc_voltage_calibration.point1.value = 0;
-	adc_voltage_calibration.point1.code = 0 * VOLTAGE_ADC_OVERSAMPLE;
+	adc_voltage_calibration.point1.code = 0;
 	adc_voltage_calibration.point2.value = 20000;
 	adc_voltage_calibration.point2.code = 3276 * VOLTAGE_ADC_OVERSAMPLE;
     adc_voltage_calibration.scale = 10000L;
 	CalculateCoefficients(&adc_voltage_calibration);
     
     adc_current_calibration.point1.value = 0;
-	adc_current_calibration.point1.code = 0 * CURRENT_ADC_OVERSAMPLE;
+	adc_current_calibration.point1.code = 0;
 	adc_current_calibration.point2.value = 20000;
 	adc_current_calibration.point2.code = 3276 * CURRENT_ADC_OVERSAMPLE;
     adc_current_calibration.scale = 10000L;

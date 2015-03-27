@@ -106,7 +106,7 @@ int main(void) {
 	}
 	
 	// Setup and start watchdog
-    hw_SetupWatchdog(25000);
+//    hw_SetupWatchdog(25000);
 	// GUI initialization depends on device mode
     GUI_Init();
 	// Start main loop
@@ -136,13 +136,6 @@ int main(void) {
             ProcessButtons();
 			Encoder_UpdateDelta();
 			
-            // Temporary!
-            if (buttons.action_down)
-                Sound_Event(SE_KeyConfirm);
-            else if (encoder_delta)
-                Sound_Event(SE_EncoderConfirm);
-            
-
 			GUI_Process();
 
 		}

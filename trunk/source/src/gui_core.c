@@ -32,8 +32,7 @@ uint8_t processEditor(edit_t *edit, uint8_t code) {
                 edit->entered_digits++;
                 if(edit->dot_position >= 0)
                     edit->dot_position++;
-                }
-                // Check maximum
+				// Check maximum
                 if (getScaledEditValue(edit) > edit->max_value) {
                     // Revert
                     edit->value = temp32u;
@@ -41,6 +40,9 @@ uint8_t processEditor(edit_t *edit, uint8_t code) {
                     edit->entered_digits--;
                     result = EDIT_AT_MAX;
                 }
+            } else {
+				result = EDIT_AT_MAX;
+			}
         }
     } else if (code == EDIT_DOT) {
         if (edit->fract_digits > 0) {
