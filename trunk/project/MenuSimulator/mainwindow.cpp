@@ -6,7 +6,7 @@
 #include "keydriver.h"
 #include "gui_wrapper.h"
 #include "buttons.h"
-//#include "tdd_verification.h"
+#include "tdd_verification.h"
 
 // Internal button codes
 enum buttons {
@@ -163,6 +163,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //TDD_VerifyCalibration();
     //TDD_VerifyWaveformGenerator();
+    //TDD_VerifyRound();
+    //TDD_VerifyRoundSigned();
 }
 
 MainWindow::~MainWindow()

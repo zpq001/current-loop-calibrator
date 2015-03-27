@@ -91,9 +91,8 @@ static void set_output(uint8_t state) {
 }
 
 
-uint8_t Sound_SetEnabled(uint8_t state) {
+void Sound_SetEnabled(uint8_t state) {
     sound_enabled = state;
-    return sound_enabled;
 }
 
 uint8_t Sound_GetEnabled(void) {
@@ -118,8 +117,8 @@ void Sound_Event(uint8_t event) {
             case SE_KeyConfirm:
                 new_melody_ptr = _beep_KeyConfirm;
                 break;
-            case SE_KeyIllegal:
-                new_melody_ptr = _beep_KeyIllegal;
+            case SE_KeyReject:
+                new_melody_ptr = _beep_KeyReject;
                 break;
             case SE_EncoderConfirm:
                 new_melody_ptr = _beep_EncoderConfirm;

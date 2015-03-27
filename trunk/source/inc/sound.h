@@ -6,7 +6,7 @@
 enum SoundEvents {
     SE_Start = 1,
     SE_KeyConfirm,
-    SE_KeyIllegal,
+    SE_KeyReject,
     SE_EncoderConfirm,
     SE_EncoderIllegal,
     SE_SettingConfirm,
@@ -22,7 +22,7 @@ typedef struct {
 
 
 void Sound_Init(void);
-uint8_t Sound_SetEnabled(uint8_t state);
+void Sound_SetEnabled(uint8_t state);
 uint8_t Sound_GetEnabled(void);
 void Sound_RestoreSetting(void);
 void Sound_SaveSetting(void);

@@ -11,6 +11,7 @@
 #include "lcd_contrast.h"
 #include "power_monitor.h"
 #include "sound.h"
+#include "utils.h"
 
 #ifndef _MENU_SIMULATOR_
 #include "lcd_melt20s4.h"
@@ -98,6 +99,32 @@ void GUI_Process(void) {
 }
 
 
+static void displayAmpMeter(void) {
+    int32_t temp32;
+    char str[10];
+
+    // Ampermeter result
+    temp32 = ExtADC_GetCurrent();
+
+    switch (ExtADC_GetRange()) {
+        case EXTADC_LOW_RANGE:
+            round_int32(&temp32, 1);
+            i32toa_align_right(temp32, str, 10, 4, 3);
+            LCD_InsertCharsXY(13, 3, &str[2], 5);
+            break;
+        case EXTADC_HIGH_RANGE:
+            round_int32(&temp32, 2);
+            i32toa_align_right(temp32, str, 10, 4, 3);
+            LCD_InsertCharsXY(13, 3, &str[0], 5);
+            break;
+        default:
+            str[3] = str[4] = '*';  // Overload
+            LCD_InsertCharsXY(13, 3, &str[0], 5);
+    }
+
+}
+
+
 static void runNormalMode(void) {
     int32_t temp32;
     uint32_t temp32u;
@@ -115,19 +142,19 @@ static void runNormalMode(void) {
                 LCD_Clear();
                 LCD_PutStringXY(0,0,"Пост. ток. Профиль  ");
                 LCD_PutStringXY(0,1,"Уст. ток:         мА");
-                LCD_PutStringXY(10,2,"Uвых=    В");
-                //LCD_PutStringXY(0,2,"Iвых=   мА");
+                LCD_PutStringXY(0,2,"Выход:     B      мА");
                 LCD_PutStringXY(0,3,"Амперметр:        мА");
                 DAC_SetMode(DAC_MODE_CONST);
             }
             // Profile number
-            temp32 = DAC_GetActiveProfile();
             if (buttons.action_down & KEY_OUTPUT_CTRL) {
-                temp32 = DAC_SetProfile(temp32 + 1);
+                temp32 = DAC_GetActiveProfile() + 1;
+                temp8u = DAC_SetProfile((temp32 > DAC_PROFILE_COUNT) ? 1 : temp32);
+                sound_event = (temp8u == VALUE_IN_RANGE) ? SE_SettingConfirm : SE_SettingIllegal;
                 editMode = 0;
-                sound_event = SE_SettingConfirm;
             }
-            i32toa_align_right(temp32+1, str, 10, 1, -1);
+            temp32 = DAC_GetActiveProfile();
+            i32toa_align_right(temp32, str, 10, 1, -1);
             LCD_InsertCharsXY(19, 0, &str[8], 1);
 
             // Current setting control
@@ -136,6 +163,7 @@ static void runNormalMode(void) {
                 if (editorCodeValid) {
                     startEditor(&edit, editorCode, 1, DAC_MAX_SETTING / 100);
                     editMode = 1;
+                    // TODO: add cursor blinking
                     sound_event = SE_KeyConfirm;
                 }
             } else {
@@ -143,14 +171,14 @@ static void runNormalMode(void) {
                 if (buttons.action_down & KEY_OK) {
                     temp32u = getScaledEditValue(&edit) * 100;
                     temp8u = DAC_SetSettingConst(temp32u);
-                    sound_event = (temp8u == SETTING_OK) ? SE_SettingConfirm : SE_SettingIllegal;
+                    sound_event = (temp8u == VALUE_IN_RANGE) ? SE_SettingConfirm : SE_SettingIllegal;
                     editMode = 0;
                 } else if (buttons.action_down & KEY_ESC) {
                     editMode = 0;
                     sound_event = SE_KeyConfirm;
                 } else if (editorCodeValid) {
                     temp8u = processEditor(&edit, editorCode);
-                    sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyIllegal;
+                    sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
                 }
             }
             // Current setting display
@@ -163,37 +191,22 @@ static void runNormalMode(void) {
                 i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
                 LCD_InsertCharsXY(14, 1, &str[5], 4);
             }
-#if 1
-            // Loop health
-            if (ADC_GetLoopStatus() == LOOP_OK)
-                LCD_PutStringXY(0,2,"Подключ.");
-            else
-                LCD_PutStringXY(0,2,"Обрыв   ");
-#else
+
             // Output current
-            temp32 = ADC_GetLoopCurrent();
-            i32toa_align_right(temp32, str, 10, 4, 3);
-            LCD_InsertCharsXY(5, 2, &str[3], 4);
-#endif
+            temp32u = ADC_GetLoopCurrent();
+            round_uint32(&temp32u, 1);
+            i32toa_align_right(temp32u, str, 10, 4, 3);
+            LCD_InsertCharsXY(14, 2, &str[3], 4);
+
             // Output voltage
-            temp32 = ADC_GetLoopVoltage();
-            i32toa_align_right(temp32, str, 10, 4, 3);
-            LCD_InsertCharsXY(15, 2, &str[3], 4);
+            temp32u = ADC_GetLoopVoltage();
+            round_uint32(&temp32u, 1);
+            i32toa_align_right(temp32u, str, 10, 4, 3);
+            LCD_InsertCharsXY(7, 2, &str[3], 4);
 
             // Ampermeter result
-            temp32 = ExtADC_GetCurrent();
-            i32toa_align_right(temp32, str, 10, 4, 3);
-            switch (ExtADC_GetRange()) {
-                case EXTADC_LOW_RANGE:
-                    LCD_InsertCharsXY(13, 3, &str[2], 5);
-                    break;
-                case EXTADC_HIGH_RANGE:
-                    LCD_InsertCharsXY(13, 3, &str[0], 5);
-                    break;
-                default:
-                    str[1] = str[2] = str[3] = str[4] = '-';  // Overload
-                    LCD_InsertCharsXY(13, 3, &str[0], 5);
-            }
+            displayAmpMeter();
+
             // Next item
             if (buttons.action_down & KEY_OUTPUT_WAVE) {
                 new_state = MENU_WAVEFORM_OUTPUT;
@@ -216,12 +229,15 @@ static void runNormalMode(void) {
             if (buttons.raw_state & KEY_OUTPUT_WAVE) {
                 if (buttons.action_down & KEY_NUM1) {
                     DAC_SetWaveform(WAVE_MEANDR);
+                    sound_event = SE_SettingConfirm;
                 }
                 else if (buttons.action_down & KEY_NUM2) {
                     DAC_SetWaveform(WAVE_SAW_DIRECT);
+                    sound_event = SE_SettingConfirm;
                 }
                 else if (buttons.action_down & KEY_NUM3) {
                     DAC_SetWaveform(WAVE_SAW_REVERSED);
+                    sound_event = SE_SettingConfirm;
                 }
             }
             // Display waveform
@@ -234,9 +250,8 @@ static void runNormalMode(void) {
             if (encoder_delta != 0) {
                 temp32 = DAC_GetPeriod();
                 temp32 += encoder_delta * 100;
-                if (temp32 < 100) temp32 = 100;
-                else if (temp32 > 100000) temp32 = 1000;
-                DAC_SetPeriod(temp32);
+                temp8u = DAC_SetPeriod(temp32);
+                sound_event = (temp8u == VALUE_IN_RANGE) ? SE_EncoderConfirm : SE_EncoderIllegal;
             }
             // Display waveform period
             temp32u = DAC_GetPeriod();
@@ -244,8 +259,10 @@ static void runNormalMode(void) {
             LCD_InsertCharsXY(14, 1, &str[2], 5);
 
             // Check restart button
-            if (buttons.action_down & KEY_OUTPUT_CTRL)
+            if (buttons.action_down & KEY_OUTPUT_CTRL) {
                 DAC_RestartCycles();
+                sound_event = SE_KeyConfirm;
+            }
 
             // Control cycles
             if (!editMode) {
@@ -254,17 +271,21 @@ static void runNormalMode(void) {
                     //startEditor(&edit, editorCode, 1);
                     startEditor(&edit, editorCode, 0, DAC_CYCLES_MAX);
                     editMode = 1;
+                    sound_event = SE_KeyConfirm;
                 }
             } else {
                 // Check enter or cancel keys
                 if (buttons.action_down & KEY_OK) {
                     temp32u = getScaledEditValue(&edit);
-                    DAC_SetTotalCycles(temp32u);
+                    temp8u = DAC_SetTotalCycles(temp32u);
+                    sound_event = (temp8u == VALUE_IN_RANGE) ? SE_SettingConfirm : SE_SettingIllegal;
                     editMode = 0;
                 } else if (buttons.action_down & KEY_ESC) {
                     editMode = 0;
+                    sound_event = SE_KeyConfirm;
                 } else if (editorCodeValid)
-                    processEditor(&edit, editorCode);
+                    temp8u = processEditor(&edit, editorCode);
+                    sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
             }
             // Display cycles
             temp32u = DAC_GetCurrentCycle();
@@ -281,29 +302,21 @@ static void runNormalMode(void) {
             }
 
             // Ampermeter result
-            temp32 = ExtADC_GetCurrent();
-            i32toa_align_right(temp32, str, 10, 4, 3);
-            switch (ExtADC_GetRange()) {
-                case EXTADC_LOW_RANGE:
-                    LCD_InsertCharsXY(13, 3, &str[2], 5);
-                    break;
-                case EXTADC_HIGH_RANGE:
-                    LCD_InsertCharsXY(13, 3, &str[0], 5);
-                    break;
-                default:
-                    str[3] = str[4] = '-';  // Overload
-                    LCD_InsertCharsXY(13, 3, &str[0], 5);
-            }
+            displayAmpMeter();
+
             // Next item
             if (buttons.action_down & KEY_OUTPUT_CONST) {
                 new_state = MENU_CONST_OUTPUT;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.raw_state & KEY_OUTPUT_WAVE) {
                 if (buttons.action_down & KEY_NUM7) {
                     new_state = MENU_WAVEFORM_EDIT;
                     wave_edit_mode = EDIT_LOW_AMP;
+                    sound_event = SE_KeyConfirm;
                 } else if (buttons.action_down & KEY_NUM8) {
                     new_state = MENU_WAVEFORM_EDIT;
                     wave_edit_mode = EDIT_HIGH_AMP;
+                    sound_event = SE_KeyConfirm;
                 }
             }
             break;
@@ -324,20 +337,24 @@ static void runNormalMode(void) {
                 if (editorCodeValid) {
                     startEditor(&edit, editorCode, 1, DAC_MAX_SETTING / 100);
                     editMode = 1;
+                    sound_event = SE_KeyConfirm;
                 }
             } else {
                 // Check enter or cancel keys
                 if (buttons.action_down & KEY_OK) {
                     temp32u = getScaledEditValue(&edit) * 100;
                     if (wave_edit_mode == EDIT_LOW_AMP)
-                        DAC_SetSettingWaveMin(temp32u);
+                        temp8u = DAC_SetSettingWaveMin(temp32u);
                     else
-                        DAC_SetSettingWaveMax(temp32u);
+                        temp8u = DAC_SetSettingWaveMax(temp32u);
+                    sound_event = (temp8u == VALUE_IN_RANGE) ? SE_SettingConfirm : SE_SettingIllegal;
                     editMode = 0;
                 } else if (buttons.action_down & KEY_ESC) {
+                    sound_event = SE_KeyConfirm;
                     editMode = 0;
                 } else if (editorCodeValid)
-                    processEditor(&edit, editorCode);
+                    temp8u = processEditor(&edit, editorCode);
+                    sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
             }
             // Display
             if (!editMode) {
@@ -356,8 +373,10 @@ static void runNormalMode(void) {
             // Next item
             if (buttons.action_down & KEY_OUTPUT_CONST) {
                 new_state = MENU_CONST_OUTPUT;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & (KEY_OK | KEY_ESC | KEY_OUTPUT_WAVE)) {
                 new_state = MENU_WAVEFORM_OUTPUT;
+                sound_event = SE_KeyConfirm;
             }
             break;
     }
@@ -408,18 +427,22 @@ static void runCalibrationMode(void) {
                 if (buttons.action_down & KEY_NUM1) encoder_delta = -1;
                 else if (buttons.action_down & KEY_NUM2) encoder_delta = 1;
             }
-            temp32 = LCD_GetContrastSetting();
+
             if (encoder_delta) {
-                temp32 += encoder_delta;
-                temp32 = LCD_SetContrastSetting(temp32);
+                temp32 = LCD_GetContrastSetting() + encoder_delta;
+                temp8u = LCD_SetContrastSetting(temp32);
+                sound_event = (temp8u == VALUE_IN_RANGE) ? SE_EncoderConfirm : SE_EncoderIllegal;
             }
+            temp32 = LCD_GetContrastSetting();
             i32toa_align_right(temp32 , str, 10, 1, -1);
             LCD_InsertCharsXY(18, 2, &str[7], 2);
             // Next item
             if (buttons.action_down & KEY_OK) {
                 new_state = SYS_BEEPER;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & KEY_ESC) {
 				new_state = SYS_BEEPER;
+                sound_event = SE_KeyConfirm;
 			}
             break;
         case SYS_BEEPER:
@@ -432,12 +455,12 @@ static void runCalibrationMode(void) {
                 if (buttons.action_down & KEY_NUM1) encoder_delta = -1;
                 else if (buttons.action_down & KEY_NUM2) encoder_delta = 1;
             }
-            temp32 = Sound_GetEnabled();
             if (encoder_delta) {
-                temp32 += encoder_delta;
-                temp32 = (temp32 <= 0) ? 0 : 1;
-                temp32 = Sound_SetEnabled(temp32);
+                temp32 = Sound_GetEnabled() + encoder_delta;
+                Sound_SetEnabled((temp32 <= 0) ? 0 : 1);
+                sound_event = SE_KeyConfirm;
             }
+            temp32 = Sound_GetEnabled();
             if (temp32 != 0)
                 LCD_PutStringXY(15,2," вкл");
             else
@@ -445,8 +468,10 @@ static void runCalibrationMode(void) {
             // Next item
             if (buttons.action_down & KEY_OK) {
                 new_state = SYS_DAC_CALIBRATION_LOW;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & KEY_ESC) {
 				new_state = SYS_DAC_CALIBRATION_LOW;
+                sound_event = SE_KeyConfirm;
 			}
             break;
         case SYS_DAC_CALIBRATION_LOW:
@@ -461,8 +486,10 @@ static void runCalibrationMode(void) {
                 startEditor(&edit, EDIT_NUM0, 3, 50000);
             }
             // User input
-            if (editorCodeValid)
-                processEditor(&edit, editorCode);
+            if (editorCodeValid) {
+                temp8u = processEditor(&edit, editorCode);
+                sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
+            }
             temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
             i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
             LCD_InsertCharsXY(11, 3, &str[2], 7);
@@ -473,8 +500,10 @@ static void runCalibrationMode(void) {
                 DAC_SaveCalibrationPoint(1, temp32);
                 ADC_SaveLoopCurrentCalibrationPoint(1, temp32);
                 new_state = SYS_DAC_CALIBRATION_HIGH;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & KEY_ESC) {
 				new_state = SYS_DAC_CALIBRATION_HIGH;
+                sound_event = SE_KeyConfirm;
 			}
             break;
         case SYS_DAC_CALIBRATION_HIGH:
@@ -488,8 +517,10 @@ static void runCalibrationMode(void) {
                 startEditor(&edit, EDIT_NUM0, 3, 50000);
             }
             // User input
-            if (editorCodeValid)
-                processEditor(&edit, editorCode);
+            if (editorCodeValid) {
+                temp8u = processEditor(&edit, editorCode);
+                sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
+            }
             temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
             i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
             LCD_InsertCharsXY(11, 3, &str[2], 7);
@@ -502,8 +533,10 @@ static void runCalibrationMode(void) {
                 ADC_SaveLoopCurrentCalibrationPoint(1, temp32);
                 ADC_LoopCurrentCalibrate();
                 new_state = SYS_ADC_VOLTAGE_CALIBRATION_LOW;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & KEY_ESC) {
 				new_state = SYS_ADC_VOLTAGE_CALIBRATION_LOW;
+                sound_event = SE_KeyConfirm;
 			}
             break;
         case SYS_ADC_VOLTAGE_CALIBRATION_LOW:
@@ -518,8 +551,10 @@ static void runCalibrationMode(void) {
                 startEditor(&edit, EDIT_NUM0, 3, 50000);
             }
             // User input
-            if (editorCodeValid)
-                processEditor(&edit, editorCode);
+            if (editorCodeValid) {
+                temp8u = processEditor(&edit, editorCode);
+                sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
+            }
             temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
             i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
             LCD_InsertCharsXY(11, 3, &str[2], 7);
@@ -529,8 +564,10 @@ static void runCalibrationMode(void) {
                 temp32 = getScaledEditValue(&edit);
                 ADC_SaveLoopVoltageCalibrationPoint(1, temp32);
                 new_state = SYS_ADC_VOLTAGE_CALIBRATION_HIGH;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & KEY_ESC) {
 				new_state = SYS_ADC_VOLTAGE_CALIBRATION_HIGH;
+                sound_event = SE_KeyConfirm;
 			}
             break;
         case SYS_ADC_VOLTAGE_CALIBRATION_HIGH:
@@ -545,8 +582,10 @@ static void runCalibrationMode(void) {
                 startEditor(&edit, EDIT_NUM0, 3, 50000);
             }
             // User input
-            if (editorCodeValid)
-                processEditor(&edit, editorCode);
+            if (editorCodeValid) {
+                temp8u = processEditor(&edit, editorCode);
+                sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
+            }
             temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
             i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
             LCD_InsertCharsXY(11, 3, &str[2], 7);
@@ -557,8 +596,10 @@ static void runCalibrationMode(void) {
                 ADC_SaveLoopVoltageCalibrationPoint(2, temp32);
                 ADC_LoopVoltageCalibrate();
                 new_state = SYS_EXTADC_CALIBRATION_ZERO;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & KEY_ESC) {
 				new_state = SYS_EXTADC_CALIBRATION_ZERO;
+                sound_event = SE_KeyConfirm;
 			}
             break;
         case SYS_EXTADC_CALIBRATION_ZERO:
@@ -573,15 +614,17 @@ static void runCalibrationMode(void) {
                 // Save zero calibration point
                 ExtADC_SaveCalibrationPoint(1, 0);
                 new_state = SYS_EXTADC_CALIBRATION_LOW_RANGE;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & KEY_ESC) {
 				new_state = SYS_EXTADC_CALIBRATION_LOW_RANGE;
+                sound_event = SE_KeyConfirm;
 			}
             break;
         case SYS_EXTADC_CALIBRATION_LOW_RANGE:
             // Display and adjust ampermeter calibration point for low range
             if (first_visit) {
                 drawCalibrateExtADCMenuHeader();
-                LCD_PutStringXY(0,1,"Калибровка 30мА");
+                LCD_PutStringXY(0,1,"Калибровка 40мА");
                 LCD_PutStringXY(0,2,"Измеренное значение:");
                 LCD_PutStringXY(18,3,"мА");
                 // Set current for first calibration point
@@ -589,8 +632,10 @@ static void runCalibrationMode(void) {
                 startEditor(&edit, EDIT_NUM0, 3, 1000000);
             }
             // User input
-            if (editorCodeValid)
-                processEditor(&edit, editorCode);
+            if (editorCodeValid) {
+                temp8u = processEditor(&edit, editorCode);
+                sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
+            }
             temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
             i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
             LCD_InsertCharsXY(11, 3, &str[2], 7);
@@ -600,15 +645,17 @@ static void runCalibrationMode(void) {
                 temp32 = getScaledEditValue(&edit);
                 ExtADC_SaveCalibrationPoint(2, temp32);
                 new_state = SYS_EXTADC_CALIBRATION_HIGH_RANGE;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & KEY_ESC) {
 				new_state = SYS_EXTADC_CALIBRATION_HIGH_RANGE;
+                sound_event = SE_KeyConfirm;
 			}
             break;
         case SYS_EXTADC_CALIBRATION_HIGH_RANGE:
             // Display and adjust ampermeter calibration point for low range
             if (first_visit) {
                 drawCalibrateExtADCMenuHeader();
-                LCD_PutStringXY(0,1,"Калибровка 300мА");
+                LCD_PutStringXY(0,1,"Калибровка 400мА");
                 LCD_PutStringXY(0,2,"Измеренное значение:");
                 LCD_PutStringXY(18,3,"мА");
                 // Set current for first calibration point
@@ -616,8 +663,10 @@ static void runCalibrationMode(void) {
                 startEditor(&edit, EDIT_NUM0, 3, 1000000);
             }
             // User input
-            if (editorCodeValid)
-                processEditor(&edit, editorCode);
+            if (editorCodeValid) {
+                temp8u = processEditor(&edit, editorCode);
+                sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
+            }
             temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
             i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
             LCD_InsertCharsXY(11, 3, &str[2], 7);
@@ -628,8 +677,10 @@ static void runCalibrationMode(void) {
                 ExtADC_SaveCalibrationPoint(3, temp32);
                 ExtADC_Calibrate();
                 new_state = SYS_DONE;
+                sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & KEY_ESC) {
 				new_state = SYS_DONE;
+                sound_event = SE_KeyConfirm;
 			}
             break;
         default:

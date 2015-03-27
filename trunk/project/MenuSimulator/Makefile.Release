@@ -84,7 +84,8 @@ DIST          =  mainwindow.h \
 		tdd_verification.h \
 		..\..\source\inc\power_monitor.h \
 		..\..\source\inc\gui_core.h \
-		..\..\source\inc\sound.h main.cpp \
+		..\..\source\inc\sound.h \
+		..\..\source\inc\utils.h main.cpp \
 		mainwindow.cpp \
 		keydriver.cpp \
 		textdisplay.cpp \
@@ -998,7 +999,8 @@ release/gui_wrapper.o: gui_wrapper.c ../../source/inc/buttons.h \
 		../../source/inc/external_adc.h \
 		../../source/inc/dac.h \
 		../../source/inc/linear_calibration.h \
-		../../source/inc/power_monitor.h
+		../../source/inc/power_monitor.h \
+		../../source/inc/sound.h
 	$(CC) -c $(CFLAGS) $(INCPATH) -o release\gui_wrapper.o gui_wrapper.c
 
 release/gui_top.o: ../../source/src/gui_top.c ../../source/inc/utils.h \
