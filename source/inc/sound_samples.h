@@ -29,16 +29,19 @@ const tone_t _beep_SyclesDone[] = {
 };
 
 const tone_t _melody_SettingConfirm[] = {
-    { FREQ(1000),	20 },
-    { FREQ(1400),	20 },
+    { FREQ(1000),	40 },
+	{ 0,	40 },
+    { FREQ(1200),	40 },
+	{0,	0}
 };
 
 const tone_t _melody_SettingIllegal[] = {
-    { FREQ(600),	20 },
-    { 0,	20 },
-    { FREQ(600),	20 },
-    { 0,	20 },
-    { FREQ(600),	20 },
+    { FREQ(600),	40 },
+    { 0,	40 },
+    { FREQ(600),	40 },
+    { 0,	40 },
+    { FREQ(600),	40 },
+	{0,	0}
 };
 
 

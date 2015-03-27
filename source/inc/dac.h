@@ -39,7 +39,7 @@ uint8_t DAC_SetProfile(uint32_t value);
 uint8_t DAC_SetSettingWaveMax(uint32_t value);
 uint8_t DAC_SetSettingWaveMin(uint32_t value);
 void DAC_SetWaveform(uint8_t newWaveForm);
-uint8_t DAC_SetPeriod(uint32_t value);
+uint8_t DAC_SetPeriod(int32_t value);
 void DAC_SetMode(uint8_t new_mode);
 uint8_t DAC_SetTotalCycles(uint32_t value);
 void DAC_RestartCycles(void);

@@ -50,6 +50,10 @@ edit_t edit;
 uint8_t editorCode;
 uint8_t editorCodeValid;
 uint8_t sound_event;
+static uint8_t dac_cycles_done;
+static uint8_t blink_counter;
+static uint8_t blink_flag;
+static const char spaces[] = "          ";
 
 RunFuncPtr runFunction;
 
@@ -87,41 +91,55 @@ void GUI_Init(void) {
     }
     first_visit = 1;
     editMode = 0;
+	dac_cycles_done = 0;
+	blink_counter = 0;
 }
 
 
 void GUI_Process(void) {
+	uint8_t edit_mode_old = editMode;
+	blink_counter = (blink_counter < 20) ? blink_counter + 1 : 0;
+	blink_flag = (blink_counter < 12) ? 1 : 0;
+	
     sound_event = 0;
+	if (dac_cycles_done) {
+		dac_cycles_done = 0;
+		sound_event = SE_CyclesDone;
+	}
     runFunction();
     if (sound_event) {
         Sound_Event(sound_event);
     }
+	
+	if (edit_mode_old != editMode) {
+		blink_counter = 0;
+	}	
+}
+
+void DAC_OnCyclesDone(void) {
+	dac_cycles_done = 1;
 }
 
 
 static void displayAmpMeter(void) {
     int32_t temp32;
     char str[10];
+	uint8_t range = ExtADC_GetRange();
 
     // Ampermeter result
     temp32 = ExtADC_GetCurrent();
 
-    switch (ExtADC_GetRange()) {
-        case EXTADC_LOW_RANGE:
-            round_int32(&temp32, 1);
-            i32toa_align_right(temp32, str, 10, 4, 3);
-            LCD_InsertCharsXY(13, 3, &str[2], 5);
-            break;
-        case EXTADC_HIGH_RANGE:
-            round_int32(&temp32, 2);
-            i32toa_align_right(temp32, str, 10, 4, 3);
-            LCD_InsertCharsXY(13, 3, &str[0], 5);
-            break;
-        default:
-            str[3] = str[4] = '*';  // Overload
-            LCD_InsertCharsXY(13, 3, &str[0], 5);
-    }
-
+	if (range == EXTADC_LOW_RANGE) {    
+		round_int32(&temp32, 1);
+		i32toa_align_right(temp32, str, 10, 4, 3);
+		LCD_InsertCharsXY(13, 3, &str[2], 5);
+    } else {
+		round_int32(&temp32, 2);
+		i32toa_align_right(temp32, str, 10, 4, 3);
+		if (range == EXTADC_HIGH_OVERLOAD)
+			str[3] = str[4] = '*';  // Overload
+        LCD_InsertCharsXY(13, 3, &str[0], 5);
+	}
 }
 
 
@@ -188,8 +206,11 @@ static void runNormalMode(void) {
                 LCD_InsertCharsXY(13, 1, &str[2], 5);
             } else {
                 temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
-                i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
-                LCD_InsertCharsXY(14, 1, &str[5], 4);
+				i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
+				if (blink_flag)
+					LCD_InsertCharsXY(14, 1, &str[5], 4);
+				else 
+					LCD_InsertCharsXY(14, 1, spaces, 4);
             }
 
             // Output current
@@ -239,6 +260,7 @@ static void runNormalMode(void) {
                     DAC_SetWaveform(WAVE_SAW_REVERSED);
                     sound_event = SE_SettingConfirm;
                 }
+				editorCodeValid = 0;
             }
             // Display waveform
             switch (DAC_GetWaveform()) {
@@ -283,9 +305,10 @@ static void runNormalMode(void) {
                 } else if (buttons.action_down & KEY_ESC) {
                     editMode = 0;
                     sound_event = SE_KeyConfirm;
-                } else if (editorCodeValid)
+                } else if (editorCodeValid) {
                     temp8u = processEditor(&edit, editorCode);
                     sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
+				}
             }
             // Display cycles
             temp32u = DAC_GetCurrentCycle();
@@ -298,7 +321,10 @@ static void runNormalMode(void) {
             } else {
                 temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
                 i32toa_align_right(edit.value , str, 10, temp8u, -1);
-                LCD_InsertCharsXY(15, 2, &str[4], 5);
+                if (blink_flag)
+					LCD_InsertCharsXY(15, 2, &str[4], 5);
+				else 
+					LCD_InsertCharsXY(15, 2, spaces, 5);
             }
 
             // Ampermeter result
@@ -349,12 +375,15 @@ static void runNormalMode(void) {
                         temp8u = DAC_SetSettingWaveMax(temp32u);
                     sound_event = (temp8u == VALUE_IN_RANGE) ? SE_SettingConfirm : SE_SettingIllegal;
                     editMode = 0;
+					buttons.action_down &= ~KEY_OK;		// prevent falling out
                 } else if (buttons.action_down & KEY_ESC) {
                     sound_event = SE_KeyConfirm;
                     editMode = 0;
-                } else if (editorCodeValid)
+					buttons.action_down &= ~KEY_ESC;
+                } else if (editorCodeValid) {
                     temp8u = processEditor(&edit, editorCode);
                     sound_event = (temp8u == EDIT_OK) ? SE_KeyConfirm : SE_KeyReject;
+				}
             }
             // Display
             if (!editMode) {
@@ -368,7 +397,11 @@ static void runNormalMode(void) {
             } else {
                 temp8u = (edit.entered_digits > 0) ? edit.entered_digits : 1;
                 i32toa_align_right(edit.value , str, 10, temp8u, edit.dot_position);
-                LCD_InsertCharsXY(14, 2, &str[5], 4);
+				if (blink_flag)
+					LCD_InsertCharsXY(14, 2, &str[5], 4);
+				else 
+					LCD_InsertCharsXY(14, 2, spaces, 4);
+				
             }
             // Next item
             if (buttons.action_down & KEY_OUTPUT_CONST) {
@@ -530,7 +563,7 @@ static void runCalibrationMode(void) {
                 temp32 = getScaledEditValue(&edit);
                 DAC_SaveCalibrationPoint(2, temp32);
                 DAC_Calibrate();
-                ADC_SaveLoopCurrentCalibrationPoint(1, temp32);
+                ADC_SaveLoopCurrentCalibrationPoint(2, temp32);
                 ADC_LoopCurrentCalibrate();
                 new_state = SYS_ADC_VOLTAGE_CALIBRATION_LOW;
                 sound_event = SE_KeyConfirm;

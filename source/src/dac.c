@@ -63,6 +63,8 @@ static uint32_t saved_TCB[3]; 	// Saved DMA configuration for fast reload in ISR
 void my_DMA_ChannelInit(uint8_t DMA_Channel, DMA_ChannelInitTypeDef* DMA_InitStruct);
 extern DMA_CtrlDataTypeDef DMA_ControlTable[];
 
+// Callback
+extern void DAC_OnCyclesDone(void);
 
 // DMA channel configuration 
 static void DAC_init_DMA(void)
@@ -150,11 +152,12 @@ void DAC_StopDMATimer(void) {
 
 // Sets DAC output to specified value [uA]
 void DAC_UpdateOutput(uint32_t value) {
-	uint32_t temp32u;
-	temp32u = GetCodeForValue(&dac_calibration, value);
-	if (temp32u > 4095)
-		temp32u = 4095;
-	DAC2_SetData(temp32u);
+	int32_t temp32;
+	temp32 = GetCodeForValue(&dac_calibration, value);
+	if (temp32 < 0) temp32 = 0;
+	else if (temp32 > 4095)
+		temp32 = 4095;
+	DAC2_SetData(temp32);
 }
 
 void DAC_SetCalibrationPoint(uint8_t pointNumber) {
@@ -228,8 +231,6 @@ void DAC_Initialize(void) {
 	dac_state.current_cycle = 1;
 	
 	// Default calibration
-	//dac_calibration.point1.value = 4000;
-	//dac_calibration.point1.code = 655;
 	dac_calibration.point1.value = 0;
 	dac_calibration.point1.code = 0;
 	dac_calibration.point2.value = 20000;
@@ -357,8 +358,8 @@ void DAC_SetWaveform(uint8_t newWaveForm) {
 	//DAC_StartDMATimer();
 }
 
-uint8_t DAC_SetPeriod(uint32_t value) {
-    uint8_t result = verify_uint32(&value, DAC_PERIOD_MIN, DAC_PERIOD_MAX);
+uint8_t DAC_SetPeriod(int32_t value) {
+    uint8_t result = verify_int32(&value, DAC_PERIOD_MIN, DAC_PERIOD_MAX);
     dac_state.period = value;
 	//if (dac_state.mode == DAC_MODE_WAVEFORM) {
 	DAC_SetDMATimerPeriod(dac_state.period);
@@ -474,6 +475,7 @@ void DMA_IRQHandler(void)
 			dac_state.current_cycle++;
 		} else {
 			TIMER_Cmd(MDR_TIMER1, DISABLE);
+			DAC_OnCyclesDone();
 		}
 	}
 
