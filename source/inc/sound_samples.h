@@ -18,7 +18,7 @@ const tone_t _beep_KeyConfirm[] = {
 	{0,	0}
 };
 
-const tone_t _beep_KeyIllegal[] = {
+const tone_t _beep_KeyReject[] = {
     { FREQ(600),	20 },
 	{0,	0}
 };

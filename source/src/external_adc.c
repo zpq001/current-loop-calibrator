@@ -111,6 +111,8 @@ void ExtADC_UpdateCurrent(void) {
     adc_low_gain_code -= conversion_result[0];
     adc_high_gain_code -= conversion_result[0];
     
+    // TODO : use signed arithmetic (remove 4096 offset - unnecessary)
+    
     if ((conversion_result[2] > 100*EXTADC_OVERSAMPLE) && (conversion_result[2] < 4000*EXTADC_OVERSAMPLE)) {
         ext_current = GetValueForCode(&adc_calibration_high_gain, adc_high_gain_code);
         ext_current_range = EXTADC_LOW_RANGE;

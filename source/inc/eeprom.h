@@ -9,7 +9,7 @@
 
 typedef struct {
 	struct {
-		uint32_t setting[PROFILE_COUNT];		// [uA]
+		uint32_t setting[DAC_PROFILE_COUNT];		// [uA]
 		uint8_t profile;
 		uint8_t waveform;
 		uint32_t period;

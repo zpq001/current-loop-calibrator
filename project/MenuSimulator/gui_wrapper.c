@@ -9,7 +9,7 @@
 #include "dac.h"
 #include "power_monitor.h"
 #include "sound.h"
-
+#include "lcd_contrast.h"
 
 buttons_t buttons;
 int16_t encoder_delta;
@@ -29,7 +29,7 @@ struct {
 cbLcdUpdatePtr updateLcdCallback;
 
 static struct {
-    uint32_t setting[PROFILE_COUNT];	// [uA]
+    uint32_t setting[DAC_PROFILE_COUNT];	// [uA]
     uint32_t dac_code;
     uint8_t profile;
     uint8_t mode;
@@ -53,9 +53,9 @@ void guiInitialize(void)
 {
     uint8_t i;
     // Default state after power-on
-    for (i=0; i<PROFILE_COUNT; i++)
+    for (i=0; i<DAC_PROFILE_COUNT; i++)
         dac_state.setting[i] = 4000;
-    dac_state.profile = 0;
+    dac_state.profile = 1;
     dac_state.mode = DAC_MODE_CONST;
     dac_state.waveform = WAVE_MEANDR;
     dac_state.period = 1500;
@@ -64,8 +64,8 @@ void guiInitialize(void)
     dac_state.total_cycles = 95684;
     dac_state.current_cycle = 87521;
 
-    device_mode = MODE_NORMAL;
-    //device_mode = MODE_CALIBRATION;
+    //device_mode = MODE_NORMAL;
+    device_mode = MODE_CALIBRATION;
 
     contrastSetting = 10;
     sound_enabled = 1;
@@ -142,7 +142,7 @@ uint8_t ADC_GetLoopStatus(void) {
 }
 
 uint32_t ADC_GetLoopCurrent(void) {
-    return 0;
+    return 21749;
 }
 
 
@@ -153,7 +153,7 @@ void ADC_LoopCurrentCalibrate(void) {
 }
 
 uint32_t ADC_GetLoopVoltage(void) {
-    return 18562;
+    return 18351;
 }
 
 void ADC_SaveLoopVoltageCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {
@@ -164,11 +164,16 @@ void ADC_LoopVoltageCalibrate(void) {
 
 
 int32_t ExtADC_GetCurrent(void) {
-    return 0;
+    //return 0;
+    //return -415000;
+    //return -380491;     // display as 380
+    return  -35751;     // display as -35.8
 }
 
 uint8_t ExtADC_GetRange(void) {
-    return 0;
+    return EXTADC_LOW_RANGE;
+    //return EXTADC_HIGH_RANGE;
+    //return EXTADC_HIGH_OVERLOAD;
 }
 
 void ExtADC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {
@@ -190,44 +195,43 @@ void DAC_SaveSettings(void) {
 
 
 uint8_t DAC_SetSettingConst(uint32_t value) {
-    uint8_t result = SETTING_OK;
-    if (value < DAC_MIN_SETTING) {
-        value = DAC_MIN_SETTING;
-        result = SETTING_LIM_BY_MIN;
-    } else if (value > DAC_MAX_SETTING) {
-        value = DAC_MAX_SETTING;
-        result = SETTING_LIM_BY_MAX;
+    uint8_t result = verify_uint32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
+    dac_state.setting[dac_state.profile-1] = value;
+    if (dac_state.mode == DAC_MODE_CONST) {
+        DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
     }
-    dac_state.setting[dac_state.profile] = value;
     return result;
 }
 
 void DAC_SetCalibrationPoint(uint8_t pointNumber) {
 }
 
-uint8_t DAC_SetProfile(int16_t num) {
-    if (num >= PROFILE_COUNT)
-        num = 0;
-    else if (num < 0)
-        num = PROFILE_COUNT - 1;
-    dac_state.profile = num;
-    return dac_state.profile;
+uint8_t DAC_SetProfile(uint32_t value) {
+    uint8_t result = verify_uint32(&value, 1, DAC_PROFILE_COUNT);
+    dac_state.profile = value;
+    return result;
 }
 
-void DAC_SetSettingWaveMax(uint32_t value) {
+uint8_t DAC_SetSettingWaveMax(uint32_t value) {
+    uint8_t result = verify_uint32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
     dac_state.wave_max = value;
+    return result;
 }
 
-void DAC_SetSettingWaveMin(uint32_t value) {
+uint8_t DAC_SetSettingWaveMin(uint32_t value) {
+    uint8_t result = verify_uint32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
     dac_state.wave_min = value;
+    return result;
 }
 
 void DAC_SetWaveform(uint8_t newWaveForm) {
     dac_state.waveform = newWaveForm;
 }
 
-void DAC_SetPeriod(uint32_t new_period) {
-    dac_state.period = new_period;
+uint8_t DAC_SetPeriod(uint32_t value) {
+    uint8_t result = verify_uint32(&value, DAC_PERIOD_MIN, DAC_PERIOD_MAX);
+    dac_state.period = value;
+    return result;
 }
 
 void DAC_SetMode(uint8_t new_mode) {
@@ -241,9 +245,11 @@ void DAC_SetMode(uint8_t new_mode) {
     }
 }
 
-void DAC_SetTotalCycles(uint32_t number) {
-    dac_state.total_cycles = number;
-    dac_state.current_cycle = number - 1;
+uint8_t DAC_SetTotalCycles(uint32_t value) {
+    uint8_t result = verify_uint32(&value, DAC_CYCLES_MIN, DAC_CYCLES_MAX);
+    dac_state.total_cycles = (value == 0) ? 1 : value;
+    dac_state.current_cycle = 1;
+    return result;
 }
 
 void DAC_RestartCycles(void) {
@@ -257,7 +263,7 @@ void DAC_RestartCycles(void) {
 
 
 uint32_t DAC_GetSettingConst(void) {
-    return dac_state.setting[dac_state.profile];
+    return dac_state.setting[dac_state.profile-1];
 }
 
 uint8_t DAC_GetActiveProfile(void) {
@@ -315,10 +321,9 @@ void DAC_Calibrate(void) {
 
 
 uint8_t LCD_SetContrastSetting(int32_t value) {
-    if (value < 0) value = 0;
-    else if (value > 20) value = 20;
+    uint8_t result = verify_int32(&value, LCD_CONTRAST_MIN, LCD_CONTRAST_MAX);
     contrastSetting = value;
-    return contrastSetting;
+    return result;
 }
 
 uint8_t LCD_GetContrastSetting(void) {
@@ -328,9 +333,8 @@ uint8_t LCD_GetContrastSetting(void) {
 
 
 
-uint8_t Sound_SetEnabled(uint8_t state) {
+void Sound_SetEnabled(uint8_t state) {
     sound_enabled = state;
-    return sound_enabled;
 }
 
 uint8_t Sound_GetEnabled(void) {
@@ -348,7 +352,7 @@ void Sound_Event(uint8_t event) {
             case SE_KeyConfirm:
 
                 break;
-            case SE_KeyIllegal:
+            case SE_KeyReject:
 
                 break;
             case SE_EncoderConfirm:

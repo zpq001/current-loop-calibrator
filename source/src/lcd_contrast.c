@@ -11,6 +11,7 @@
 #include "lcd_contrast.h"
 #include "adc.h"
 #include "eeprom.h"
+#include "utils.h"
 
 static uint8_t contrastSetting;
 static uint16_t contrastAdcCode;
@@ -110,11 +111,10 @@ void LCD_ProcessContrastBooster(void) {
 }
 
 uint8_t LCD_SetContrastSetting(int32_t value) {
-	if (value < 0) value = 0;
-	else if (value > 20) value = 20;
+	uint8_t result = verify_int32(&value, LCD_CONTRAST_MIN, LCD_CONTRAST_MAX);
 	contrastSetting = value;
     contrastAdcCode = (10 + contrastSetting) * 100;
-	return contrastSetting;
+	return result;
 }
 
 uint8_t LCD_GetContrastSetting(void) {

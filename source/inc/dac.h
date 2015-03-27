@@ -6,18 +6,14 @@
 
 #define DAC_PORT        MDR_PORTE
 #define DAC_OUTPUT_PIN  0
-#define PROFILE_COUNT	2
 
-
+#define DAC_PROFILE_COUNT	2
 #define DAC_MAX_SETTING     24000   // uA
 #define DAC_MIN_SETTING     100     // uA
-#define DAC_CYCLES_MAX      100000
+#define DAC_CYCLES_MAX      99999
 #define DAC_CYCLES_MIN      1
-
-
-#define SETTING_OK          0
-#define SETTING_LIM_BY_MIN  (1<<0)
-#define SETTING_LIM_BY_MAX  (1<<1)
+#define DAC_PERIOD_MIN      100     // ms
+#define DAC_PERIOD_MAX      99000   // ms
 
 
 
@@ -39,13 +35,13 @@ void DAC_RestoreSettings(void);
 void DAC_SaveSettings(void);
 
 uint8_t DAC_SetSettingConst(uint32_t value);
-uint8_t DAC_SetProfile(int16_t num);
-void DAC_SetSettingWaveMax(uint32_t value);
-void DAC_SetSettingWaveMin(uint32_t value);
+uint8_t DAC_SetProfile(uint32_t value);
+uint8_t DAC_SetSettingWaveMax(uint32_t value);
+uint8_t DAC_SetSettingWaveMin(uint32_t value);
 void DAC_SetWaveform(uint8_t newWaveForm);
-void DAC_SetPeriod(uint32_t new_period);
+uint8_t DAC_SetPeriod(uint32_t value);
 void DAC_SetMode(uint8_t new_mode);
-void DAC_SetTotalCycles(uint32_t number);
+uint8_t DAC_SetTotalCycles(uint32_t value);
 void DAC_RestartCycles(void);
 		
 uint32_t DAC_GetSettingConst(void);

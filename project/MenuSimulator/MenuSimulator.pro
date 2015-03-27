@@ -43,6 +43,7 @@ HEADERS  += mainwindow.h \
     tdd_verification.h \
     ../../source/inc/power_monitor.h \
     ../../source/inc/gui_core.h \
-    ../../source/inc/sound.h
+    ../../source/inc/sound.h \
+    ../../source/inc/utils.h
 
 FORMS    += mainwindow.ui

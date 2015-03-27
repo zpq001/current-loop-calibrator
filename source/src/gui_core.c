@@ -43,11 +43,15 @@ uint8_t processEditor(edit_t *edit, uint8_t code) {
                 }
         }
     } else if (code == EDIT_DOT) {
-        if (edit->dot_position < 0) {
-            edit->dot_position = 0;
-            if (edit->value == 0) {
-                edit->entered_digits++;
+        if (edit->fract_digits > 0) {
+            if (edit->dot_position < 0) {
+                edit->dot_position = 0;
+                if (edit->value == 0) {
+                    edit->entered_digits++;
+                }
             }
+        } else {
+            result = EDIT_AT_MAX;
         }
     } else if (code == EDIT_BKSPACE) {
         if (edit->dot_position == 0) {
