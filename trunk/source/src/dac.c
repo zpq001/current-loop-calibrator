@@ -3,25 +3,6 @@
 	
 		Low-level functions for DAC
 
-
-Calibration sequence:
-
-	DAC_Initialize();
-	// Point 1
-	temp32u = DAC_GetCalibrationPoint(1);
-	DAC_SetCurrent(temp32);
-	... user enters actual current value, saved in meaValue ...
-	DAC_SaveCalibrationPoint(1, meaValue);
-	ADC_SaveCalibrationPoint(1, meaValue);
-	// Point 2
-	temp32u = DAC_GetCalibrationPoint(1);
-	DAC_SetCurrent(temp32);
-	... user enters actual current value, saved in meaValue ...
-	DAC_SaveCalibrationPoint(2, meaValue);
-	ADC_SaveCalibrationPoint(2, meaValue);
-	// Done!
-	DAC_Calibrate();
-
 ********************************************************************/
 
 #include "MDR32F9Qx_config.h"
@@ -109,7 +90,7 @@ void DAC_InitDMATimer(void) {
 	
 	// Initialize timer 2 counters
 	TIMER_CntStructInit(&sTIM_CntInit);
-	sTIM_CntInit.TIMER_Prescaler                = 31;			// CLK = F_CPU / (prescaler + 1)
+	sTIM_CntInit.TIMER_Prescaler                = 319;			// CLK = F_CPU / (prescaler + 1)
 	sTIM_CntInit.TIMER_Period                   = 10;			// anything different from CNT, which is 0
 	TIMER_CntInit(MDR_TIMER1,&sTIM_CntInit);
 	
@@ -132,10 +113,10 @@ static void DAC_RestartDMA(void) {
 
 //[ms]
 void DAC_SetDMATimerPeriod(uint32_t new_period) {
-	new_period *= 1000;
+	new_period *= 100;
 	new_period /= WAVEFORM_BUFFER_SIZE;
-	MDR_TIMER1->ARR = new_period;
-	if (MDR_TIMER1->CNT > new_period)
+	MDR_TIMER1->ARR = new_period - 1;
+	if (MDR_TIMER1->CNT >= MDR_TIMER1->ARR)
 		MDR_TIMER1->CNT = 0;
 }
 
@@ -155,8 +136,8 @@ void DAC_UpdateOutput(uint32_t value) {
 	int32_t temp32;
 	temp32 = GetCodeForValue(&dac_calibration, value);
 	if (temp32 < 0) temp32 = 0;
-	else if (temp32 > 4095)
-		temp32 = 4095;
+	else if (temp32 > DAC_MAX_CODE)
+		temp32 = DAC_MAX_CODE;
 	DAC2_SetData(temp32);
 }
 
@@ -170,11 +151,12 @@ void DAC_SetCalibrationPoint(uint8_t pointNumber) {
 
 static void DAC_GenerateWaveform(void) {
 	uint16_t index;
-	uint16_t min_code = GetCodeForValue(&dac_calibration, dac_state.wave_min);
-	uint16_t max_code = GetCodeForValue(&dac_calibration, dac_state.wave_max);
-	//if (dac_state.mode == DAC_MODE_WAVEFORM) {
-	//	DAC_StopDMATimer();
-	//}
+	int32_t min_code = GetCodeForValue(&dac_calibration, dac_state.wave_min);
+	int32_t max_code = GetCodeForValue(&dac_calibration, dac_state.wave_max);
+	if (min_code < 0) min_code = 0;
+	else if (min_code > DAC_MAX_CODE) min_code = DAC_MAX_CODE;
+	if (max_code < 0) max_code = 0;
+	else if (max_code > DAC_MAX_CODE) max_code = DAC_MAX_CODE;
 	// Regenerate waveform
 	switch (dac_state.waveform) {
 		case WAVE_MEANDR:
@@ -188,9 +170,6 @@ static void DAC_GenerateWaveform(void) {
 			CreateSawWaveform(waveform_buffer, max_code, min_code, WAVEFORM_BUFFER_SIZE);
 		break;
 	}
-	//if (dac_state.mode == DAC_MODE_WAVEFORM) {
-	//	DAC_StartDMATimer();
-	//}
 }
 	
 	
@@ -220,7 +199,7 @@ void DAC_Initialize(void) {
 
 	// Default state after power-on
 	for (i=0; i<DAC_PROFILE_COUNT; i++)
-		dac_state.setting[i] = 0;
+		dac_state.setting[i] = DAC_MIN_SETTING;
 	dac_state.profile = 1;
 	dac_state.mode = DAC_MODE_CONST;
 	dac_state.waveform = WAVE_MEANDR;
@@ -242,8 +221,6 @@ void DAC_Initialize(void) {
 	DAC_SetDMATimerPeriod(dac_state.period);
 	DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
 }
-
-
 
 
 
@@ -311,16 +288,6 @@ void DAC_SaveSettings(void) {
 }
 
 
-
-uint8_t DAC_SetSettingConst(uint32_t value) {
-    uint8_t result = verify_uint32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
-    dac_state.setting[dac_state.profile-1] = value;
-	if (dac_state.mode == DAC_MODE_CONST) {
-		DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
-	}
-    return result;
-}
-
 uint8_t DAC_SetProfile(uint32_t value) {
     uint8_t result = verify_uint32(&value, 1, DAC_PROFILE_COUNT);
 	dac_state.profile = value;
@@ -330,40 +297,47 @@ uint8_t DAC_SetProfile(uint32_t value) {
     return result;
 }
 
-uint8_t DAC_SetSettingWaveMax(uint32_t value) {
-    uint8_t result = verify_uint32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
-	dac_state.wave_max = value;
-	//DAC_StopDMATimer();
-	DAC_GenerateWaveform();
-	DAC_RestartDMA();
-	//DAC_StartDMATimer();	// CHECKME
+uint8_t DAC_SetSettingConst(int32_t value) {
+    uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
+    dac_state.setting[dac_state.profile-1] = value;
+	if (dac_state.mode == DAC_MODE_CONST) {
+		DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
+	}
     return result;
 }
 
-uint8_t DAC_SetSettingWaveMin(uint32_t value) {
-    uint8_t result = verify_uint32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
-	dac_state.wave_min = value;
-	//DAC_StopDMATimer();
+uint8_t DAC_SetSettingWaveMax(int32_t value) {
+    uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
+	dac_state.wave_max = value;
+	DAC_StopDMATimer();
 	DAC_GenerateWaveform();
 	DAC_RestartDMA();
-	//DAC_StartDMATimer();
+	DAC_StartDMATimer();
+    return result;
+}
+
+uint8_t DAC_SetSettingWaveMin(int32_t value) {
+    uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
+	dac_state.wave_min = value;
+	DAC_StopDMATimer();
+	DAC_GenerateWaveform();
+	DAC_RestartDMA();
+	DAC_StartDMATimer();
     return result;
 }
 
 void DAC_SetWaveform(uint8_t newWaveForm) {
     dac_state.waveform = newWaveForm;
-	//DAC_StopDMATimer();
+	DAC_StopDMATimer();
     DAC_GenerateWaveform();
 	DAC_RestartDMA();
-	//DAC_StartDMATimer();
+	DAC_StartDMATimer();
 }
 
 uint8_t DAC_SetPeriod(int32_t value) {
     uint8_t result = verify_int32(&value, DAC_PERIOD_MIN, DAC_PERIOD_MAX);
     dac_state.period = value;
-	//if (dac_state.mode == DAC_MODE_WAVEFORM) {
 	DAC_SetDMATimerPeriod(dac_state.period);
-	//}
     return result;
 }
 
@@ -382,8 +356,6 @@ void DAC_SetMode(uint8_t new_mode) {
 		}
 	}
 }
-
-
 
 uint8_t DAC_SetTotalCycles(uint32_t value) {
     uint8_t result = verify_uint32(&value, DAC_CYCLES_MIN, DAC_CYCLES_MAX);
@@ -431,7 +403,7 @@ uint8_t DAC_GetWaveform(void) {
     return dac_state.waveform;
 }
 
-uint16_t DAC_GetPeriod(void) {
+uint32_t DAC_GetPeriod(void) {
     return dac_state.period;
 }
 

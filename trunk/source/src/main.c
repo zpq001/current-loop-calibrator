@@ -1,3 +1,11 @@
+/****************************************************************//*
+	@brief Module Main
+	
+	Start-up and setup sequence
+	Main loop
+    
+    
+********************************************************************/
 
 #include <string.h>
 #include "MDR32F9Qx_iwdg.h"
@@ -76,7 +84,8 @@ int main(void) {
 	// Restore settings
 	if (device_mode == MODE_NORMAL) {
 		settings_ok = EE_RestoreSettings();
-		if (settings_ok) {
+		// Use defaults when starting with cancel button pressed
+		if ((settings_ok) && (!(GetRawButtonState() & KEY_ESC))) {
 			// Apply settings
 			DAC_RestoreSettings();
 			// other modules
@@ -106,7 +115,7 @@ int main(void) {
 	}
 	
 	// Setup and start watchdog
-//    hw_SetupWatchdog(25000);
+    hw_SetupWatchdog(25000);
 	// GUI initialization depends on device mode
     GUI_Init();
 	// Start main loop

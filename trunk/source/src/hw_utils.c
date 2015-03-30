@@ -129,7 +129,7 @@ void my_DMA_GlobalInit(void)
 	// MDR_DMA->ALT_CTRL_BASE_PTR is automatically updated by DMA itself and is accessible for read only
 	MDR_DMA->CTRL_BASE_PTR = (uint32_t)DMA_ControlTable;
 	/* DMA configuration register */
-	//MDR_DMA->CFG = DMA_CFG_MASTER_ENABLE || 0 /*DMA_InitStruct->DMA_ProtCtrl*/;		// CHECKME
+	//MDR_DMA->CFG = DMA_CFG_MASTER_ENABLE || 0 /*DMA_InitStruct->DMA_ProtCtrl*/;		
 	MDR_DMA->CFG = DMA_CFG_MASTER_ENABLE | DMA_AHB_Privileged;
 }
 

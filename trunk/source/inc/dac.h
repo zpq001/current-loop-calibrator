@@ -13,8 +13,8 @@
 #define DAC_CYCLES_MAX      99999
 #define DAC_CYCLES_MIN      1
 #define DAC_PERIOD_MIN      100     // ms
-#define DAC_PERIOD_MAX      99000   // ms
-
+#define DAC_PERIOD_MAX      99900   // ms
+#define DAC_MAX_CODE		4013	// = 2.45V at shunt (a bit lower than hardware protection threshold, which is 2.5V)
 
 
 
@@ -34,10 +34,10 @@ void DAC_SaveCalibration(void);
 void DAC_RestoreSettings(void);
 void DAC_SaveSettings(void);
 
-uint8_t DAC_SetSettingConst(uint32_t value);
 uint8_t DAC_SetProfile(uint32_t value);
-uint8_t DAC_SetSettingWaveMax(uint32_t value);
-uint8_t DAC_SetSettingWaveMin(uint32_t value);
+uint8_t DAC_SetSettingConst(int32_t value);
+uint8_t DAC_SetSettingWaveMax(int32_t value);
+uint8_t DAC_SetSettingWaveMin(int32_t value);
 void DAC_SetWaveform(uint8_t newWaveForm);
 uint8_t DAC_SetPeriod(int32_t value);
 void DAC_SetMode(uint8_t new_mode);
@@ -49,7 +49,7 @@ uint8_t DAC_GetActiveProfile(void);
 uint32_t DAC_GetSettingWaveMax(void);
 uint32_t DAC_GetSettingWaveMin(void);
 uint8_t DAC_GetWaveform(void);
-uint16_t DAC_GetPeriod(void);
+uint32_t DAC_GetPeriod(void);
 uint8_t DAC_GetMode(void);
 uint32_t DAC_GetTotalCycles(void);
 uint32_t DAC_GetCurrentCycle(void);

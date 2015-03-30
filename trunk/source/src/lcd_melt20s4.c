@@ -164,11 +164,11 @@ void LCD_Init(void) {
     LCD_SetCursorPosition(0,1); 
     LCD_PutString("  петли 0-20мА");
     LCD_SetCursorPosition(0,3); 
-    LCD_PutString("Версия 0.1");
+    LCD_PutString("Версия 1.0");
 }
 
 void LCD_Clear(void) {
-    write_byte(BYTE_CMD, CMD_CLEAR);    // CHECKME
+    write_byte(BYTE_CMD, CMD_CLEAR);
 }
 
 void LCD_SetCursorPosition(uint8_t x, uint8_t y) {
@@ -207,7 +207,6 @@ void LCD_InsertCharsXY(uint8_t x, uint8_t y, const char *data, uint8_t count) {
     LCD_InsertChars(data, count);
 }
 
-// TODO: cursor blink!!
 
 void LCD_CaptureKeyboard(void) {
     uint8_t i,j;

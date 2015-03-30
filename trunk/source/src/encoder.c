@@ -52,7 +52,14 @@ void Encoder_UpdateDelta(void) {
 	old_counter = encoder_counter&0xFFFC;
 	delta = old_counter - delta;
 	encoder_delta = delta>>2;
-    encoder_delta *= (encoder_delta < 0) ? -encoder_delta : encoder_delta;
+	if ((encoder_delta >= 4) || (encoder_delta <= -4))
+		encoder_delta *= 10;
+	else if ((encoder_delta >= 3) || (encoder_delta <= -3))
+		encoder_delta *= 5;
+	else if ((encoder_delta >= 2) || (encoder_delta <= -2))
+		encoder_delta *= 2;
+	
+    //encoder_delta *= (encoder_delta < 0) ? -encoder_delta : encoder_delta;
 }
 
 

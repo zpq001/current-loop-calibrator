@@ -1,5 +1,13 @@
+/****************************************************************//*
+	@brief Module ADC
+	
+	Functions for internal voltage and current ADCs.
+	Loop status is determined by result of current ADC, not hardware comparators
+    
+    
+********************************************************************/
 
-
+#include <stdlib.h>
 #include "MDR32F9Qx_config.h"
 #include "MDR32F9Qx_adc.h"
 #include "MDR32F9Qx_port.h"
@@ -8,6 +16,7 @@
 #include "adc.h"
 #include "dac.h"
 #include "eeprom.h"
+#include "power_monitor.h"
 
 #define CURRENT_ADC_OVERSAMPLE  4
 #define VOLTAGE_ADC_OVERSAMPLE  4
@@ -19,7 +28,7 @@ static uint32_t adc_voltage_code;
 static uint32_t loop_voltage;
 static uint32_t loop_current;
 static uint8_t loop_status;
-static uint32_t temperature;
+//static uint32_t temperature;
 
 void ADC_Initialize(void) {
 	
@@ -77,6 +86,7 @@ void ADC_Initialize(void) {
 // Using ADC1
 void ADC_UpdateLoopCurrent(void) {
     uint32_t temp32u;
+	int32_t temp32;
     uint8_t i;
     temp32u = 0;
 	ADC1_SetChannel(ADC_PIN_CURRENT);
@@ -86,29 +96,29 @@ void ADC_UpdateLoopCurrent(void) {
         temp32u += ADC1_GetResult() & 0xFFF;
     }
 	adc_current_code = temp32u;
-    loop_current = GetValueForCode(&adc_current_calibration, temp32u);        
+    temp32 = GetValueForCode(&adc_current_calibration, temp32u);  
+	loop_current  = (temp32 < 0) ? 0 : temp32;
 }
 
 void ADC_UpdateLoopMonitor(void) {
-    int32_t temp32;
     loop_status = LOOP_OK;
-    // Check loop break
-    if (loop_current <= LOOP_BREAK_TRESHOLD) {
-        loop_status |= LOOP_BREAK;
-		LED_Set(LED_BREAK, 1);
-    } else {
-		LED_Set(LED_BREAK, 0);
-    }
-    // Check loop error
-    temp32 = loop_current - DAC_GetSettingConst();
-    if (temp32 < 0)
-        temp32 = -temp32;
-    if (temp32 >= LOOP_ERROR_TRESHOLD) {
-        loop_status |= LOOP_ERROR;
-		LED_Set(LED_ERROR, 1);
-    } else {
-		LED_Set(LED_ERROR, 0);
-    }
+	if (device_mode == MODE_NORMAL) {
+		// Check loop break
+		if (loop_current <= LOOP_BREAK_TRESHOLD) {
+			loop_status |= LOOP_BREAK;
+		}
+		// Check loop error
+		if (DAC_GetMode() == DAC_MODE_CONST) {
+			if (abs((int32_t)loop_current - (int32_t)DAC_GetSettingConst()) > LOOP_ERROR_TRESHOLD)
+				loop_status |= LOOP_ERROR;
+		} else {
+			if (((int32_t)loop_current < (int32_t)DAC_GetSettingWaveMin() - LOOP_ERROR_TRESHOLD) || 
+				((int32_t)loop_current > (int32_t)DAC_GetSettingWaveMax() + LOOP_ERROR_TRESHOLD))
+				loop_status |= LOOP_ERROR;
+		}
+	}
+	LED_Set(LED_ERROR, loop_status & LOOP_ERROR);
+	LED_Set(LED_BREAK, loop_status & LOOP_BREAK);
 }
 
 uint8_t ADC_GetLoopStatus(void) {
@@ -150,6 +160,7 @@ void ADC_LC_SaveCalibration(void) {
 // Using ADC1
 void ADC_UpdateLoopVoltage(void) {
 	uint32_t temp32u;
+	int32_t temp32;
     uint8_t i;
     temp32u = 0;
     ADC1_SetChannel(ADC_PIN_VOLTAGE);
@@ -159,7 +170,8 @@ void ADC_UpdateLoopVoltage(void) {
         temp32u += ADC1_GetResult() & 0xFFF;
     }
 	adc_voltage_code = temp32u;
-    loop_voltage = GetValueForCode(&adc_voltage_calibration, temp32u);
+	temp32 = GetValueForCode(&adc_voltage_calibration, temp32u);
+    loop_voltage = (temp32 < 0) ? 0 : temp32;
 }
 
 uint32_t ADC_GetLoopVoltage(void) {
@@ -196,14 +208,15 @@ void ADC_LV_SaveCalibration(void) {
 // Other
 
 // Using ADC1
+/*
 void ADC_UpdateMCUTemperature(void) {
 	ADC1_SetChannel(ADC_CH_TEMP_SENSOR);
 	ADC1_Start();
 	while (ADC1_GetFlagStatus(ADCx_FLAG_END_OF_CONVERSION) == RESET);
-	temperature = ADC1_GetResult();     // FIXME
+	temperature = ADC1_GetResult();
 	temperature &= 0xFFF;
 }
-
+*/
 
 // Using ADC2
 void ADC_Contrast_Start(void) {

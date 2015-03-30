@@ -4,12 +4,12 @@
 
 
 const tone_t _beep_EncoderConfirm[] = {
-    { FREQ(1000),	10 },
+//    { FREQ(1000),	10 },
 	{0,	0}
 };
 
 const tone_t _beep_EncoderIllegal[] = {
-    { FREQ(600),	10 },
+    { FREQ(600),	22 },
 	{0,	0}
 };
 
