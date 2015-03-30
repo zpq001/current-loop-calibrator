@@ -2,6 +2,7 @@
 	Module power_monitor
 	
 	Power supply monitor
+	Saving settings when power is shut down
 
 ********************************************************************/
 #include <string.h>

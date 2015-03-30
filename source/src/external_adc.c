@@ -14,8 +14,8 @@
 #include "eeprom.h"
 
 #define CH_VGND			0
-#define CH_LOW_GAIN		1
-#define CH_HIGH_GAIN	2
+#define CH_LOW_GAIN		2
+#define CH_HIGH_GAIN	1
 
 #define EXTADC_OVERSAMPLE  4
 
@@ -136,7 +136,7 @@ void ExtADC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {
         adc_calibration_low_gain.point1.value = 0;
         adc_calibration_low_gain.point1.code = adc_low_gain_code;
         adc_calibration_high_gain.point1.value = 0;
-        adc_calibration_high_gain.point1.code = adc_low_gain_code;
+        adc_calibration_high_gain.point1.code = adc_high_gain_code;
     } else if (pointNum == 2) {
         // Calibration at 30mA
         adc_calibration_high_gain.point2.value = measuredValue;

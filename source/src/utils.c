@@ -1,3 +1,10 @@
+/****************************************************************//*
+	@brief Module utils
+	
+	String conversion and other utilities
+    
+    
+********************************************************************/
 
 #include <stdint.h>
 #include "utils.h"

@@ -1,3 +1,11 @@
+/****************************************************************//*
+	@brief Module GUI
+	
+	Implementation of user interface
+	Module incorporates displaying device status and controlling device.
+    
+    
+********************************************************************/
 
 #include <string.h>
 #include "utils.h"
@@ -176,12 +184,17 @@ static void runNormalMode(void) {
             LCD_InsertCharsXY(19, 0, &str[8], 1);
 
             // Current setting control
+			if (encoder_delta) {
+				temp32 = DAC_GetSettingConst();
+				temp32 += encoder_delta * 100;
+				temp8u = DAC_SetSettingConst(temp32);
+				sound_event = (temp8u == VALUE_IN_RANGE) ? SE_EncoderConfirm : SE_EncoderIllegal;
+			}
             if (!editMode) {
                 // Capture numeric keys
                 if (editorCodeValid) {
                     startEditor(&edit, editorCode, 1, DAC_MAX_SETTING / 100);
                     editMode = 1;
-                    // TODO: add cursor blinking
                     sound_event = SE_KeyConfirm;
                 }
             } else {
@@ -359,6 +372,18 @@ static void runNormalMode(void) {
                     LCD_PutStringXY(0,2,"Максимум:         мА");
             }
             // Control
+			if (encoder_delta) {
+				if (wave_edit_mode == EDIT_LOW_AMP)
+                    temp32 = DAC_GetSettingWaveMin();
+                else
+                    temp32 = DAC_GetSettingWaveMax();
+				temp32 += encoder_delta * 100;
+				if (wave_edit_mode == EDIT_LOW_AMP)
+					temp8u = DAC_SetSettingWaveMin(temp32);
+				else
+					temp8u = DAC_SetSettingWaveMax(temp32);
+				sound_event = (temp8u == VALUE_IN_RANGE) ? SE_EncoderConfirm : SE_EncoderIllegal;
+			}
             if (!editMode) {
                 if (editorCodeValid) {
                     startEditor(&edit, editorCode, 1, DAC_MAX_SETTING / 100);
@@ -722,6 +747,7 @@ static void runCalibrationMode(void) {
                 LCD_PutStringXY(0,0,"Калибровка прибора");
                 LCD_PutStringXY(0,1,"     завершена.");
                 LCD_PutStringXY(0,3,"Перезапустите прибор");
+				DAC_UpdateOutput(0);
             }
             break;
     }
