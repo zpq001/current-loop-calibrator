@@ -102,13 +102,14 @@ void DAC_InitDMATimer(void) {
 
 static void DAC_RestartDMA(void) {
 	uint32_t *tcb_ptr;
+	MDR_DMA->CHNL_ENABLE_SET &= ~(1 << DMA_Channel_TIM1);
 	// Reload TCB
 	tcb_ptr = (uint32_t*)&DMA_ControlTable[DMA_Channel_TIM1];
 	*tcb_ptr++ = saved_TCB[0];
 	*tcb_ptr++ = saved_TCB[1];
 	*tcb_ptr = saved_TCB[2];
 	// Restart channel
-	//MDR_DMA->CHNL_ENABLE_SET = (1 << DMA_Channel_TIM1);
+	MDR_DMA->CHNL_ENABLE_SET = (1 << DMA_Channel_TIM1);
 }
 
 //[ms]
@@ -308,30 +309,45 @@ uint8_t DAC_SetSettingConst(int32_t value) {
 
 uint8_t DAC_SetSettingWaveMax(int32_t value) {
     uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
+	uint8_t restart_timer;
 	dac_state.wave_max = value;
+	__disable_irq();
+	restart_timer = (MDR_TIMER1->CNTRL & (TIMER_CNTRL_CNT_EN)) ? 1 : 0;
 	DAC_StopDMATimer();
+	__enable_irq();
 	DAC_GenerateWaveform();
 	DAC_RestartDMA();
-	DAC_StartDMATimer();
+	if (restart_timer)
+		DAC_StartDMATimer();
     return result;
 }
 
 uint8_t DAC_SetSettingWaveMin(int32_t value) {
     uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
+	uint8_t restart_timer;
 	dac_state.wave_min = value;
+	__disable_irq();
+	restart_timer = (MDR_TIMER1->CNTRL & (TIMER_CNTRL_CNT_EN)) ? 1 : 0;
 	DAC_StopDMATimer();
+	__enable_irq();
 	DAC_GenerateWaveform();
 	DAC_RestartDMA();
-	DAC_StartDMATimer();
+	if (restart_timer)
+		DAC_StartDMATimer();
     return result;
 }
 
 void DAC_SetWaveform(uint8_t newWaveForm) {
+	uint8_t restart_timer;
     dac_state.waveform = newWaveForm;
+	__disable_irq();
+	restart_timer = (MDR_TIMER1->CNTRL & (TIMER_CNTRL_CNT_EN)) ? 1 : 0;
 	DAC_StopDMATimer();
+	__enable_irq();
     DAC_GenerateWaveform();
 	DAC_RestartDMA();
-	DAC_StartDMATimer();
+	if (restart_timer)
+		DAC_StartDMATimer();
 }
 
 uint8_t DAC_SetPeriod(int32_t value) {
