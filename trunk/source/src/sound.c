@@ -85,7 +85,7 @@ static void set_period(uint16_t period_us) {
 
 static void set_output(uint8_t state) {
     if (state) 
-        MDR_TIMER3->CCR1 = MDR_TIMER3->ARR >> 1;
+        MDR_TIMER3->CCR1 = MDR_TIMER3->ARR >> 3;	// duty
     else
         MDR_TIMER3->CCR1 = 0;
 }
