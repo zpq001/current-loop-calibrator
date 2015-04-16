@@ -284,7 +284,15 @@ static void runNormalMode(void) {
             // Control waveform period
             if (encoder_delta != 0) {
                 temp32 = DAC_GetPeriod();
-                temp32 += encoder_delta * 100;
+				if (temp32 >= 100000) {
+					temp32 += encoder_delta * 1000;	// [1s]
+					// Remove 100ms gradation if greater than 100s
+					if (temp32 > 100000) {
+						temp32 -= temp32 % 1000;
+					}
+				} else {
+					temp32 += encoder_delta * 100;	// [100ms]
+				}
                 temp8u = DAC_SetPeriod(temp32);
                 sound_event = (temp8u == VALUE_IN_RANGE) ? SE_EncoderConfirm : SE_EncoderIllegal;
             }

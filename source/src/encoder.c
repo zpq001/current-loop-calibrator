@@ -53,11 +53,11 @@ void Encoder_UpdateDelta(void) {
 	delta = old_counter - delta;
 	encoder_delta = delta>>2;
 	if ((encoder_delta >= 4) || (encoder_delta <= -4))
-		encoder_delta *= 10;
+		encoder_delta *= 20;
 	else if ((encoder_delta >= 3) || (encoder_delta <= -3))
-		encoder_delta *= 5;
+		encoder_delta *= 10;
 	else if ((encoder_delta >= 2) || (encoder_delta <= -2))
-		encoder_delta *= 2;
+		encoder_delta *= 5;
 	
     //encoder_delta *= (encoder_delta < 0) ? -encoder_delta : encoder_delta;
 }
