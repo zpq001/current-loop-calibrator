@@ -43,6 +43,7 @@ void DAC_SaveCalibration(void);
 void DAC_RestoreSettings(void);
 void DAC_SaveSettings(void);
 
+void DAC_SetOutputState(uint8_t isEnabled);
 uint8_t DAC_SetProfile(uint32_t value);
 uint8_t DAC_SetSettingConst(int32_t value);
 uint8_t DAC_SetSettingWaveMax(int32_t value);
@@ -53,6 +54,7 @@ void DAC_SetMode(uint8_t new_mode);
 uint8_t DAC_SetTotalCycles(uint32_t value);
 void DAC_RestartCycles(void);
 		
+uint8_t DAC_GetOutputState(void);
 uint32_t DAC_GetSettingConst(void);
 uint8_t DAC_GetActiveProfile(void);
 uint32_t DAC_GetSettingWaveMax(void);

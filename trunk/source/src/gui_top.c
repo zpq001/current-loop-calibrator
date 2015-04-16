@@ -172,6 +172,15 @@ static void runNormalMode(void) {
                 LCD_PutStringXY(0,3,"Амперметр:        мА");
                 DAC_SetMode(DAC_MODE_CONST);
             }
+
+            // Output control
+            if (!editMode) {
+                if (buttons.action_down & KEY_OK)
+                    DAC_SetOutputState(1);
+                else if (buttons.action_down & KEY_ESC)
+                    DAC_SetOutputState(0);
+            }
+
             // Profile number
             if (buttons.action_down & KEY_OUTPUT_CTRL) {
                 temp32 = DAC_GetActiveProfile() + 1;
@@ -259,6 +268,15 @@ static void runNormalMode(void) {
                 LCD_PutStringXY(0,3,"Амперметр:        мА");
                 DAC_SetMode(DAC_MODE_WAVEFORM);
             }
+
+            // Output control
+            if (!editMode) {
+                if (buttons.action_down & KEY_OK)
+                    DAC_SetOutputState(1);
+                else if (buttons.action_down & KEY_ESC)
+                    DAC_SetOutputState(0);
+            }
+
             // Control waveform
             if (buttons.raw_state & KEY_OUTPUT_WAVE) {
                 if (buttons.action_down & KEY_NUM1) {
