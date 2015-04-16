@@ -13,15 +13,24 @@
 #define DAC_CYCLES_MAX      99999
 #define DAC_CYCLES_MIN      1
 #define DAC_PERIOD_MIN      100     // ms
-#define DAC_PERIOD_MAX      99900   // ms
+#define DAC_PERIOD_MAX      500000  // ms
 #define DAC_MAX_CODE		4013	// = 2.45V at shunt (a bit lower than hardware protection threshold, which is 2.5V)
 
 
 
 enum DacModes {DAC_MODE_CONST, DAC_MODE_WAVEFORM};
 enum SignalWaveforms {WAVE_MEANDR, WAVE_SAW_DIRECT, WAVE_SAW_REVERSED};
-
-
+/*enum DacEvents {
+	UPDATED_SETTING = 0x01,
+	UPDATED_PROFILE = 0x02,
+	UPDATED_WAVEFORM = 0x04, 
+	UPDATED_PERIOD = 0x08,
+	ENABLED_OUTPUT = 0x10,
+	DISABLED_OUTPUT = 0x20,
+	UPDATED_MODE = 0x40,
+	RESTART_CYCLES = 0x80
+};
+*/
 void DAC_Initialize(void);
 void DAC_UpdateOutput(uint32_t value);	// Directly sets output to value
 										// Used only for calibration

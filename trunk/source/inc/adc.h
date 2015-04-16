@@ -5,7 +5,7 @@
 #define ADC_PIN_VOLTAGE		3
 #define ADC_PIN_CONTRAST	4
 
-#define LOOP_BREAK_TRESHOLD 3900    // [uA]
+#define LOOP_BREAK_TRESHOLD 3950    // [uA]
 #define LOOP_ERROR_TRESHOLD 100     // [uA]
 // Loop errors may be ORed
 #define LOOP_OK     0               // Loop current is equal to the setting
