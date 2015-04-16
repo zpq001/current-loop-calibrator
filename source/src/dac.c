@@ -27,7 +27,9 @@ static struct {
 	uint8_t profile;
 	uint8_t mode;
 	uint8_t waveform;
-	uint8_t output_enabled;
+	uint8_t oe;
+    uint8_t cycles_done;
+    uint8_t regenerate_waveform;
 	uint32_t period;		// [ms]
 	uint32_t wave_min;		// [uA]
 	uint32_t wave_max;		// [uA]
@@ -136,12 +138,17 @@ static void DAC_StopDMATimer(void) {
 // Sets DAC output to specified value [uA]
 void DAC_UpdateOutput(uint32_t value) {
 	int32_t temp32;
-	temp32 = GetCodeForValue(&dac_calibration, value);
-	if (temp32 < 0) temp32 = 0;
-	else if (temp32 > DAC_MAX_CODE)
-		temp32 = DAC_MAX_CODE;
-	DAC2_SetData(temp32);
+    if (value == 0) {
+        temp32 = 0;
+    } else {
+        temp32 = GetCodeForValue(&dac_calibration, value);
+        if (temp32 < 0) temp32 = 0;
+        else if (temp32 > DAC_MAX_CODE)
+            temp32 = DAC_MAX_CODE;
+    }
+    DAC2_SetData(temp32);
 }
+
 
 void DAC_SetCalibrationPoint(uint8_t pointNumber) {
 	uint32_t temp32u;
@@ -172,63 +179,9 @@ static void DAC_GenerateWaveform(void) {
 			CreateSawWaveform(waveform_buffer, max_code, min_code, WAVEFORM_BUFFER_SIZE);
 		break;
 	}
+    dac_state.regenerate_waveform = 0;
 }
-/*
-static void DAC_control(uint8_t event) {
-	uint8_t restart_timer;
-	
-	if (event & DISABLED_OUTPUT) {
-		dac_state.output_enabled = 0;
-		DAC_UpdateOutput(0);
-		if (dac_state.mode == DAC_MODE_CONST) {
-			DAC_StopDMATimer();
-		}
-	}
-	if (event & ENABLED_OUTPUT) {
-		dac_state.output_enabled = 1;
-		if (dac_state.mode == DAC_MODE_WAVEFORM) {
-			DAC_RestartDMA();
-			DAC_StartDMATimer();
-			// Create single request for DMA to output first point of waveform
-			MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
-		}
-	}
-	if (event & RESTART_CYCLES) {
-		if ((dac_state.mode == DAC_MODE_WAVEFORM) && (dac_state.output_enabled)) {
-			DAC_StopDMATimer();
-			DAC_RestartDMA();
-			dac_state.current_cycle = 1;
-			DAC_StartDMATimer();
-		}
-	}
-	
-	if (event & (UPDATED_SETTING | UPDATED_PROFILE)) {
-		if ((dac_state.mode == DAC_MODE_CONST) && (dac_state.output_enabled)) {
-			DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
-		}
-	}
 
-	if (event & (UPDATED_PERIOD)) {
-		DAC_SetDMATimerPeriod(dac_state.period);
-	}
-	
-	if (event & (UPDATED_WAVEFORM)) {
-		__disable_irq();
-		restart_timer = (MDR_TIMER1->CNTRL & (TIMER_CNTRL_CNT_EN)) ? 1 : 0;
-		DAC_StopDMATimer();
-		__enable_irq();
-		DAC_GenerateWaveform();
-		DAC_RestartDMA();
-		if (restart_timer) {
-			DAC_StartDMATimer();
-			// Create single request for DMA to output first point of waveform
-			MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
-		}
-	}
-
-}
-	*/
-	
 	
 void DAC_Initialize(void) {
 	uint8_t i;
@@ -259,11 +212,13 @@ void DAC_Initialize(void) {
 	dac_state.profile = 1;
 	dac_state.mode = DAC_MODE_CONST;
 	dac_state.waveform = WAVE_MEANDR;
+    dac_state.regenerate_waveform = 1;
 	dac_state.period = 1000;		// ms
 	dac_state.wave_min = 4000;		// uA
 	dac_state.wave_max = 20000;		// uA
 	dac_state.total_cycles = 10;
 	dac_state.current_cycle = 1;
+    dac_state.cycles_done = 0;
 	
 	// Default calibration
 	dac_calibration.point1.value = 0;
@@ -273,9 +228,7 @@ void DAC_Initialize(void) {
     dac_calibration.scale = 10000L;
 	
 	CalculateCoefficients(&dac_calibration);
-	DAC_GenerateWaveform();
-	DAC_SetDMATimerPeriod(dac_state.period);
-	DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
+	DAC_UpdateOutput(0);
 }
 
 
@@ -290,7 +243,6 @@ void DAC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue) {
 
 void DAC_Calibrate(void) {
 	CalculateCoefficients(&dac_calibration);
-	DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
 }
 
 
@@ -300,8 +252,6 @@ void DAC_ApplyCalibration(void) {
 	dac_calibration.point2.value = system_settings.dac.point2.value;
 	dac_calibration.point2.code  = system_settings.dac.point2.code;
 	CalculateCoefficients(&dac_calibration);
-	DAC_GenerateWaveform();
-	DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
 }
 
 
@@ -324,10 +274,6 @@ void DAC_RestoreSettings(void) {
 	dac_state.wave_min 		 = settings.dac.wave_min;
 	dac_state.wave_max 		 = settings.dac.wave_max;
 	dac_state.total_cycles 	 = settings.dac.total_cycles;
-
-	DAC_GenerateWaveform();
-	DAC_SetDMATimerPeriod(dac_state.period);
-	DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
 }
 
 void DAC_SaveSettings(void) {
@@ -344,86 +290,51 @@ void DAC_SaveSettings(void) {
 }
 
 
-uint8_t DAC_SetProfile(uint32_t value) {
-    uint8_t result = verify_uint32(&value, 1, DAC_PROFILE_COUNT);
-	dac_state.profile = value;
-		if (dac_state.mode == DAC_MODE_CONST) {
-		DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
-	}
-    return result;
+
+
+// Enables or disables output in both constant source and 
+// waveform modes
+void DAC_SetOutputState(uint8_t isEnabled) {
+    if (isEnabled != dac_state.oe) {
+        dac_state.oe = isEnabled;
+        if (dac_state.mode == DAC_MODE_CONST) {
+            if (dac_state.oe) {
+                DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
+            } else {
+                DAC_UpdateOutput(0);
+            }
+        } else {
+            if (dac_state.oe) {
+                if (dac_state.regenerate_waveform)
+                    DAC_GenerateWaveform();
+                DAC_RestartDMA();
+                dac_state.current_cycle = 1;
+                dac_state.cycles_done = 0;
+                DAC_StartDMATimer();
+                MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
+            } else {
+                DAC_StopDMATimer();
+                DAC_UpdateOutput(0);
+            }
+        }
+    }
 }
 
 uint8_t DAC_SetSettingConst(int32_t value) {
     uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
     dac_state.setting[dac_state.profile-1] = value;
-	if (dac_state.mode == DAC_MODE_CONST) {
+	if ((dac_state.oe) && (dac_state.mode == DAC_MODE_CONST)) {
 		DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
 	}
-	//DAC_control(UPDATED_SETTING);
     return result;
 }
 
-uint8_t DAC_SetSettingWaveMax(int32_t value) {
-    uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
-	uint8_t restart_timer;
-	dac_state.wave_max = value;
-	__disable_irq();
-	restart_timer = (MDR_TIMER1->CNTRL & (TIMER_CNTRL_CNT_EN)) ? 1 : 0;
-	DAC_StopDMATimer();
-	__enable_irq();
-	DAC_GenerateWaveform();
-	DAC_RestartDMA();
-	if (restart_timer) {
-		DAC_StartDMATimer();
-		// Create single request for DMA to output first point of waveform
-		MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
+uint8_t DAC_SetProfile(uint32_t value) {
+    uint8_t result = verify_uint32(&value, 1, DAC_PROFILE_COUNT);
+	dac_state.profile = value;
+	if ((dac_state.oe) && (dac_state.mode == DAC_MODE_CONST)) {
+		DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
 	}
-	
-	//DAC_control(UPDATED_WAVEFORM);
-    return result;
-}
-
-uint8_t DAC_SetSettingWaveMin(int32_t value) {
-    uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
-	uint8_t restart_timer;
-	dac_state.wave_min = value;
-	__disable_irq();
-	restart_timer = (MDR_TIMER1->CNTRL & (TIMER_CNTRL_CNT_EN)) ? 1 : 0;
-	DAC_StopDMATimer();
-	__enable_irq();
-	DAC_GenerateWaveform();
-	DAC_RestartDMA();
-	if (restart_timer) {
-		DAC_StartDMATimer(); 
-		// Create single request for DMA to output first point of waveform
-		MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
-	}
-	//DAC_control(UPDATED_WAVEFORM);
-    return result;
-}
-
-void DAC_SetWaveform(uint8_t newWaveForm) {
-	uint8_t restart_timer;
-    dac_state.waveform = newWaveForm;
-	__disable_irq();
-	restart_timer = (MDR_TIMER1->CNTRL & (TIMER_CNTRL_CNT_EN)) ? 1 : 0;
-	DAC_StopDMATimer();
-	__enable_irq();
-    DAC_GenerateWaveform();
-	DAC_RestartDMA();
-	if (restart_timer) {
-		DAC_StartDMATimer();
-		// Create single request for DMA to output first point of waveform
-		MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
-	}
-	//DAC_control(UPDATED_WAVEFORM);
-}
-
-uint8_t DAC_SetPeriod(int32_t value) {
-    uint8_t result = verify_int32(&value, DAC_PERIOD_MIN, DAC_PERIOD_MAX);
-    dac_state.period = value;
-	DAC_SetDMATimerPeriod(dac_state.period);
-	//DAC_control(UPDATED_PERIOD);
     return result;
 }
 
@@ -431,49 +342,77 @@ void DAC_SetMode(uint8_t new_mode) {
 	if (new_mode != dac_state.mode) {
 		if (new_mode == DAC_MODE_WAVEFORM) {
 			dac_state.mode = DAC_MODE_WAVEFORM;
-			// Waveform is already generated
-			DAC_RestartDMA();
-			dac_state.current_cycle = 1;
-			DAC_StartDMATimer();
-			// Create single request for DMA to output first point of waveform
-			MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
 		} else {
 			dac_state.mode = DAC_MODE_CONST;
 			DAC_StopDMATimer();
-			DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
 		}
+        dac_state.oe = 0;
+        DAC_UpdateOutput(0);
 	}
+}
+
+
+uint8_t DAC_SetSettingWaveMax(int32_t value) {
+    uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
+	dac_state.wave_max = value;
+    DAC_SetWaveform(dac_state.waveform);
+    return result;
+}
+
+uint8_t DAC_SetSettingWaveMin(int32_t value) {
+    uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
+	dac_state.wave_min = value;
+	DAC_SetWaveform(dac_state.waveform);
+    return result;
+}
+
+void DAC_SetWaveform(uint8_t newWaveForm) {
+    dac_state.waveform = newWaveForm;
+	if ((dac_state.mode == DAC_MODE_WAVEFORM) && (dac_state.oe)) {
+        DAC_StopDMATimer();
+        DAC_GenerateWaveform();
+        DAC_RestartDMA();
+        if (!dac_state.cycles_done) {
+            DAC_StartDMATimer(); 
+            MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
+        }
+    } else {
+        dac_state.regenerate_waveform = 1;
+    }
+}
+
+uint8_t DAC_SetPeriod(int32_t value) {
+    uint8_t result = verify_int32(&value, DAC_PERIOD_MIN, DAC_PERIOD_MAX);
+    dac_state.period = value;
+	DAC_SetDMATimerPeriod(dac_state.period);
+    return result;
 }
 
 uint8_t DAC_SetTotalCycles(uint32_t value) {
     uint8_t result = verify_uint32(&value, DAC_CYCLES_MIN, DAC_CYCLES_MAX);
-    if (dac_state.mode == DAC_MODE_WAVEFORM) {
+    if ((dac_state.mode == DAC_MODE_WAVEFORM) && (dac_state.oe)) {
         DAC_StopDMATimer();
-        DAC_RestartDMA();
     }
 	dac_state.total_cycles = (value == 0) ? 1 : value;
 	dac_state.current_cycle = 1;
-    if (dac_state.mode == DAC_MODE_WAVEFORM) {
+    dac_state.cycles_done = 0;
+    if ((dac_state.mode == DAC_MODE_WAVEFORM) && (dac_state.oe)) {
+        DAC_RestartDMA();
         DAC_StartDMATimer();
-		// Create single request for DMA to output first point of waveform
 		MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
     }
     return result;
 }
 
-
 void DAC_RestartCycles(void) {
-    if (dac_state.mode == DAC_MODE_WAVEFORM) {
-        DAC_StopDMATimer();
-        DAC_RestartDMA();
-        dac_state.current_cycle = 1;
-        DAC_StartDMATimer();
-		// Create single request for DMA to output first point of waveform
-		MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
-    }
+    DAC_SetTotalCycles(dac_state.total_cycles);
 }
 
 
+
+uint8_t DAC_GetOutputState(void) {
+	return dac_state.oe;
+}
 
 uint32_t DAC_GetSettingConst(void) {
     return dac_state.setting[dac_state.profile-1];
@@ -539,17 +478,15 @@ void DMA_IRQHandler(void)
 			dac_state.current_cycle++;
 		} else {
 			TIMER_Cmd(MDR_TIMER1, DISABLE);
+            dac_state.cycles_done = 1;
 			DAC_OnCyclesDone();
 		}
 	}
 
-	
 	// Error handling
-	if (DMA_GetFlagStatus(0, DMA_FLAG_DMA_ERR) == SET)
-	{
+	if (DMA_GetFlagStatus(0, DMA_FLAG_DMA_ERR) == SET)	{
 		DMA_ClearError();	// normally this should not happen
 	}
-
 }
 
 

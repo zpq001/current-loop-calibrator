@@ -108,14 +108,21 @@ void ADC_UpdateLoopMonitor(void) {
 			loop_status |= LOOP_BREAK;
 		}
 		// Check loop error
-		if (DAC_GetMode() == DAC_MODE_CONST) {
-			if (abs((int32_t)loop_current - (int32_t)DAC_GetSettingConst()) > LOOP_ERROR_TRESHOLD)
-				loop_status |= LOOP_ERROR;
-		} else {
-			if (((int32_t)loop_current < (int32_t)DAC_GetSettingWaveMin() - LOOP_ERROR_TRESHOLD) || 
-				((int32_t)loop_current > (int32_t)DAC_GetSettingWaveMax() + LOOP_ERROR_TRESHOLD))
-				loop_status |= LOOP_ERROR;
-		}
+        if (DAC_GetOutputState()) {
+            // Output enabled
+            if (DAC_GetMode() == DAC_MODE_CONST) {
+                if (abs((int32_t)loop_current - (int32_t)DAC_GetSettingConst()) > LOOP_ERROR_TRESHOLD)
+                    loop_status |= LOOP_ERROR;
+            } else {
+                if (((int32_t)loop_current < (int32_t)DAC_GetSettingWaveMin() - LOOP_ERROR_TRESHOLD) || 
+                    ((int32_t)loop_current > (int32_t)DAC_GetSettingWaveMax() + LOOP_ERROR_TRESHOLD))
+                    loop_status |= LOOP_ERROR;
+            }
+        } else {
+            // Output disabled
+            if (loop_current > LOOP_ERROR_TRESHOLD)
+                loop_status |= LOOP_ERROR;
+        }
 	}
 	LED_Set(LED_ERROR, loop_status & LOOP_ERROR);
 	LED_Set(LED_BREAK, loop_status & LOOP_BREAK);

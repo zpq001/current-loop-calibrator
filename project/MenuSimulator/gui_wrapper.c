@@ -34,6 +34,9 @@ static struct {
     uint8_t profile;
     uint8_t mode;
     uint8_t waveform;
+    uint8_t oe;
+    uint8_t cycles_done;
+    uint8_t regenerate_waveform;
     uint32_t period;		// [ms]
     uint32_t wave_min;		// [uA]
     uint32_t wave_max;		// [uA]
@@ -64,8 +67,8 @@ void guiInitialize(void)
     dac_state.total_cycles = 95684;
     dac_state.current_cycle = 87521;
 
-    //device_mode = MODE_NORMAL;
-    device_mode = MODE_CALIBRATION;
+    device_mode = MODE_NORMAL;
+    //device_mode = MODE_CALIBRATION;
 
     contrastSetting = 10;
     sound_enabled = 1;
@@ -193,8 +196,15 @@ void DAC_SaveSettings(void) {
 }
 
 
+// Enables or disables output in both constant source and
+// waveform modes
+void DAC_SetOutputState(uint8_t isEnabled) {
+    if (isEnabled != dac_state.oe) {
+        dac_state.oe = isEnabled;
+    }
+}
 
-uint8_t DAC_SetSettingConst(uint32_t value) {
+uint8_t DAC_SetSettingConst(int32_t value) {
     uint8_t result = verify_uint32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
     dac_state.setting[dac_state.profile-1] = value;
     if (dac_state.mode == DAC_MODE_CONST) {
@@ -212,13 +222,13 @@ uint8_t DAC_SetProfile(uint32_t value) {
     return result;
 }
 
-uint8_t DAC_SetSettingWaveMax(uint32_t value) {
+uint8_t DAC_SetSettingWaveMax(int32_t value) {
     uint8_t result = verify_uint32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
     dac_state.wave_max = value;
     return result;
 }
 
-uint8_t DAC_SetSettingWaveMin(uint32_t value) {
+uint8_t DAC_SetSettingWaveMin(int32_t value) {
     uint8_t result = verify_uint32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
     dac_state.wave_min = value;
     return result;
@@ -228,7 +238,7 @@ void DAC_SetWaveform(uint8_t newWaveForm) {
     dac_state.waveform = newWaveForm;
 }
 
-uint8_t DAC_SetPeriod(uint32_t value) {
+uint8_t DAC_SetPeriod(int32_t value) {
     uint8_t result = verify_uint32(&value, DAC_PERIOD_MIN, DAC_PERIOD_MAX);
     dac_state.period = value;
     return result;
@@ -260,7 +270,9 @@ void DAC_RestartCycles(void) {
 
 
 
-
+uint8_t DAC_GetOutputState(void) {
+    return dac_state.oe;
+}
 
 uint32_t DAC_GetSettingConst(void) {
     return dac_state.setting[dac_state.profile-1];
@@ -282,7 +294,7 @@ uint8_t DAC_GetWaveform(void) {
     return dac_state.waveform;
 }
 
-uint16_t DAC_GetPeriod(void) {
+uint32_t DAC_GetPeriod(void) {
     return dac_state.period;
 }
 
