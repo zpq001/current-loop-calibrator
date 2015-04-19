@@ -175,10 +175,17 @@ static void runNormalMode(void) {
 
             // Output control
             if (!editMode) {
-                if (buttons.action_down & KEY_OK)
-                    DAC_SetOutputState(1);
-                else if (buttons.action_down & KEY_ESC)
-                    DAC_SetOutputState(0);
+                if (buttons.action_down & KEY_OK) {
+					if (DAC_GetOutputState() == 0) {
+						DAC_SetOutputState(1);
+						sound_event = SE_OutputOn;
+					}
+				} else if (buttons.action_down & KEY_ESC) {
+					if (DAC_GetOutputState() != 0) {
+						DAC_SetOutputState(0);
+						sound_event = SE_OutputOff;
+					}
+				}
             }
 
             // Profile number
@@ -271,10 +278,17 @@ static void runNormalMode(void) {
 
             // Output control
             if (!editMode) {
-                if (buttons.action_down & KEY_OK)
-                    DAC_SetOutputState(1);
-                else if (buttons.action_down & KEY_ESC)
-                    DAC_SetOutputState(0);
+                if (buttons.action_down & KEY_OK) {
+					if (DAC_GetOutputState() == 0) {
+						DAC_SetOutputState(1);
+						sound_event = SE_OutputOn;
+					}
+				} else if (buttons.action_down & KEY_ESC) {
+					if (DAC_GetOutputState() != 0) {
+						DAC_SetOutputState(0);
+						sound_event = SE_OutputOff;
+					}
+				}
             }
 
             // Control waveform

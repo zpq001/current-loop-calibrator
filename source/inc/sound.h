@@ -11,7 +11,9 @@ enum SoundEvents {
     SE_EncoderIllegal,
     SE_SettingConfirm,
     SE_SettingIllegal,
-    SE_CyclesDone
+    SE_CyclesDone,
+	SE_OutputOn,
+	SE_OutputOff
 };
 
 typedef struct {

@@ -157,6 +157,9 @@ uint8_t EE_RestoreSystemSettings(uint8_t erase_current) {
 	return result;
 }
 
+uint32_t EE_GetPowerCyclesCount(void) {
+	return num_power_cycles;
+}
 
 
 void EE_SaveSettings(void) {

@@ -135,6 +135,12 @@ void Sound_Event(uint8_t event) {
             case SE_CyclesDone:
                 new_melody_ptr = _beep_SyclesDone;
                 break;
+			case SE_OutputOn: 
+                new_melody_ptr = _beep_KeyConfirm;
+                break;
+            case SE_OutputOff:
+                new_melody_ptr = _beep_KeyConfirm;
+                break;
         }
     }
 }
