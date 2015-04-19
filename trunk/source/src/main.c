@@ -24,12 +24,22 @@
 #include "gui_top.h"
 #include "eeprom.h"
 #include "sound.h"
+#include "utils.h"
 
 /*
 	timer3 -> buzzer
 	timer2 -> contrast charge pump
 	timer1 -> DMA for waveform
 */
+
+static void displayPowerCycles(void) {
+	uint32_t temp32u;
+    char str[10];
+	
+	temp32u = EE_GetPowerCyclesCount();
+	i32toa_align_right((int32_t)temp32u, str, 10, 1, -1);
+	LCD_InsertCharsXY(11, 3, &str[0], 9);
+}
 
 
 SoftTimer16b_t adcUpdateTimer;
@@ -90,6 +100,10 @@ int main(void) {
 			DAC_RestoreSettings();
 			// other modules
 		}
+	}
+	// Display power on cycles count
+	if (GetRawButtonState() & KEY_ESC) {
+		displayPowerCycles();
 	}
 		
     // Setup software timers

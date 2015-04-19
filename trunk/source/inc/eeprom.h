@@ -56,6 +56,7 @@ extern system_settings_t system_settings;
 
 uint8_t EE_RestoreSettings(void);
 uint8_t EE_RestoreSystemSettings(uint8_t erase_current);
+uint32_t EE_GetPowerCyclesCount(void);
 void EE_SaveSettings(void);
 void EE_SaveSystemSettings(void);
 

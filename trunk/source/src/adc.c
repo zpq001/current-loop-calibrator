@@ -20,6 +20,7 @@
 
 #define CURRENT_ADC_OVERSAMPLE  4
 #define VOLTAGE_ADC_OVERSAMPLE  4
+#define BLINK_PERIOD			25	// in units of ADC_UpdateLoopMonitor() call period
 
 static calibration_t adc_voltage_calibration;
 static calibration_t adc_current_calibration;
@@ -28,6 +29,7 @@ static uint32_t adc_voltage_code;
 static uint32_t loop_voltage;
 static uint32_t loop_current;
 static uint8_t loop_status;
+static uint8_t blink_counter;
 //static uint32_t temperature;
 
 void ADC_Initialize(void) {
@@ -78,6 +80,8 @@ void ADC_Initialize(void) {
 	adc_current_calibration.point2.code = 3276 * CURRENT_ADC_OVERSAMPLE;
     adc_current_calibration.scale = 10000L;
 	CalculateCoefficients(&adc_current_calibration);
+	
+	blink_counter = 0;
 }
 
 //-----------------------------------------------------------------//
@@ -104,8 +108,16 @@ void ADC_UpdateLoopMonitor(void) {
     loop_status = LOOP_OK;
 	if (device_mode == MODE_NORMAL) {
 		// Check loop break
-		if (loop_current <= LOOP_BREAK_TRESHOLD) {
-			loop_status |= LOOP_BREAK;
+		if (DAC_GetOutputState()) {
+			if (loop_current <= LOOP_BREAK_TRESHOLD) {
+				loop_status |= LOOP_BREAK;
+			}	
+			blink_counter = 0;
+		} else {
+			blink_counter = (blink_counter < BLINK_PERIOD - 1) ? blink_counter + 1 : 0;
+			if (blink_counter < BLINK_PERIOD / 2) {
+				loop_status |= LOOP_BREAK;
+			}
 		}
 		// Check loop error
         if (DAC_GetOutputState()) {

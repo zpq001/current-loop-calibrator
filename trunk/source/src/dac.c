@@ -3,6 +3,9 @@
 	
 		Low-level functions for DAC
 
+
+
+
 ********************************************************************/
 
 #include "MDR32F9Qx_config.h"
@@ -146,7 +149,7 @@ void DAC_UpdateOutput(uint32_t value) {
         else if (temp32 > DAC_MAX_CODE)
             temp32 = DAC_MAX_CODE;
     }
-    DAC2_SetData(temp32);
+	DAC2_SetData(temp32);
 }
 
 
@@ -194,7 +197,7 @@ void DAC_Initialize(void) {
 	
 	// Setup DAC
     DAC2_Init(DAC2_REF);
-    DAC2_Cmd(ENABLE);
+    //DAC2_Cmd(ENABLE);
     DAC2_SetData(0);  
 	
 	// Setup timer
@@ -274,6 +277,8 @@ void DAC_RestoreSettings(void) {
 	dac_state.wave_min 		 = settings.dac.wave_min;
 	dac_state.wave_max 		 = settings.dac.wave_max;
 	dac_state.total_cycles 	 = settings.dac.total_cycles;
+	
+	DAC_SetDMATimerPeriod(dac_state.period);
 }
 
 void DAC_SaveSettings(void) {
@@ -292,34 +297,38 @@ void DAC_SaveSettings(void) {
 
 
 
-// Enables or disables output in both constant source and 
-// waveform modes
+// Enables or disables output in both CONST and WAVEFORM modes
 void DAC_SetOutputState(uint8_t isEnabled) {
     if (isEnabled != dac_state.oe) {
         dac_state.oe = isEnabled;
         if (dac_state.mode == DAC_MODE_CONST) {
             if (dac_state.oe) {
                 DAC_UpdateOutput(dac_state.setting[dac_state.profile-1]);
+				DAC2_Cmd(ENABLE);
             } else {
-                DAC_UpdateOutput(0);
+				DAC_UpdateOutput(0);
+				DAC2_Cmd(DISABLE);
             }
         } else {
             if (dac_state.oe) {
+				DAC2_Cmd(ENABLE);
                 if (dac_state.regenerate_waveform)
                     DAC_GenerateWaveform();
                 DAC_RestartDMA();
-                dac_state.current_cycle = 1;
-                dac_state.cycles_done = 0;
                 DAC_StartDMATimer();
                 MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);
             } else {
                 DAC_StopDMATimer();
                 DAC_UpdateOutput(0);
+				DAC2_Cmd(DISABLE);
+				dac_state.current_cycle = 1;
+				dac_state.cycles_done = 0;
             }
         }
     }
 }
 
+// Set setting for CONST mode
 uint8_t DAC_SetSettingConst(int32_t value) {
     uint8_t result = verify_int32(&value, DAC_MIN_SETTING, DAC_MAX_SETTING);
     dac_state.setting[dac_state.profile-1] = value;
@@ -329,6 +338,7 @@ uint8_t DAC_SetSettingConst(int32_t value) {
     return result;
 }
 
+// Set profile for CONST mode
 uint8_t DAC_SetProfile(uint32_t value) {
     uint8_t result = verify_uint32(&value, 1, DAC_PROFILE_COUNT);
 	dac_state.profile = value;
@@ -338,16 +348,18 @@ uint8_t DAC_SetProfile(uint32_t value) {
     return result;
 }
 
+// Set CONST or WAVEFORM modes
 void DAC_SetMode(uint8_t new_mode) {
 	if (new_mode != dac_state.mode) {
-		if (new_mode == DAC_MODE_WAVEFORM) {
-			dac_state.mode = DAC_MODE_WAVEFORM;
-		} else {
-			dac_state.mode = DAC_MODE_CONST;
+		dac_state.mode = new_mode;
+		if (dac_state.mode == DAC_MODE_CONST) {
 			DAC_StopDMATimer();
+			dac_state.current_cycle = 1;
+			dac_state.cycles_done = 0;
 		}
         dac_state.oe = 0;
         DAC_UpdateOutput(0);
+		DAC2_Cmd(DISABLE);
 	}
 }
 
@@ -367,11 +379,13 @@ uint8_t DAC_SetSettingWaveMin(int32_t value) {
 }
 
 void DAC_SetWaveform(uint8_t newWaveForm) {
+	uint8_t otherWaveform = (dac_state.waveform != newWaveForm);
     dac_state.waveform = newWaveForm;
 	if ((dac_state.mode == DAC_MODE_WAVEFORM) && (dac_state.oe)) {
         DAC_StopDMATimer();
         DAC_GenerateWaveform();
-        DAC_RestartDMA();
+		if (otherWaveform)
+			DAC_RestartDMA();
         if (!dac_state.cycles_done) {
             DAC_StartDMATimer(); 
             MDR_DMA->CHNL_SW_REQUEST = (1<<DMA_Channel_TIM1);

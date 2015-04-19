@@ -162,9 +162,9 @@ void LCD_Init(void) {
     LCD_SetCursorPosition(0,0);
     LCD_PutString("Калибратор токовой");
     LCD_SetCursorPosition(0,1); 
-    LCD_PutString("  петли 0-20мА");
+    LCD_PutString("  петли 4-20мА");
     LCD_SetCursorPosition(0,3); 
-    LCD_PutString("Версия 1.0");
+    LCD_PutString("Версия 1.1");
 }
 
 void LCD_Clear(void) {
