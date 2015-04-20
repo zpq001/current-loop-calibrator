@@ -10,12 +10,14 @@
 #include "power_monitor.h"
 #include "sound.h"
 #include "lcd_contrast.h"
+#include "eeprom.h"
 
 buttons_t buttons;
 int16_t encoder_delta;
 uint8_t contrastSetting;	// 0 to 20
 uint8_t sound_enabled;
 uint8_t device_mode;
+system_settings_t system_settings;
 
 struct {
     char *strings[4];    // + \0
@@ -69,6 +71,8 @@ void guiInitialize(void)
 
     device_mode = MODE_NORMAL;
     //device_mode = MODE_CALIBRATION;
+
+    system_settings.output_mode = OUTPUT_UPDATE_NORMAL;
 
     contrastSetting = 10;
     sound_enabled = 1;

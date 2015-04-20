@@ -139,7 +139,7 @@ static void DAC_StopDMATimer(void) {
 
 
 // Sets DAC output to specified value [uA]
-void DAC_UpdateOutput(uint32_t value) {
+static void DAC_UpdateOutput(uint32_t value) {
 	int32_t temp32;
     if (value == 0) {
         temp32 = 0;
@@ -150,15 +150,9 @@ void DAC_UpdateOutput(uint32_t value) {
             temp32 = DAC_MAX_CODE;
     }
 	DAC2_SetData(temp32);
+	dac_state.dac_code = temp32;	// save for calibration
 }
 
-
-void DAC_SetCalibrationPoint(uint8_t pointNumber) {
-	uint32_t temp32u;
-	temp32u = (pointNumber == 1) ? 655 : 3276;	// corresponds to 4mA / 20mA with ideal components
-	DAC2_SetData(temp32u);
-	dac_state.dac_code = temp32u;	// save for calibration
-}
 
 
 static void DAC_GenerateWaveform(void) {
@@ -181,6 +175,10 @@ static void DAC_GenerateWaveform(void) {
 		case WAVE_SAW_REVERSED:
 			CreateSawWaveform(waveform_buffer, max_code, min_code, WAVEFORM_BUFFER_SIZE);
 		break;
+		case WAVE_TRIANGULAR:
+			CreateSawWaveform(waveform_buffer, min_code, max_code, WAVEFORM_BUFFER_SIZE / 2);
+			CreateSawWaveform(&waveform_buffer[WAVEFORM_BUFFER_SIZE / 2], max_code, min_code, WAVEFORM_BUFFER_SIZE / 2);	
+			break;
 	}
     dac_state.regenerate_waveform = 0;
 }
@@ -211,7 +209,7 @@ void DAC_Initialize(void) {
 
 	// Default state after power-on
 	for (i=0; i<DAC_PROFILE_COUNT; i++)
-		dac_state.setting[i] = DAC_MIN_SETTING;
+		dac_state.setting[i] = 4000;
 	dac_state.profile = 1;
 	dac_state.mode = DAC_MODE_CONST;
 	dac_state.waveform = WAVE_MEANDR;
@@ -231,6 +229,7 @@ void DAC_Initialize(void) {
     dac_calibration.scale = 10000L;
 	
 	CalculateCoefficients(&dac_calibration);
+	DAC_SetDMATimerPeriod(dac_state.period);
 	DAC_UpdateOutput(0);
 }
 

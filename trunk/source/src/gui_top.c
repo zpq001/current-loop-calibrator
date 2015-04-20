@@ -20,6 +20,7 @@
 #include "power_monitor.h"
 #include "sound.h"
 #include "utils.h"
+#include "eeprom.h"
 
 #ifndef _MENU_SIMULATOR_
 #include "lcd_melt20s4.h"
@@ -34,7 +35,7 @@ enum MenuItems{
 };
 
 enum SysMenuItems{
-    SYS_CONTRAST, SYS_BEEPER,
+    SYS_CONTRAST, SYS_BEEPER, SYS_OUTPUT_MODE,
     SYS_DAC_CALIBRATION_LOW,
     SYS_DAC_CALIBRATION_HIGH,
     SYS_ADC_VOLTAGE_CALIBRATION_LOW,
@@ -218,6 +219,9 @@ static void runNormalMode(void) {
                 if (buttons.action_down & KEY_OK) {
                     temp32u = getScaledEditValue(&edit) * 100;
                     temp8u = DAC_SetSettingConst(temp32u);
+					if ((system_settings.output_mode == OUTPUT_UPDATE_INSTANT) && (DAC_GetOutputState() == 0)) {
+						DAC_SetOutputState(1);
+					}
                     sound_event = (temp8u == VALUE_IN_RANGE) ? SE_SettingConfirm : SE_SettingIllegal;
                     editMode = 0;
                 } else if (buttons.action_down & KEY_ESC) {
@@ -305,6 +309,10 @@ static void runNormalMode(void) {
                     DAC_SetWaveform(WAVE_SAW_REVERSED);
                     sound_event = SE_SettingConfirm;
                 }
+                else if (buttons.action_down & KEY_NUM4) {
+                    DAC_SetWaveform(WAVE_TRIANGULAR);
+                    sound_event = SE_SettingConfirm;
+                }
 				editorCodeValid = 0;
             }
             // Display waveform
@@ -312,6 +320,7 @@ static void runNormalMode(void) {
                 case WAVE_MEANDR:       LCD_PutStringXY(10,0,"    меандр"); break;
                 case WAVE_SAW_DIRECT:   LCD_PutStringXY(10,0,"      пила"); break;
                 case WAVE_SAW_REVERSED: LCD_PutStringXY(10,0," обр. пила"); break;
+                case WAVE_TRIANGULAR:   LCD_PutStringXY(10,0,"  треугол."); break;
             }
             // Control waveform period
             if (encoder_delta != 0) {
@@ -336,6 +345,9 @@ static void runNormalMode(void) {
             // Check restart button
             if (buttons.action_down & KEY_OUTPUT_CTRL) {
                 DAC_RestartCycles();
+				if ((system_settings.output_mode == OUTPUT_UPDATE_INSTANT) && (DAC_GetOutputState() == 0)) {
+					DAC_SetOutputState(1);
+				}
                 sound_event = SE_KeyConfirm;
             }
 
@@ -353,6 +365,9 @@ static void runNormalMode(void) {
                 if (buttons.action_down & KEY_OK) {
                     temp32u = getScaledEditValue(&edit);
                     temp8u = DAC_SetTotalCycles(temp32u);
+					if ((system_settings.output_mode == OUTPUT_UPDATE_INSTANT) && (DAC_GetOutputState() == 0)) {
+						DAC_SetOutputState(1);
+					}
                     sound_event = (temp8u == VALUE_IN_RANGE) ? SE_SettingConfirm : SE_SettingIllegal;
                     editMode = 0;
                 } else if (buttons.action_down & KEY_ESC) {
@@ -565,6 +580,34 @@ static void runCalibrationMode(void) {
                 LCD_PutStringXY(15,2,"выкл");
             // Next item
             if (buttons.action_down & KEY_OK) {
+                new_state = SYS_OUTPUT_MODE;
+                sound_event = SE_KeyConfirm;
+            } else if (buttons.action_down & KEY_ESC) {
+				new_state = SYS_OUTPUT_MODE;
+                sound_event = SE_KeyConfirm;
+			}
+            break;
+		case SYS_OUTPUT_MODE:
+            // Display and adjust output update mode
+            if (first_visit) {
+                drawSysMenuHeader();
+                LCD_PutStringXY(0,2,"Включение выхода:");
+            }
+            if (encoder_delta == 0) {
+                if (buttons.action_down & KEY_NUM1) encoder_delta = -1;
+                else if (buttons.action_down & KEY_NUM2) encoder_delta = 1;
+            }
+            if (encoder_delta) {
+                system_settings.output_mode = (encoder_delta < 0) ? OUTPUT_UPDATE_NORMAL : OUTPUT_UPDATE_INSTANT;
+                sound_event = SE_KeyConfirm;
+            }
+            
+            if (system_settings.output_mode == OUTPUT_UPDATE_NORMAL)
+                LCD_PutStringXY(11,3,"режим 1");
+            else
+                LCD_PutStringXY(11,3,"режим 2");
+            // Next item
+            if (buttons.action_down & KEY_OK) {
                 new_state = SYS_DAC_CALIBRATION_LOW;
                 sound_event = SE_KeyConfirm;
             } else if (buttons.action_down & KEY_ESC) {
@@ -580,7 +623,8 @@ static void runCalibrationMode(void) {
                 LCD_PutStringXY(0,2,"Измеренное значение:");
                 LCD_PutStringXY(18,3,"мА");
                 // Set current for first calibration point
-                DAC_SetCalibrationPoint(1);
+                DAC_SetSettingConst(4000);
+				DAC_SetOutputState(1);
                 startEditor(&edit, EDIT_NUM0, 3, 50000);
             }
             // User input
@@ -611,7 +655,7 @@ static void runCalibrationMode(void) {
                 LCD_PutStringXY(0,2,"Измеренное значение:");
                 LCD_PutStringXY(18,3,"мА");
                 // Set current for second calibration point
-                DAC_SetCalibrationPoint(2);
+                DAC_SetSettingConst(20000);
                 startEditor(&edit, EDIT_NUM0, 3, 50000);
             }
             // User input
@@ -645,7 +689,7 @@ static void runCalibrationMode(void) {
                 LCD_PutStringXY(0,2,"Измеренное значение:");
                 LCD_PutStringXY(18,3,"В");
                 // Set current for first calibration point
-                DAC_UpdateOutput(4000);
+				DAC_SetSettingConst(4000);
                 startEditor(&edit, EDIT_NUM0, 3, 50000);
             }
             // User input
@@ -676,7 +720,7 @@ static void runCalibrationMode(void) {
                 LCD_PutStringXY(0,2,"Измеренное значение:");
                 LCD_PutStringXY(18,3,"В");
                 // Set current for first calibration point
-                DAC_UpdateOutput(20000);
+                DAC_SetSettingConst(20000);
                 startEditor(&edit, EDIT_NUM0, 3, 50000);
             }
             // User input
@@ -726,7 +770,7 @@ static void runCalibrationMode(void) {
                 LCD_PutStringXY(0,2,"Измеренное значение:");
                 LCD_PutStringXY(18,3,"мА");
                 // Set current for first calibration point
-                DAC_UpdateOutput(20000);
+                DAC_SetSettingConst(20000);
                 startEditor(&edit, EDIT_NUM0, 3, 1000000);
             }
             // User input
@@ -757,7 +801,7 @@ static void runCalibrationMode(void) {
                 LCD_PutStringXY(0,2,"Измеренное значение:");
                 LCD_PutStringXY(18,3,"мА");
                 // Set current for first calibration point
-                DAC_UpdateOutput(20000);
+                DAC_SetSettingConst(20000);
                 startEditor(&edit, EDIT_NUM0, 3, 1000000);
             }
             // User input
@@ -787,7 +831,7 @@ static void runCalibrationMode(void) {
                 LCD_PutStringXY(0,0,"Калибровка прибора");
                 LCD_PutStringXY(0,1,"     завершена.");
                 LCD_PutStringXY(0,3,"Перезапустите прибор");
-				DAC_UpdateOutput(0);
+				DAC_SetOutputState(0);
             }
             break;
     }
