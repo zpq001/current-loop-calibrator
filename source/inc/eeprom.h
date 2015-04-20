@@ -45,6 +45,7 @@ typedef struct {
 	} extadc_low_gain;
 	uint8_t contrast_level;
 	uint8_t sound_state;
+	uint8_t output_mode;
 	uint16_t crc;
 	uint32_t dummy;     // Padding for 32-bit word access
 } system_settings_t;

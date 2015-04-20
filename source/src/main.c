@@ -90,6 +90,9 @@ int main(void) {
 		ExtADC_ApplyCalibration();
         LCD_RestoreContrastSetting();
         Sound_RestoreSetting();
+	} else {
+		// Default
+		system_settings.output_mode = OUTPUT_UPDATE_NORMAL;
 	}
 	// Restore settings
 	if (device_mode == MODE_NORMAL) {

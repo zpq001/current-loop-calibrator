@@ -19,23 +19,10 @@
 
 
 enum DacModes {DAC_MODE_CONST, DAC_MODE_WAVEFORM};
-enum SignalWaveforms {WAVE_MEANDR, WAVE_SAW_DIRECT, WAVE_SAW_REVERSED};
-/*enum DacEvents {
-	UPDATED_SETTING = 0x01,
-	UPDATED_PROFILE = 0x02,
-	UPDATED_WAVEFORM = 0x04, 
-	UPDATED_PERIOD = 0x08,
-	ENABLED_OUTPUT = 0x10,
-	DISABLED_OUTPUT = 0x20,
-	UPDATED_MODE = 0x40,
-	RESTART_CYCLES = 0x80
-};
-*/
-void DAC_Initialize(void);
-void DAC_UpdateOutput(uint32_t value);	// Directly sets output to value
-										// Used only for calibration
+enum SignalWaveforms {WAVE_MEANDR, WAVE_SAW_DIRECT, WAVE_SAW_REVERSED, WAVE_TRIANGULAR};
 
-void DAC_SetCalibrationPoint(uint8_t pointNumber);
+void DAC_Initialize(void);
+
 void DAC_SaveCalibrationPoint(uint8_t pointNum, uint32_t measuredValue);
 void DAC_Calibrate(void);
 void DAC_ApplyCalibration(void);
