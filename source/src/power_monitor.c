@@ -68,6 +68,8 @@ void PowerMonitor_Init(void) {
 
 
 void COMPARATOR_IRQHandler(void) {
+	uint32_t dwt_time_mark;
+	
     // Save all settings to EEPROM here
 	// When we get here,  main power supply is off and MCU operates from on-board capacitors
 	// Disable all power-consuming devices and reduce F_CPU
@@ -102,9 +104,13 @@ void COMPARATOR_IRQHandler(void) {
 		EE_SaveSystemSettings();
 	}
 	
-	// Safely wait until power suply goes down.
-	while(1) {
+	dwt_time_mark = DWT_StartDelayUs(500000 / 4);	// F_CPU is 32MHz, but here MCU operates on HSI which is 8MHz
+	// Safely wait until power suply goes down
+	while (DWT_DelayInProgress(dwt_time_mark)) {
 		IWDG_ReloadCounter();
 	}
+	// If power supply is still preset and MCU gets here, there was false triggering
+	// Stop resetting watchdog - MCU will soon be rebooted
+	while(1);
 }
 
