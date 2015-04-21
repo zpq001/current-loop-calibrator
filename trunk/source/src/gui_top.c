@@ -794,7 +794,7 @@ static void runCalibrationMode(void) {
 			}
             break;
         case SYS_EXTADC_CALIBRATION_HIGH_RANGE:
-            // Display and adjust ampermeter calibration point for low range
+            // Display and adjust ampermeter calibration point for high range
             if (first_visit) {
                 drawCalibrateExtADCMenuHeader();
                 LCD_PutStringXY(0,1,"Калибровка 400мА");

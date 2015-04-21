@@ -23,6 +23,8 @@ void Encoder_Init(void) {
 	PORT_Init(ENCODER_PORT, &PORT_InitStructure);
     
     encoder_counter = 0;
+	Encoder_Process();
+	Encoder_UpdateDelta();
 }
 
 void Encoder_Process(void) {
